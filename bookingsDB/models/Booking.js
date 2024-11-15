@@ -28,9 +28,9 @@ var bookingSchema = new mongoose.Schema({
         ref : 'Office',
     },
 
-    date_and_time: {
+    appointment_datetime: {
     type: Date, // Use Date type for date handling
-    required: true
+    ref : 'Appointment'
     }
 
    
