@@ -4,28 +4,51 @@ stages:
   - test
   - deploy
 
-install:
+variables:
+  # Use Node.js version you prefer (make sure to use the right version)
+  NODE_VERSION: "16"  # Example: Node.js 16.x
+
+before_script:
+  - npm install -g npm@latest  # Make sure npm is up to date
+
+install_dependencies:
   stage: install
+  image: node:16  # Use a Docker image with Node.js pre-installed
   script:
-    - npm ci
-  artifacts:
-    paths:
-      - node_modules/
+    - npm install  # Install dependencies from package.json
 
-build:
+build_project:
   stage: build
+  tags: 
+   - docker
+  image: node:16
   script:
-    - npm run build
-  artifacts:
-    paths:
-      - dist/
+    - cd client-ui
+    - npm run build  # Build the Vue.js app with Vite
 
-test:
+run_tests:
   stage: test
-  script:
-    - npm run test
+  tags: 
+   - docker
+  image: node:16
 
-deploy:
+deploy_project:
   stage: deploy
+  tags:
+    - docker
+  image: ruby:alpine
   script:
-    - echo "Deploy logic goes here"
+    - apk update && apk add git curl
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
+  environment:
+    name: production
+    url: https://$HEROKU_APP_NAME.herokuapp.com/
+  only:
+    refs:
+      - master
+    variables:
+      - $HEROKU_APP_NAME
+      - $HEROKU_API_KEY
+
+
