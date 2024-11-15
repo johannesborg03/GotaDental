@@ -31,7 +31,6 @@ deploy:
   stage: deploy
   tags:
     - docker
-  image: ruby:alpine
   script:
    - cd client-ui
    - npm install
