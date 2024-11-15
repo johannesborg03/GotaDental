@@ -23,6 +23,10 @@ var timeslotSchema = new mongoose.Schema({
         ref : 'Dentist',
     },
 
+    date_and_time: {
+    type: String
+    }
+
    
 });
 
