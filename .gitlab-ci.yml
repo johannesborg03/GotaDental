@@ -7,9 +7,6 @@ variables:
   # Use Node.js version you prefer (make sure to use the right version)
   NODE_VERSION: "16"  # Example: Node.js 16.x
 
-before_script:
-  - npm install -g npm@latest  # Make sure npm is up to date
-
 install_dependencies:
   stage: install
   image: node:16  # Use a Docker image with Node.js pre-installed
