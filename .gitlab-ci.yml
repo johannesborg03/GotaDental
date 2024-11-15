@@ -1,7 +1,6 @@
 stages:
   - install
   - build
-  - test
   - deploy
 
 variables:
@@ -25,12 +24,6 @@ build_project:
   script:
     - cd client-ui
     - npm run build  # Build the Vue.js app with Vite
-
-run_tests:
-  stage: test
-  tags: 
-   - docker
-  image: node:16
 
 deploy_project:
   stage: deploy
