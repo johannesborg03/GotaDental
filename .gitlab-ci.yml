@@ -15,6 +15,7 @@ install_dependencies:
    - docker
   image: node:22  # Use a Docker image with Node.js pre-installed
   script:
+    - cd client-ui
     - npm install  # Install dependencies from package.json
 
 build_project:
