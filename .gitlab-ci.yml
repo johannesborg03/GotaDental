@@ -25,6 +25,7 @@ build_project:
   image: node:22
   script:
     - cd client-ui
+    - npm install
     - npm run build  # Build the Vue.js app with Vite
 
 deploy_project:
