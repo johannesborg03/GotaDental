@@ -29,7 +29,8 @@ var bookingSchema = new mongoose.Schema({
     },
 
     date_and_time: {
-    type: String
+    type: Date, // Use Date type for date handling
+    required: true
     }
 
    
