@@ -1,4 +1,4 @@
-
+image: node:22-alpine  # Use Alpine-based image with Node.js 22
 
 stages:
   - install
@@ -13,25 +13,25 @@ install_dependencies:
   stage: install
   tags: 
    - docker
-  image: node:22  # Use a Docker image with Node.js pre-installed
   script:
+    - apk add --no-cache nodejs npm  # Install Node.js and npm in Alpine image
     - cd client-ui
     - npm install  # Install dependencies from package.json
 
-build_project:
+build:
   stage: build
   tags: 
    - docker
-  image: node:22
   script:
     - cd client-ui
     - npm install
     - npm run build  # Build the Vue.js app with Vite
 
-deploy_project:
+deploy:
   stage: deploy
   tags:
     - docker
+  image: ruby:alpine
   script:
    - cd client-ui
    - npm install
