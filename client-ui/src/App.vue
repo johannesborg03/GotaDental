@@ -5,6 +5,7 @@
   <div>
     <nav>
       <a href="/register" class="nav-link">Register</a>
+      <a href="/login" class="nav-link">Login</a>
     </nav>
     <router-view /> 
   </div>
