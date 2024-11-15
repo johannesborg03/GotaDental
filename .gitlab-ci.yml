@@ -1,3 +1,5 @@
+
+
 stages:
   - install
   - build
@@ -5,11 +7,13 @@ stages:
 
 variables:
   # Use Node.js version you prefer (make sure to use the right version)
-  NODE_VERSION: "16"  # Example: Node.js 16.x
+  NODE_VERSION: "22"  # Example: Node.js 16.x
 
 install_dependencies:
   stage: install
-  image: node:16  # Use a Docker image with Node.js pre-installed
+  tags: 
+   - docker
+  image: node:22  # Use a Docker image with Node.js pre-installed
   script:
     - npm install  # Install dependencies from package.json
 
@@ -17,7 +21,7 @@ build_project:
   stage: build
   tags: 
    - docker
-  image: node:16
+  image: node:22
   script:
     - cd client-ui
     - npm run build  # Build the Vue.js app with Vite
