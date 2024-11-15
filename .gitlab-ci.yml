@@ -36,19 +36,10 @@ deploy_project:
   stage: deploy
   tags:
     - docker
-  image: ruby:alpine
   script:
-    - apk update && apk add git curl
-    - gem install dpl
-    - dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
-  environment:
-    name: production
-    url: https://$HEROKU_APP_NAME.herokuapp.com/
-  only:
-    refs:
-      - master
-    variables:
-      - $HEROKU_APP_NAME
-      - $HEROKU_API_KEY
+   - cd client-ui
+   - npm install
+ 
+     
 
 
