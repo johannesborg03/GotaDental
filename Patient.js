@@ -15,6 +15,10 @@ var patientSchema = new mongoose.Schema({
         min : 1,
         max : 50,
     },
+    email : {
+        type : String,
+    },
+    
 
 }); 
 
