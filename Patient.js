@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var patientSchema = new mongoose.Schema({
-    patientId : {
+    patient_id : {
         type : String,
         required : true,
         min : 1,
@@ -22,7 +22,10 @@ var patientSchema = new mongoose.Schema({
         type : Boolean,
         required : true
     },
-    
+    booking_id : {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Bookings
+    },
+
 
 
 }); 
