@@ -7,7 +7,7 @@ var Office = require('../models/Office.js');
 const mongoose = require('mongoose');
 
 // Create a new timeslot for a specific dentist
-router.post('/api/:dentist_id/timeslot', async function (req, res) {
+router.post('/api/timeslots/:dentist_id/timeslot', async function (req, res) {
     try {
 
         const dentistID = req.params.dentist_id; 
@@ -72,6 +72,42 @@ router.get('/api/:office_id/timeslots', async function (req, res) {
     } catch (error) {
         res.status(500).json({
             message: "Server error while retrieving timeslots",
+            error: error.message,
+        });
+    }
+});
+
+// Get a specific timeslot for a dentist in a specific office
+router.get('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function (req, res) {
+    try {
+        // Find the office by the office_id
+        const office = await Office.findOne({ office_id: req.params.office_id });
+        if (!office) {
+            return res.status(404).json({ message: "Office not found" });
+        }
+
+        // Check if the dentist is part of the office
+        if (!office.dentists.includes(req.params.dentist_id)) {
+            return res.status(404).json({ message: "Dentist not found in this office" });
+        }
+
+        // Find the specific timeslot for the dentist
+        const timeslot = await Timeslot.findOne({
+            _id: req.params.timeslot_id,
+            dentist_id: req.params.dentist_id
+        });
+
+        if (!timeslot) {
+            return res.status(404).json({ message: "Timeslot not found for this dentist" });
+        }
+
+        res.status(200).json({
+            message: "Timeslot retrieved successfully",
+            timeslot: timeslot
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error while retrieving the timeslot",
             error: error.message,
         });
     }
