@@ -36,11 +36,11 @@ router.post('/api/timeslots/:dentist_id/timeslot', async function (req, res) {
             message: "Timeslot created successfully",
             timeslot: timeslot
         });
-    } catch (err) {
+    } catch (error) {
         console.error("Error while creating timeslot:", err);  
         res.status(500).json({
             message: "Server error while creating timeslot",
-            error: err.message
+            error: error.message
         });
     }
 });
