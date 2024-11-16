@@ -44,7 +44,19 @@ export default {
         { message: this.slotMessage, time: this.slotTime },
 
       ],
-    }
+    };
+  },
+  mehtods: {
+    registerSlot() {
+      if (this.slotDate && this.slotTime) {
+        this.slotMessage = `Slot registered for ${this.slotDate} at ${this.slotTime}`;
+  
+        this.slotDate = "";
+        this.slotTime = "";
+      } else {
+        this.slotMessage = "Please select both date and time.";
+      }
+    },
   }
 }
 
