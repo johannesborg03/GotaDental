@@ -13,7 +13,8 @@
                     <input type="password" required v-model="password" placeholder="Enter password" class="user-input">
                 </div>
                 <div>
-                    <input type="password" required v-model="ConfirmPassword" placeholder="Confirm password" class="user-input">
+                    <input type="password" required v-model="ConfirmPassword" placeholder="Confirm password"
+                        class="user-input">
                 </div>
                 <div class="terms">
                     <label>Accept terms and conditions</label>
@@ -26,8 +27,10 @@
 </template>
 
 <script>
-export default{
-        data() {
+import { publishMessage } from '../mqttClient';
+
+export default {
+    data() {
         return {
             username: '',
             email: '',
@@ -36,5 +39,15 @@ export default{
             terms: false
         }
     },
+    methods: {
+        submitForm() {
+                if (this.password !== this.ConfirmPassword) {
+                    alert('Password do not match');
+                    this.password = ''
+                    this.confirmPassword = ''
+                    return;
+            }
+        }
+    }
 }
 </script>
