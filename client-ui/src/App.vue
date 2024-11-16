@@ -7,6 +7,9 @@
       <a href="/register" class="nav-link">Register</a>
       <a href="/login" class="nav-link">Login</a>
     </nav>
+    <div>
+      <a href="/dentist" class="nav-link">Dentist</a>
+    </div>
     <router-view /> 
   </div>
 </template>
