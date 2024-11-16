@@ -36,17 +36,35 @@ export default {
             email: '',
             password: '',
             ConfirmPassword: '',
-            terms: false
-        }
+            terms: false,
+        };
     },
     methods: {
         submitForm() {
-                if (this.password !== this.ConfirmPassword) {
-                    alert('Password do not match');
-                    this.password = ''
-                    this.confirmPassword = ''
-                    return;
+            if (this.password !== this.ConfirmPassword) {
+                alert('Password do not match');
+                this.password = ''
+                this.confirmPassword = ''
+                return;
             }
+
+                const topic = 'users/registration';
+                const message = JSON.stringify({
+                    username: this.username,
+                    email: this.email,
+                });
+
+                // Publish the registration details
+                publishMessage(topic, message);
+
+                alert('User registered successfully!');
+
+                // Reset form fields
+                this.username = '';
+                this.email = '';
+                this.password = '';
+                this.confirmPassword = '';
+                this.terms = false;
         }
     }
 }
