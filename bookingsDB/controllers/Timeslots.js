@@ -46,7 +46,7 @@ router.post('/api/timeslots/:dentist_id/timeslot', async function (req, res) {
 });
 
 // Get all timeslots for dentist in a specific office 
-router.get('/api/:office_id/timeslots', async function (req, res) {
+router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
     try {
         // Find the office by the office_id
         const office = await Office.findOne({ office_id: req.params.office_id });
@@ -113,3 +113,4 @@ router.get('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
     }
 });
 
+module.exports = router;
