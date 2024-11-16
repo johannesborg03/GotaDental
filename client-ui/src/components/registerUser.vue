@@ -27,7 +27,7 @@
 </template>
 
 <script>
-//import { publishMessage } from '../mqttClient'; REMOVE COMMENT AFTER THE MQTT CLIENT IS MERGED
+import { publishMessage } from '../mqttClient'; 
 
 export default {
     data() {
@@ -55,7 +55,7 @@ export default {
                 });
 
                 // Publish the registration details
-                //publishMessage(topic, message); REMOVE COMMENT AFTER THE MQTT CLIENT IS MERGED
+                publishMessage(topic, message); 
 
                 alert('User registered successfully!');
 
