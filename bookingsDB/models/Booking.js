@@ -16,21 +16,25 @@ var bookingSchema = new mongoose.Schema({
     patient_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Patient',
+        required: true
     },
 
     dentist_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Dentist',
+        required: true
     },
 
     office_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Office',
+        required: true
     },
 
     appointment_datetime: {
     type: Date, // Use Date type for date handling
-    ref : 'Appointment'
+    ref : 'Appointment',
+    required: true
     }
 
    

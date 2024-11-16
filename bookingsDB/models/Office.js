@@ -21,6 +21,7 @@ var officeSchema = new mongoose.Schema({
     dentist_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Dentist',
+        required: true
     },
 
     latitude: {

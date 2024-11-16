@@ -16,11 +16,13 @@ var timeslotSchema = new mongoose.Schema({
     office_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Office',
+        required: true
     },
 
     dentist_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Dentist',
+        required: true
     },
 
     date_and_time: {
