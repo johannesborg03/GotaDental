@@ -11,9 +11,7 @@
         <a href="/login" class="nav-link">Login</a>
       </div>
     </nav>
-    <div>
-      <a href="/dentist" class="nav-link">Dentist</a>
-    </div>
+    
     <router-view /> 
   </div>
 </template>
