@@ -14,7 +14,6 @@
                 <input type="time" v-model="bookingTime" />
             </div>
 
-
             <div>
                 <button @click="bookAppointment">Book Dentist Slot</button>
             </div>

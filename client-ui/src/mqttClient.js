@@ -1,10 +1,22 @@
-import mqtt from 'mqtt'
+import mqtt from 'mqtt';
 
-const client = mqtt.connect('ws://localhost:9001', {
+const mqttClient = mqtt.connect('ws://localhost:9001', {
     clientId: `mqttjs_${Math.random().toString(16).substr(2, 8)}`,
     clean: true, // Clean session
+    reconnectPeriod: 1000, // Reconnect every second if disconnected
 });
 
+mqttClient.on('connect', () => {
+    console.log('Connected to MQTT broker');
+});
+
+mqttClient.on('error', (error) => {
+    console.error('Connection error:', error);
+});
+
+mqttClient.on('close', () => {
+    console.log('MQTT connection closed');
+});
 
 // Publish a message to a topic
 export function publishMessage(topic, message) {
@@ -27,7 +39,6 @@ export function subscribeToTopic(topic, messageHandler) {
         }
     });
 
-    // Listen for messages on the topic
     mqttClient.on('message', (receivedTopic, message) => {
         if (receivedTopic === topic) {
             messageHandler(message.toString());
@@ -35,12 +46,4 @@ export function subscribeToTopic(topic, messageHandler) {
     });
 }
 
-client.on('connect', () => {
-    console.log('Connected to MQTT broker');
-});
-
-client.on('error', (error) => {
-    console.error('Connection error:', error);
-});
-
-export default client;
+export default mqttClient;
