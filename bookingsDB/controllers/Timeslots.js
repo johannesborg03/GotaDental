@@ -2,10 +2,11 @@ var express = require('express');
 var router = express.Router();
 var Timeslot = require('../models/timeslot.js');
 var Dentist = require('../models/Dentist.js'); 
+var Office = require('../models/Office.js'); 
 
 const mongoose = require('mongoose');
 
-// Create a new timeslot for a specific dentist (POST /api/offices/:id/timeslot)
+// Create a new timeslot for a specific dentist
 router.post('/api/:dentist_id/timeslot', async function (req, res) {
     try {
         const dentistID = req.params.dentist_id; 
@@ -42,3 +43,38 @@ router.post('/api/:dentist_id/timeslot', async function (req, res) {
         });
     }
 });
+
+// Get all timeslots for dentists in a specific office 
+router.get('/api/:office_id/timeslots', async function (req, res) {
+    try {
+        // Find the office by the office_id
+        const office = await Office.findOne({ office_id: req.params.office_id });
+        if (!office) {
+            return res.status(404).json({ message: "Office not found" });
+        }
+
+        // Find the timeslots for the office
+        const dentists = await Dentist.find({ office_id: office._id });
+        if (!dentists.length) {
+            return res.status(404).json({ message: "No dentists found for this office" });
+        }
+
+        const officeName = office.office_name;
+
+        const timeslots = await Timeslot.find({ dentist_id: { $in: dentists.map(d => d._id) } });
+        if (timeslots.length === 0) {
+            return res.status(404).json({ message: `No timeslots found for the dentists in ${officeName}` });
+        }
+        
+        res.status(200).json({
+            message: "Timeslots retrieved successfully",
+            timeslots: timeslots
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error while retrieving timeslots",
+            error: error.message,
+        });
+    }
+});
+
