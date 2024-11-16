@@ -38,6 +38,18 @@ export default {
                 { message: "Your booking for 12:00 PM is booked.", date: "2003-11-16" }
             ],
         }
+    },
+    methods: {
+        bookSlot() {
+            if (this.bookingDate && this.bookingTime) {
+                this.bookingMessage = `Slot booked for ${this.bookingDate} at ${this.bookingTime}`;
+
+                this.bookingDate = "";
+                this.bookingTime = "";
+            } else {
+                this.bookingMessage = "Please select the available slot!";
+            }
+        },
     }
 }
 </script>
