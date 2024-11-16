@@ -23,9 +23,11 @@ var patientSchema = new mongoose.Schema({
         required : true
     },
     booking_id : {
-        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Bookings
+        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Booking, Should this be deleted?
     },
-
+    appointments : [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'      // Reference to Appointments
+    }]
 
 
 }); 
