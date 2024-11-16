@@ -11,7 +11,8 @@ var timeslotSchema = new mongoose.Schema({
     timeslot_state : {
         type : Number,
         required : true,
-        enum: [0, 1] // Only allows values 0 or 1
+        enum: [0, 1], // Only allows values 0 or 1
+        default: 0
     },
     office_id: {
         type: mongoose.Schema.Types.ObjectId,
