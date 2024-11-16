@@ -10,7 +10,7 @@
             <label for="time">Select Time:</label>
             <input type="time" v-model="bookingTime" />
 
-            <button @click="bookSlot">Book Dentist Slot</button>
+            <button @click="bookAnointment">Book Dentist Slot</button>
 
             <p v-if="bookingNotification" class="bookingNotification">{{ bookingNotification }}</p>
         </div>
@@ -33,14 +33,11 @@ export default {
             bookingDate: "",
             bookingTime: "",
             bookingNotification: "",
-
-            notification: [
-                { message: "Your booking for 12:00 PM is booked.", date: "2003-11-16" }
-            ],
+            notification: [],
         }
     },
     methods: {
-        bookSlot() {
+        bookAnointment() {
             if (this.bookingDate && this.bookingTime) {
                 this.bookingMessage = `Slot booked for ${this.bookingDate} at ${this.bookingTime}`;
 
