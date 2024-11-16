@@ -4,8 +4,12 @@
 <template>
   <div>
     <nav>
-      <a href="/register" class="nav-link">Register</a>
-      <a href="/login" class="nav-link">Login</a>
+      <div>
+        <a href="/register" class="nav-link">Register</a>
+      </div>
+      <div>
+        <a href="/login" class="nav-link">Login</a>
+      </div>
     </nav>
     <router-view /> 
   </div>
