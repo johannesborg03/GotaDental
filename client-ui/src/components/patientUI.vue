@@ -4,14 +4,19 @@
 
         <div class="booking-appointment">
             <h2>Book a appointment</h2>
-            <label for="date">Select Date:</label>
-            <input type="date" v-model="bookingDate" />
+            <div>
+                <label for="date">Select Date:</label>
+                <input type="date" v-model="bookingDate" />
+            </div>
 
-            <label for="time">Select Time:</label>
-            <input type="time" v-model="bookingTime" />
+            <div>
+                <label for="time">Select Time:</label>
+                <input type="time" v-model="bookingTime" />
+            </div>
 
-            <button @click="bookAnointment">Book Dentist Slot</button>
-
+            <div>
+                <button @click="bookAppointment">Book Dentist Slot</button>
+            </div>
             <p v-if="bookingNotification" class="bookingNotification">{{ bookingNotification }}</p>
         </div>
 
@@ -27,26 +32,45 @@
 </template>
 
 <script>
+import { publishMessage, subscribeToTopic } from '../mqttClient';
+
 export default {
     data() {
         return {
-            bookingDate: "",
-            bookingTime: "",
-            bookingNotification: "",
-            notification: [],
-        }
+            bookingDate: '',
+            bookingTime: '',
+            bookingNotification: '',
+            notifications: [],
+        };
     },
     methods: {
-        bookAnointment() {
-            if (this.bookingDate && this.bookingTime) {
-                this.bookingMessage = `Slot booked for ${this.bookingDate} at ${this.bookingTime}`;
-
-                this.bookingDate = "";
-                this.bookingTime = "";
-            } else {
-                this.bookingMessage = "Please select the available slot!";
+        bookAppointment() {
+            if (!this.bookingDate || !this.bookingTime) {
+                this.bookingNotification = 'Please select a valid date and time!';
+                return;
             }
+
+            const topic = 'appointments/requests';
+            const message = JSON.stringify({
+                patientId: 'patient_123', //Change later to retrieve the patient id
+                date: this.bookingDate,
+                time: this.bookingTime,
+            });
+
+            publishMessage(topic, message);
+
+            this.bookingNotification = `Appointment requested for ${this.bookingDate} at ${this.bookingTime}`;
+
+            this.bookingDate = '';
+            this.bookingTime = '';
         },
-    }
-}
+    },
+    mounted() {
+        // Subscribe to notifications for this patient
+        const topic = 'appointments/notifications';
+        subscribeToTopic(topic, (message) => {
+            this.notifications.push(message);
+        });
+    },
+};
 </script>
