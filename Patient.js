@@ -18,7 +18,12 @@ var patientSchema = new mongoose.Schema({
     email : {
         type : String,
     },
+    notified : {
+        type : Boolean,
+        required : true
+    },
     
+
 
 }); 
 
