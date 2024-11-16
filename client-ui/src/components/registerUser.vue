@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { publishMessage } from '../mqttClient';
+import { publishMessage } from '@/mqttClient';
 
 export default {
     data() {
