@@ -1,8 +1,8 @@
 <template>
-    <div class="dentist-interface">
-        <h1>Dentist Interface</h1>
+  <div class="dentist-interface">
+    <h1>Dentist Interface</h1>
 
-    
+
     <div class="slot-registration">
       <h2>Slot Registration</h2>
       <label for="slot-date">Date:</label>
@@ -24,14 +24,31 @@
         </li>
       </ul>
     </div>
-    </div>
+  </div>
 
 </template>
 
 <script>
 
+export default {
+  data() {
+    return {
+
+      slotDate: "",
+      slotTime: "",
+      slotMessage: "",
+
+
+      notifications: [
+
+        { message: this.slotMessage, time: this.slotTime },
+
+      ],
+    }
+  }
+}
+
+
 </script>
 
-<style>
-
-</style>
+<style></style>
