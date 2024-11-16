@@ -4,13 +4,20 @@
 
         <div class="booking-appointment">
             <h2>Book a appointment</h2>
-            <label for="date">Select Date:</label>
-            <input type="date" v-model="bookingDate" />
+            <div>
+                <label for="date">Select Date:</label>
+                <input type="date" v-model="bookingDate" />
+            </div>
 
-            <label for="time">Select Time:</label>
-            <input type="time" v-model="bookingTime" />
+            <div>
+                <label for="time">Select Time:</label>
+                <input type="time" v-model="bookingTime" />
+            </div>
 
-            <button @click="bookAppointment">Book Dentist Slot</button>
+
+            <div>
+                <button @click="bookAppointment">Book Dentist Slot</button>
+            </div>
             <p v-if="bookingNotification" class="bookingNotification">{{ bookingNotification }}</p>
         </div>
 
@@ -26,58 +33,45 @@
 </template>
 
 <script>
-import mqttClient from '../mqttClient';
+import { publishMessage, subscribeToTopic } from '../mqttClient';
 
 export default {
     data() {
         return {
-            bookingDate: "",
-            bookingTime: "",
-            bookingNotification: "",
-            notification: [],
-        }
+            bookingDate: '',
+            bookingTime: '',
+            bookingNotification: '',
+            notifications: [],
+        };
     },
     methods: {
         bookAppointment() {
             if (!this.bookingDate || !this.bookingTime) {
-                this.bookingNotification = 'Please select both a date and time.';
+                this.bookingNotification = 'Please select a valid date and time!';
                 return;
             }
 
+            const topic = 'appointments/requests';
             const message = JSON.stringify({
+                patientId: 'patient_123', //Change later to retrieve the patient id
                 date: this.bookingDate,
                 time: this.bookingTime,
             });
 
-            // Publish the booking message to the MQTT topic
-            mqttClient.publish('appointments/bookings', message, (err) => {
-                if (err) {
-                    console.error('Publish error:', err);
-                    this.bookingNotification = 'Failed to book the appointment.';
-                } else {
-                    console.log('Booking message published:', message);
-                    this.bookingNotification = 'Appointment booked successfully!';
-                }
-            });
+            publishMessage(topic, message);
+
+            this.bookingNotification = `Appointment requested for ${this.bookingDate} at ${this.bookingTime}`;
+
+            this.bookingDate = '';
+            this.bookingTime = '';
         },
     },
     mounted() {
-        // Subscribe to notifications topic
-        mqttClient.subscribe('appointments/notifications', (err) => {
-            if (err) {
-                console.error('Subscription error:', err);
-            } else {
-                console.log('Subscribed to appointments/notifications');
-            }
-        });
-
-        // Listen for messages on the notifications topic
-        mqttClient.on('message', (topic, message) => {
-            if (topic === 'appointments/notifications') {
-                const notification = JSON.parse(message.toString());
-                this.notifications.push(notification); // Add the notification to the notifications array
-            }
+        // Subscribe to notifications for this patient
+        const topic = 'appointments/notifications';
+        subscribeToTopic(topic, (message) => {
+            this.notifications.push(message);
         });
     },
-}
+};
 </script>
