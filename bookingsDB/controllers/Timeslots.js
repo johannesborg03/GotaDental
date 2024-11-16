@@ -127,7 +127,7 @@ router.put('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
         }
 
         const updatedTimeslot = await Timeslot.findOneAndUpdate(
-            { _id: req.params.timeslot_id, dentist_id: req.params.dentist_id },req.body,{ new: true, runValidators: true }
+            { timeslot_id: req.params.timeslot_id, dentist_id: req.params.dentist_id },req.body,{ new: true, runValidators: true }
         );
 
         if (!updatedTimeslot) {
@@ -147,5 +147,35 @@ router.put('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
 });
 
 
+// Delete a timeslot for a dentist in a specific office 
+router.delete('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function (req, res) {
+    try {
+        const office = await Office.findOne({ office_id: req.params.office_id });
+        if (!office) {
+            return res.status(404).json({ message: "Office not found" });
+        }
+
+         // Check if the dentist is part of the office
+         if (!office.dentists.includes(req.params.dentist_id)) {
+            return res.status(404).json({ message: "Dentist not found in this office" });
+        }
+
+        const deletedTimeslot = await Timeslot.findOneAndDelete({timeslot_id: req.params.timeslot_id,dentist_id: req.params.dentist_id});
+
+        if (!deletedTimeslot) {
+            return res.status(404).json({ message: "Timeslot not found" });
+        }
+
+        res.status(200).json({
+            message: "Timeslot deleted successfully",
+            timeslot: deletedTimeslot
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error while deleting timeslot",
+            error: error.message,
+        });
+    }
+});
 
 module.exports = router;
