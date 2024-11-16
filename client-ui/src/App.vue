@@ -11,6 +11,7 @@
         <a href="/login" class="nav-link">Login</a>
       </div>
     </nav>
+    
     <router-view /> 
   </div>
 </template>
