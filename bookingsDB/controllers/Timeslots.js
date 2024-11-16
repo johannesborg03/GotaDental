@@ -9,9 +9,10 @@ const mongoose = require('mongoose');
 // Create a new timeslot for a specific dentist
 router.post('/api/:dentist_id/timeslot', async function (req, res) {
     try {
+
         const dentistID = req.params.dentist_id; 
-        // Find the user by their username
-        
+
+        // Find the dentinst by dentist_id
         const dentist = await Dentist.findOne({dentist_id: dentistID });
         if (!dentist) {
             return res.status(404).json({ message: "Dentist not found" });
@@ -21,7 +22,7 @@ router.post('/api/:dentist_id/timeslot', async function (req, res) {
         var timeslot = new Timeslot({
             timeslot_id: req.body.timeslot_id, 
             date_and_time: req.body.date_and_time,
-            dentist_id: dentistID,  // Use dentistID directly
+            dentist_id: dentistID,  
             timeslot_state: req.body.timeslot_state
         });
 
@@ -36,7 +37,7 @@ router.post('/api/:dentist_id/timeslot', async function (req, res) {
             timeslot: timeslot
         });
     } catch (err) {
-        console.error("Error while creating timeslot:", err);  // Log the error for debugging
+        console.error("Error while creating timeslot:", err);  
         res.status(500).json({
             message: "Server error while creating timeslot",
             error: err.message
@@ -44,7 +45,7 @@ router.post('/api/:dentist_id/timeslot', async function (req, res) {
     }
 });
 
-// Get all timeslots for dentists in a specific office 
+// Get all timeslots for dentist in a specific office 
 router.get('/api/:office_id/timeslots', async function (req, res) {
     try {
         // Find the office by the office_id
@@ -53,17 +54,15 @@ router.get('/api/:office_id/timeslots', async function (req, res) {
             return res.status(404).json({ message: "Office not found" });
         }
 
-        // Find the timeslots for the office
-        const dentists = await Dentist.find({ office_id: office._id });
-        if (!dentists.length) {
-            return res.status(404).json({ message: "No dentists found for this office" });
+        const dentistIds = office.dentists;
+        if (!dentistIds || dentistIds.length === 0) {
+            return res.status(404).json({ message: "No dentists found in this office" });
         }
 
-        const officeName = office.office_name;
-
-        const timeslots = await Timeslot.find({ dentist_id: { $in: dentists.map(d => d._id) } });
+        //Find all timeslots for a dentist
+        const timeslots = await Timeslot.find({ dentist_id: { $in: dentistIds } });
         if (timeslots.length === 0) {
-            return res.status(404).json({ message: `No timeslots found for the dentists in ${officeName}` });
+            return res.status(404).json({ message: "No timeslots found for the dentists" });
         }
         
         res.status(200).json({
