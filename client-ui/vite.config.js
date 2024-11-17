@@ -1,7 +1,17 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-})
+  build: {
+    rollupOptions: {
+      // Ensure Bootstrap's CSS is not treated as an external dependency
+      external: ['bootstrap']
+    }
+  },
+  optimizeDeps: {
+    // Explicitly include Bootstrap and its CSS
+    include: ['bootstrap', 'bootstrap/dist/css/bootstrap.css']
+  }
+});
+
