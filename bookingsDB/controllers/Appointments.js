@@ -159,21 +159,27 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
 }); 
 
 
-// Cancel a appointment by a patient
+// Cancel an appointment and associated booking by a patient
 router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { patient_id, appointment_id } = req.params;
 
-        // Find the booking by appointment_id and patient_id
-        const booking = await Booking.findOne({ appointment_datetime: appointment_id, patient_id: patient_id });
-        if (!booking) {
-            return res.status(404).json({ message: "Booking not found for this patient" });
+        // Find the appointment
+        const appointment = await Appointment.findOne({ _id: appointment_id, patient_id: patient_id });
+        if (!appointment) {
+            return res.status(404).json({ message: "Appointment not found for this patient" });
         }
 
-        // Delete the booking
-        await Booking.deleteOne({ _id: booking._id });
+        // Find and delete the associated booking
+        const booking = await Booking.findByIdAndDelete(appointment.booking_id);
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
 
-        // Update the timeslot state back to available
+        // Delete the appointment
+        await Appointment.deleteOne({ _id: appointment_id });
+
+        // Optionally, update the timeslot state back to available
         const timeslot = await Timeslot.findOne({
             dentist_id: booking.dentist_id,
             date_and_time: booking.appointment_datetime
@@ -185,35 +191,41 @@ router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', a
         }
 
         res.status(200).json({
-            message: "Booking canceled successfully by patient",
+            message: "Appointment and booking canceled successfully by patient",
+            appointment: appointment,
             booking: booking
         });
     } catch (error) {
-        console.error("Error while canceling booking by patient:", error);
+        console.error("Error while canceling appointment and booking by patient:", error);
         res.status(500).json({
-            message: "Server error while canceling booking",
+            message: "Server error while canceling appointment and booking by patient",
             error: error.message
         });
     }
 });
 
-
-// Cancel a appointment by a dentist
+// Cancel an appointment and associated booking by a dentist
 router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { dentist_id, appointment_id } = req.params;
 
-        // Find the booking by appointment_id and dentist_id
-        const booking = await Booking.findOne({ appointment_datetime: appointment_id, dentist_id: dentist_id });
-        if (!booking) {
-            return res.status(404).json({ message: "Booking not found for this dentist" });
+        // Find the appointment
+        const appointment = await Appointment.findOne({ _id: appointment_id, dentist_id: dentist_id });
+        if (!appointment) {
+            return res.status(404).json({ message: "Appointment not found for this dentist" });
         }
 
-        // Delete the booking
-        await Booking.deleteOne({ _id: booking._id });
+        // Find and delete the associated booking
+        const booking = await Booking.findByIdAndDelete(appointment.booking_id);
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
 
-        // Update the timeslot state back to available
-        const timeslot = await timeslot.findOne({
+        // Delete the appointment
+        await Appointment.deleteOne({ _id: appointment_id });
+
+        // Optionally, update the timeslot state back to available
+        const timeslot = await Timeslot.findOne({
             dentist_id: dentist_id,
             date_and_time: booking.appointment_datetime
         });
@@ -224,15 +236,15 @@ router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', a
         }
 
         res.status(200).json({
-            message: "Booking canceled successfully by dentist",
+            message: "Appointment and booking canceled successfully by dentist",
+            appointment: appointment,
             booking: booking
         });
     } catch (error) {
-        console.error("Error while canceling booking by dentist:", error);
+        console.error("Error while canceling appointment and booking by dentist:", error);
         res.status(500).json({
-            message: "Server error while canceling booking",
+            message: "Server error while canceling appointment and booking by dentist",
             error: error.message
         });
     }
 });
-module.exports = router;
