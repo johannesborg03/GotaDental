@@ -28,6 +28,24 @@
                     </div>
                 </form>
 
+                <!-- Notification Message -->
+                <p v-if="bookingNotification" class="mt-3 alert alert-success">
+                    {{ bookingNotification }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Notifications</h2>
+                <ul class="list-group">
+                    <li v-for="(notification, index) in notifications" :key="index" class="list-group-item">
+                        <i class="bi bi-bell"></i>
+                        {{ notification.message }} - {{ notification.date }}
+                    </li>
+                </ul>
+
             </div>
         </div>
     </div>
