@@ -14,7 +14,20 @@
                         <label for="date" class="form-label">Select Date:</label>
                         <input type="date" id="date" class="form-control" v-model="bookingDate" required />
                     </div>
-                    
+                    <!-- Time Input -->
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Select Time:</label>
+                        <input type="time" id="time" class="form-control" v-model="bookingTime" required />
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div>
+                        <button class="btn btn-primary w-100" type="submit">
+                            <i class="bi bi-calendar-check"></i> Book Dentist Slot
+                        </button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
