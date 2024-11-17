@@ -197,4 +197,42 @@ router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', a
     }
 });
 
+
+// Cancel a appointment by a dentist
+router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', async function (req, res) {
+    try {
+        const { dentist_id, appointment_id } = req.params;
+
+        // Find the booking by appointment_id and dentist_id
+        const booking = await Booking.findOne({ appointment_datetime: appointment_id, dentist_id: dentist_id });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found for this dentist" });
+        }
+
+        // Delete the booking
+        await Booking.deleteOne({ _id: booking._id });
+
+        // Update the timeslot state back to available
+        const timeslot = await timeslot.findOne({
+            dentist_id: dentist_id,
+            date_and_time: booking.appointment_datetime
+        });
+
+        if (timeslot) {
+            timeslot.timeslot_state = 0; // Set back to available
+            await timeslot.save();
+        }
+
+        res.status(200).json({
+            message: "Booking canceled successfully by dentist",
+            booking: booking
+        });
+    } catch (error) {
+        console.error("Error while canceling booking by dentist:", error);
+        res.status(500).json({
+            message: "Server error while canceling booking",
+            error: error.message
+        });
+    }
+});
 module.exports = router;
