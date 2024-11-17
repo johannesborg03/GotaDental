@@ -1,34 +1,13 @@
 <template>
-    <div class="patient-interface">
-        <h1>Your account</h1>
-
-        <div class="booking-appointment">
-            <h2>Book a appointment</h2>
-            <div>
-                <label for="date">Select Date:</label>
-                <input type="date" v-model="bookingDate" />
-            </div>
-
-            <div>
-                <label for="time">Select Time:</label>
-                <input type="time" v-model="bookingTime" />
-            </div>
-
-            <div>
-                <button @click="bookAppointment">Book Dentist Slot</button>
-            </div>
-            <p v-if="bookingNotification" class="bookingNotification">{{ bookingNotification }}</p>
-        </div>
-
-        <div class="notifications">
-            <h2>Notification</h2>
-            <ul>
-                <li v-for="(notification, index) in notifications" :key="index">
-                    {{ notification.message }} - {{ notification.date }}
-                </li>
-            </ul>
+    <div class="container py-4">
+        <!-- Account Section -->
+        <div class="mb-4">
+            <h1 class="text-primary">Your Account</h1>
         </div>
     </div>
+
+
+
 </template>
 
 <script>
