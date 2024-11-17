@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Office = require('../models/Office');
-const Timeslot = require('../models/timeslot'); // not cap
 const Dentist = require('../models/Dentist');
 
 // Get all offices with location data
@@ -20,23 +19,23 @@ router.get('/api/offices', async function (req, res) {
     }
 });
 
-// Get details for a specific office, including dentists and available timeslots
+// Get basic details for a specific office
 router.get('/api/offices/:office_id', async function (req, res) {
     try {
-        const office = await Office.findOne({ office_id: req.params.office_id })
-                                   .populate('dentist_id'); // Populate dentist details
+        const office = await Office.findOne({ office_id: req.params.office_id }).populate('dentist_id', 'name'); 
 
         if (!office) {
             return res.status(404).json({ message: "Office not found" });
         }
 
-        // Find available timeslots for dentists in this office
-        const timeslots = await Timeslot.find({ dentist_id: office.dentist_id });
-
         res.status(200).json({
             message: "Office details retrieved successfully",
-            office: office,
-            timeslots: timeslots
+            office: {
+                office_id: office.office_id,
+                office_name: office.office_name,
+                office_address: office.office_address,
+                dentist_name: office.dentist_id.name
+            }
         });
     } catch (error) {
         res.status(500).json({
