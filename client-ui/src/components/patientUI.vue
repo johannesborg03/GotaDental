@@ -4,7 +4,22 @@
         <div class="mb-4">
             <h1 class="text-primary">Your Account</h1>
         </div>
+        <!-- Booking Appointment Section -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Book an Appointment</h2>
+                <form @submit.prevent="bookAppointment">
+                    <!-- Date Input -->
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Select Date:</label>
+                        <input type="date" id="date" class="form-control" v-model="bookingDate" required />
+                    </div>
+                    
+            </div>
+        </div>
     </div>
+
+
 
 
 
