@@ -179,44 +179,4 @@ router.delete('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async functi
 });
 
 
-// Add a note to an appointment by a dentist
-router.post('/api/appointments/:appointment_id/notes', async function (req, res) {
-    try {
-        const appointmentID = req.params.appointment_id;
-        const dentistID = req.body.dentist_id; 
-
-        // Find the appointment by appointment_id
-        const appointment = await Appointment.findOne({ _id: appointmentID });
-        if (!appointment) {
-            return res.status(404).json({ message: "Appointment not found" });
-        }
-
-        // Verify that the dentist is associated with the appointment
-        if (!appointment.dentist_id.equals(dentistID)) {
-            return res.status(403).json({ message: "Dentist not authorized for this appointment" });
-        }
-
-        // Add a note to the appointment
-        const note = {
-            dentist_id: dentistID,
-            content: req.body.content,
-            date: new Date()
-        };
-
-        appointment.notes.push(note);
-        await appointment.save();
-
-        res.status(201).json({
-            message: "Note added successfully",
-            appointment: appointment
-        });
-    } catch (error) {
-        console.error("Error while adding note to appointment:", error);
-        res.status(500).json({
-            message: "Server error while adding note",
-            error: error.message
-        });
-    }
-});
-
 module.exports = router;
