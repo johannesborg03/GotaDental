@@ -50,10 +50,6 @@
         </div>
     </div>
 
-
-
-
-
 </template>
 
 <script>
