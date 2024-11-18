@@ -7,7 +7,8 @@ var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3000;
 
 // Controllers:
-
+var dentistsController = require('./src/controllers/Dentists');
+var patientsController = require('./src/controllers/Patients')
 //--
 
 // Connect to MongoDB
@@ -29,7 +30,8 @@ app.use(cors()); // Enable CORS
 
 
 //app.use each controller:
-
+app.use(dentistsController);
+app.use(patientsController);
 //--
 
 

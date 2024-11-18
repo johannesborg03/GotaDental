@@ -6,10 +6,10 @@ var cors = require('cors');
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3000;
 
-var appointmentsController = require('./controllers/Appointments');
-var bookingsController = require('./controllers/Bookings');
-var officesController = require('./controllers/Offices');
-var timeslotsController = require('./controllers/Timeslots');
+var appointmentsController = require('./coreServices/bookingService/src/controllers/Appointments');
+var bookingsController = require('./coreServices/bookingService/src/controllers/Bookings');
+var officesController = require('./coreServices/bookingService/src/controllers/Offices');
+var timeslotsController = require('./coreServices/bookingService/src/controllers/Timeslots');
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
