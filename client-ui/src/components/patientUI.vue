@@ -35,6 +35,15 @@
             </div>
         </div>
 
+        <div class="available-slots">
+            <h2>Available Slots</h2>
+            <ul>
+                <li v-for="(slot, index) in availableSlots" :key="index">
+                    {{ slot.date }} at {{ slot.time }}
+                </li>
+            </ul>
+        </div>
+
         <!-- Notifications Section -->
         <div class="card">
             <div class="card-body">
@@ -53,17 +62,19 @@
 </template>
 
 <script>
-import { publishMessage } from '../mqttClient';
+import { subscribeToTopic } from '../mqttClient';
 
 export default {
     data() {
         return {
-            bookingDate: '',
-            bookingTime: '',
-            bookingNotification: '',
-            notifications: [],
+            //bookingDate: '',
+            //bookingTime: '',
+            //bookingNotification: '',
+            //notifications: [],
+            availableSlots: [],
         };
     },
+    /*
     methods: {
         async bookAppointment() {
             if (!this.bookingDate || !this.bookingTime) {
@@ -86,9 +97,15 @@ export default {
             this.bookingTime = '';
         },
     },
+        */
+
     mounted() {
-        subscribeToTopic('appointment_exchange', 'notifications.patient_123', (msg) => {
-            this.notifications.push(JSON.parse(msg));
+        // Subscribe to slot updates
+        subscribeToTopic('appointment_exchange', 'slots.update', (message) => {
+            const slot = JSON.parse(message);
+
+            // Dynamically add the slot to the availableSlots array
+            this.availableSlots.push(slot);
         });
     },
 };
