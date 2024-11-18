@@ -9,6 +9,12 @@ var dentistSchema = new mongoose.schema({
         max : 50,
         unique : true
     },
+    name : {
+        type : String,
+        required : true,
+        min : 1,
+        max : 50,
+    },
 })
 
 
