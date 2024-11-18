@@ -29,7 +29,7 @@ app.use(cors()); // Enable CORS
 
 
 //app.use each controller:
-
+app.use(dentistsController);
 //--
 
 
