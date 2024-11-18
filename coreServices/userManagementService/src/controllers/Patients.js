@@ -4,7 +4,7 @@ var router = express.Router();
 
 
 var Patient = require('../models/Patient');
-// Create new Dentist (POST):
+// Create new patient (POST):
 
 
 router.post('/api/patients', async function (req, res) {
@@ -38,48 +38,48 @@ router.post('/api/patients', async function (req, res) {
         });
     }
 });
-// GET all dentists
+// GET all patients
 router.get('/api/patients', async (req, res) => {
     try {
-        const patients = await Patient.find();  // Fetch all dentists from the database
+        const patients = await Patient.find();  // Fetch all patients from the database
         res.status(200).json(patients);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching patients', error: error.message });
     }
 });
 
-// DELETE all dentists
-router.delete('/api/dentists', async (req, res) => {
+// DELETE all patients
+router.delete('/api/patients', async (req, res) => {
     try {
-        const result = await Dentist.deleteMany();  // Delete all dentists from the database
-        res.status(200).json({ message: 'All dentists deleted successfully', result });
+        const result = await Patient.deleteMany();  // Delete all patients from the database
+        res.status(200).json({ message: 'All patients deleted successfully', result });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting dentists', error: error.message });
+        res.status(500).json({ message: 'Error deleting patients', error: error.message });
     }
 });
 
 // PUT to update a dentist by dentist_id
-router.put('/api/dentists/:dentist_id', async (req, res) => {
+router.put('/api/patients/:patient_id', async (req, res) => {
     try {
-        const updatedDentist = await Dentist.findOneAndUpdate(
-            { dentist_id: req.params.dentist_id },  // Find dentist by dentist_id
+        const updatedPatient = await Patient.findOneAndUpdate(
+            { patient_id: req.params.patient_id },  // Find patient by patient_id
             {
                 name: req.body.name,
                 email: req.body.email,
-                date_of_birth: req.body.date_of_birth,
+                notified : req.body.notified,
                 booking_id: req.body.booking_id,  // Optional
-                timeslots: req.body.timeslots,    // Optional
+                appointments: req.body.appointments,    // Optional
             },
             { new: true }  // Return the updated document
         );
 
-        if (!updatedDentist) {
-            return res.status(404).json({ message: 'Dentist not found' });
+        if (!updatedPatient) {
+            return res.status(404).json({ message: 'Patient not found' });
         }
 
-        res.status(200).json({ message: 'Dentist updated successfully', dentist: updatedDentist });
+        res.status(200).json({ message: 'Patient updated successfully', patient: updatedPatient });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating dentist', error: error.message });
+        res.status(500).json({ message: 'Error updating patient', error: error.message });
     }
 });
 
