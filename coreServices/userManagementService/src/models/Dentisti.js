@@ -24,7 +24,10 @@ var dentistSchema = new mongoose.schema({
     booking_id : {
         type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Booking, Should this be deleted?
     },
-})
+    timeslots : [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Timeslot'      // Reference to Appointments
+    }]
+});
 
 
 var Dentist = mongoose.model('Dentist', dentistSchema);
