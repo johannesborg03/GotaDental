@@ -1,0 +1,1 @@
+// Subscribes events from RabbitMQ
