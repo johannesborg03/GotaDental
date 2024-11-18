@@ -1,5 +1,5 @@
 var express = require('express');
-var router = express.Router();
+const router = express.Router();
 var Timeslot = require('../models/timeslot.js'); // Gets red when its a big T
 // var Dentist = require('../models/Dentist.js'); 
 var Office = require('../models/Office.js'); 
@@ -177,6 +177,5 @@ router.delete('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async functi
         });
     }
 });
-
 
 module.exports = router;

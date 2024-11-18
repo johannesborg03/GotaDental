@@ -22,15 +22,16 @@ mongoose.connect(mongoURI).then(() => {
 // Create Express app
 var app = express();
 
+// Middleware
+app.use(express.json()); // Parse JSON payloads
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
+app.use(cors()); // Enable CORS
 
-app.use(express.json());
-app.use(cors());
 
-
-app.use(appointmentsController);
-app.use(bookingsController);
-app.use(officesController);
-app.use(timeslotsController); 
+app.use('/api/appointments', appointmentsController);
+app.use('/api/bookings', bookingsController);
+app.use('/api/offices', officesController);
+app.use('/api/timeslots', timeslotsController);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

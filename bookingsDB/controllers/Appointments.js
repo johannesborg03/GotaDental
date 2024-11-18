@@ -1,8 +1,8 @@
 var express = require('express');
-var router = express.Router();
+const router = express.Router();
 var Booking = require('../models/Booking.js');
 // var Dentist = require('../models/Dentist.js'); 
-var Patient = require('../../userManagementDB/models/Patient.js');
+// var Patient = require('../../userManagementDB/models/Patient.js');
 var Appointment = require('../models/Appointment.js');
 
 const mongoose = require('mongoose');
@@ -249,3 +249,5 @@ router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', a
         });
     }
 });
+
+module.exports = router;

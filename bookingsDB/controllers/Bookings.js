@@ -3,7 +3,7 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const Appointment = require('../models/Appointment');
 const Timeslot = require('../models/timeslot');
-var Patient = require('../../userManagementDB/models/Patient.js');
+// var Patient = require('../../userManagementDB/models/Patient.js');
 // const Dentist = require('../models/Dentist');
 const Office = require('../models/Office');
 
@@ -69,3 +69,5 @@ router.post('/api/bookings', async function (req, res) {
         });
     }
 });
+
+module.exports = router;
