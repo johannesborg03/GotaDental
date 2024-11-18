@@ -1,13 +1,15 @@
 var express = require ('express');
 var router = express.Router();
 
+
+
 var Dentist = require('../models/Dentist');
 // Create new Dentist (POST):
 
 
 router.post('/api/dentists', async function (req, res) {
     try {
-        var dentist = new User({
+        var dentist = new Dentist({
             dentist_id: req.body.dentist_id,
             name : req.body.name,
             email: req.body.email,
@@ -31,8 +33,11 @@ router.post('/api/dentists', async function (req, res) {
             });
         }
         res.status(500).json({
-            message : "Server error while creating user",
+            message : "Server error while creating dentist",
             error : error.message
         });
     }
-})
+});
+
+
+module.exports = router;
