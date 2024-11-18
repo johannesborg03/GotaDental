@@ -29,37 +29,36 @@
 </template>
 
 <script>
-import { subscribeToTopic, publishMessage } from '../mqttClient';
+import { publishMessage } from '../mqttClient';
 
 export default {
   data() {
     return {
-
       slotDate: "",
       slotTime: "",
       slotMessage: "",
-      notifications: [{ message: this.slotMessage, time: this.slotTime },],
+      //notifications: [{ message: this.slotMessage, time: this.slotTime },],
     };
   },
   methods: {
     async registerSlot() {
-      if (this.slotDate && this.slotTime) {
-        const message = {
-          dentistId: 'dentist_456',
-          date: this.slotDate,
-          time: this.slotTime,
-        };
-
-        // Help publish slot to the RabbitMQ Broker
-        await publishMessage('appointment_exchange', message, `slots.dentist_456`
-        );
-        this.slotMessage = `Slot registered for ${this.slotDate} at ${this.slotTime}`;
-
-        this.slotDate = '';
-        this.slotTime = '';
-      } else {
+      if (!this.slotDate || !this.slotTime) {
         this.slotMessage = 'Please select both date and time.';
+        return;
       }
+
+      const slotDetails = {
+        date: this.slotDate,
+        time: this.slotTime,
+        dentistId: 'dentist_456', // Replace with dynamic ID 
+      };
+
+      // Help publish slot to the RabbitMQ Broker
+      await publishMessage('appointment_exchange', slotDetails, `slots.update`);
+
+      this.slotMessage = `Slot registered for ${this.slotDate} at ${this.slotTime}`;
+      this.slotDate = '';
+      this.slotTime = '';
     },
   },
   mounted() {
