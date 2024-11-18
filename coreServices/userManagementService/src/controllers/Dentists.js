@@ -83,4 +83,23 @@ router.put('/api/dentists/:dentist_id', async (req, res) => {
     }
 });
 
+// PATCH to update a dentist by dentist_id
+router.patch('/api/dentists/:dentist_id', async (req, res) => {
+    try {
+        const updatedDentist = await Dentist.findOneAndUpdate(
+            { dentist_id: req.params.dentist_id },  // Find dentist by dentist_id
+            req.body,  // Only update the fields provided in the request body
+            { new: true }  // Return the updated document
+        );
+
+        if (!updatedDentist) {
+            return res.status(404).json({ message: 'Dentist not found' });
+        }
+
+        res.status(200).json({ message: 'Dentist updated successfully', dentist: updatedDentist });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating dentist', error: error.message });
+    }
+});
+
 module.exports = router;
