@@ -3,8 +3,8 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const Appointment = require('../models/Appointment');
 const Timeslot = require('../models/timeslot');
-const Patient = require('../models/Patient');
-const Dentist = require('../models/Dentist');
+var Patient = require('../../userManagementDB/models/Patient.js');
+// const Dentist = require('../models/Dentist');
 const Office = require('../models/Office');
 
 // Create a booking and associated appointment

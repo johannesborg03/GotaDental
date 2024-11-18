@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Timeslot = require('../models/timeslot.js'); // Gets red when its a big T
-var Dentist = require('../models/Dentist.js'); 
+// var Dentist = require('../models/Dentist.js'); 
 var Office = require('../models/Office.js'); 
 
 const mongoose = require('mongoose');

@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var Booking = require('../models/Booking.js');
-var Dentist = require('../models/Dentist.js'); 
-var Patient = require('../models/Patient.js'); 
+// var Dentist = require('../models/Dentist.js'); 
+var Patient = require('../../userManagementDB/models/Patient.js');
+var Appointment = require('../models/Appointment.js');
 
 const mongoose = require('mongoose');
 
@@ -15,7 +16,7 @@ router.get('/api/appointments/:patient_id', async function (req, res) {
         if (!patient) {
             return res.status(404).json({ message: "Patient not found" });
         }
-        const appointments = await appointment.find({ _id: { $in: patient.appointments } });
+        const appointments = await Appointment.find({ _id: { $in: patient.appointments } });
 
         res.status(200).json({
             message: "Appointments retrieved successfully",

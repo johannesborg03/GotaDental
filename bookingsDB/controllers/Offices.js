@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Office = require('../models/Office');
-const Dentist = require('../models/Dentist');
+// const Dentist = require('../models/Dentist');
 
 // Get all offices with location data
 router.get('/api/offices', async function (req, res) {
