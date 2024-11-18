@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { publishMessage, subscribeToTopic } from '../mqttClient';
+import { publishMessage } from '../mqttClient';
 
 export default {
     data() {
@@ -65,20 +65,20 @@ export default {
         };
     },
     methods: {
-        bookAppointment() {
+        async bookAppointment() {
             if (!this.bookingDate || !this.bookingTime) {
                 this.bookingNotification = 'Please select a valid date and time!';
                 return;
             }
 
-            const topic = 'appointments/requests';
-            const message = JSON.stringify({
+            //const topic = 'appointments/requests';
+            const message = {
                 patientId: 'patient_123', //Change later to retrieve the patient id
                 date: this.bookingDate,
                 time: this.bookingTime,
-            });
+            };
 
-            publishMessage(topic, message);
+            await publishMessage('appointment_exchange', message, `appointments.patient_123`);
 
             this.bookingNotification = `Appointment requested for ${this.bookingDate} at ${this.bookingTime}`;
 
@@ -87,10 +87,8 @@ export default {
         },
     },
     mounted() {
-        // Subscribe to notifications for this patient
-        const topic = 'appointments/notifications';
-        subscribeToTopic(topic, (message) => {
-            this.notifications.push(message);
+        subscribeToTopic('appointment_exchange', 'notifications.patient_123', (msg) => {
+            this.notifications.push(JSON.parse(msg));
         });
     },
 };
