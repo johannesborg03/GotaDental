@@ -15,6 +15,9 @@ var dentistSchema = new mongoose.schema({
         min : 1,
         max : 50,
     },
+    email : {
+        type : String,
+    },
 })
 
 
