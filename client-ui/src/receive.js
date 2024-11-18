@@ -1,10 +1,21 @@
-import {connect} from 'amqplib';
+import amqp from 'amqplib';
 
-const connection = await connect('amqp://localhost');
-const channel = await connection.createChannel();
-const queue = 'messages';
-await channel.assertQueue(queue, {durable: false});
+async function receiveMessage() {
+    try {
+        const connection = await amqp.connect('amqp://localhost');
+        const channel = await connection.createChannel();
+        const queue = 'test_queue';
 
-channel.consume(queue, (msg) => {
-    console.log(` [x] Recevied ${msg.content.toString()}`);
-});
+        await channel.assertQueue(queue);
+
+        console.log('Waiting for messages...');
+        channel.consume(queue, (msg) => {
+            console.log(`Received message: ${msg.content.toString()}`);
+            channel.ack(msg);
+        });
+    } catch (error) {
+        console.error('Error receiving message:', error);
+    }
+}
+
+receiveMessage();
