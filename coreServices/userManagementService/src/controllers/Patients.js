@@ -3,32 +3,32 @@ var router = express.Router();
 
 
 
-var Dentist = require('../models/Dentist');
+var Patient = require('../models/Patient');
 // Create new Dentist (POST):
 
 
-router.post('/api/dentists', async function (req, res) {
+router.post('/api/patients', async function (req, res) {
     try {
-        var dentist = new Dentist({
-            dentist_id: req.body.dentist_id,
+        var patient = new Patient({
+            patient_id: req.body.dentist_id,
             name : req.body.name,
             email: req.body.email,
-            date_of_birth : req.body.date_of_birth,
+            notified : req.body.notified,
             booking_id : req.body.booking_id,
-            timeslots : req.body.timeslots,
+            appointments : req.body.appointments
         });
 
-        const savedDentist = await dentist.save();
+        const savedPatient = await patient.save();
         res.status(201).json({
-            message : "Dentist Created Successfully",
-            dentist: dentist
+            message : "Patient Created Successfully",
+            patient: patient
         });
     } catch (err) {
-        console.error("Error while creating dentist:", err);  // Log the error for debugging
+        console.error("Error while creating patient:", err);  // Log the error for debugging
         if (err.code ===11000) {
             let duplicateField = Object.keys(err.keyValue)[0];
             return res.status(400).json({
-                message : `A dentist with the same ${duplicateField} already exist`,
+                message : `A patient with the same ${duplicateField} already exist`,
                 field : duplicateField
             });
         }
