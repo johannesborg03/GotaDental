@@ -38,6 +38,15 @@ router.post('/api/dentists', async function (req, res) {
         });
     }
 });
+// GET all dentists
+router.get('/api/dentists', async (req, res) => {
+    try {
+        const dentists = await Dentist.find();  // Fetch all dentists from the database
+        res.status(200).json(dentists);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching dentists', error: error.message });
+    }
+});
 
 
 module.exports = router;
