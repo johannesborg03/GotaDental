@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { subscribeToTopic, publishMessage } from '../mqttClient';
 
 export default {
   data() {
@@ -37,30 +38,38 @@ export default {
       slotDate: "",
       slotTime: "",
       slotMessage: "",
-
-
-      notifications: [
-
-        { message: this.slotMessage, time: this.slotTime },
-
-      ],
+      notifications: [{ message: this.slotMessage, time: this.slotTime },],
     };
   },
-  mehtods: {
-    registerSlot() {
+  methods: {
+    async registerSlot() {
       if (this.slotDate && this.slotTime) {
+        const message = {
+          dentistId: 'dentist_456',
+          date: this.slotDate,
+          time: this.slotTime,
+        };
+
+        // Help publish slot to the RabbitMQ Broker
+        await publishMessage('appointment_exchange', message, `slots.dentist_456`
+        );
         this.slotMessage = `Slot registered for ${this.slotDate} at ${this.slotTime}`;
-  
-        this.slotDate = "";
-        this.slotTime = "";
+
+        this.slotDate = '';
+        this.slotTime = '';
       } else {
-        this.slotMessage = "Please select both date and time.";
+        this.slotMessage = 'Please select both date and time.';
       }
     },
-  }
-}
-
-
+  },
+  mounted() {
+    // Subscribe to the appointment requests for this specific dentist
+    subscribeToTopic('appointment_exchange', 'appointments.patient_123', (msg) => {
+      const message = JSON.parse(msg);
+      this.notifications.push({ message: `Booking: ${message.date} at ${message.time}`, time: message.time });
+    });
+  },
+};
 </script>
 
 <style></style>
