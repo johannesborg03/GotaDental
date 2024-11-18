@@ -28,10 +28,10 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 
-app.use('/api/appointments', appointmentsController);
-app.use('/api/bookings', bookingsController);
-app.use('/api/offices', officesController);
-app.use('/api/timeslots', timeslotsController);
+app.use(appointmentsController);
+app.use(bookingsController);
+app.use(officesController);
+app.use(timeslotsController);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

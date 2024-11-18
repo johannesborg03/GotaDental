@@ -8,6 +8,14 @@ const Office = require('../models/Office');
 router.get('/api/offices', async function (req, res) {
     try {
         const offices = await Office.find({}, 'office_id office_name latitude longitude');
+
+        if (offices.length === 0) {
+            return res.status(404).json({
+                message: "No offices found",
+                offices: []
+            });
+        }
+        
         res.status(200).json({
             message: "Offices retrieved successfully",
             offices: offices
