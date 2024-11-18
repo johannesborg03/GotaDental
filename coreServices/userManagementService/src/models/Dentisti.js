@@ -18,6 +18,12 @@ var dentistSchema = new mongoose.schema({
     email : {
         type : String,
     },
+    date_of_birth : {
+        type: Date,
+    },
+    booking_id : {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Booking, Should this be deleted?
+    },
 })
 
 
