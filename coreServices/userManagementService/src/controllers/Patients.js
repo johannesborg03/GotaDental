@@ -39,12 +39,12 @@ router.post('/api/patients', async function (req, res) {
     }
 });
 // GET all dentists
-router.get('/api/dentists', async (req, res) => {
+router.get('/api/patients', async (req, res) => {
     try {
-        const dentists = await Dentist.find();  // Fetch all dentists from the database
-        res.status(200).json(dentists);
+        const patients = await Patient.find();  // Fetch all dentists from the database
+        res.status(200).json(patients);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching dentists', error: error.message });
+        res.status(500).json({ message: 'Error fetching patients', error: error.message });
     }
 });
 
