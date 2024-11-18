@@ -59,7 +59,7 @@ router.delete('/api/dentists', async (req, res) => {
 });
 
 // PUT to update a dentist by dentist_id
-router.put('/:dentist_id', async (req, res) => {
+router.put('/api/:dentist_id', async (req, res) => {
     try {
         const updatedDentist = await Dentist.findOneAndUpdate(
             { dentist_id: req.params.dentist_id },  // Find dentist by dentist_id
