@@ -84,7 +84,7 @@ router.put('/api/patients/:patient_id', async (req, res) => {
 });
 
 // PATCH to update a dentist by dentist_id
-router.patch('/api/patient/:patient_id', async (req, res) => {
+router.patch('/api/patients/:patient_id', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
             { patient_id: req.params.patient_id },  // Find patient by patient_id
