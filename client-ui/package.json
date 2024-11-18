@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "amqplib": "^0.10.4",
     "bootstrap": "^5.3.3",
     "mqtt": "^5.10.2",
     "rabbitmq-stream-js-client": "^0.4.2",
