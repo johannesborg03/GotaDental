@@ -10,7 +10,7 @@ var Dentist = require('../models/Dentist');
 router.post('/api/dentists', async function (req, res) {
     try {
         var dentist = new Dentist({
-            username: req.body.dentist_username,
+            dentist_username: req.body.dentist_username,
             password: req.body.password,
             name : req.body.name,
             email: req.body.email,
@@ -35,7 +35,7 @@ router.post('/api/dentists', async function (req, res) {
         }
         res.status(500).json({
             message : "Server error while creating dentist",
-            error : error.message
+            error : err.message
         });
     }
 });
@@ -63,7 +63,7 @@ router.delete('/api/dentists', async (req, res) => {
 router.put('/api/dentists/:dentist_username', async (req, res) => {
     try {
         const updatedDentist = await Dentist.findOneAndUpdate(
-            { username: req.params.dentist_username },  // Find dentist by username
+            { dentist_username: req.params.dentist_username },  // Find dentist by username
             {
                 password: req.body.password,
                 name: req.body.name,
@@ -89,7 +89,7 @@ router.put('/api/dentists/:dentist_username', async (req, res) => {
 router.patch('/api/dentists/:dentist_username', async (req, res) => {
     try {
         const updatedDentist = await Dentist.findOneAndUpdate(
-            { username: req.params.dentist_username },  // Find dentist by dentist_id
+            { dentist_username: req.params.dentist_username },  // Find dentist by dentist_id
             req.body,  // Only update the fields provided in the request body
             { new: true }  // Return the updated document
         );

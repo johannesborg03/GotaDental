@@ -10,7 +10,7 @@ var Patient = require('../models/Patient');
 router.post('/api/patients', async function (req, res) {
     try {
         var patient = new Patient({
-            patient_username: req.body.dentist_id,
+            patient_username: req.body.patient_username,
             password: req.body.password,
             name : req.body.name,
             email: req.body.email,
@@ -35,7 +35,7 @@ router.post('/api/patients', async function (req, res) {
         }
         res.status(500).json({
             message : "Server error while creating dentist",
-            error : error.message
+            error : err.message
         });
     }
 });
@@ -63,7 +63,7 @@ router.delete('/api/patients', async (req, res) => {
 router.put('/api/patients/:patient_username', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
-            { patient_id: req.params.patient_username },  // Find patient by patient_id
+            { patient_username: req.params.patient_username },  // Find patient by patient_username
             {
                 name: req.body.name,
                 password: req.body.password,
