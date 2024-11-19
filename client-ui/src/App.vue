@@ -1,4 +1,12 @@
-<script setup>
+<script>
+import navigationBar from './components/navigationBar.vue';
+
+export default {
+  components: {
+    navigationBar,
+  }
+}
+
 </script>
 
 <template>
@@ -10,9 +18,14 @@
       <div>
         <a href="/login" class="nav-link">Login</a>
       </div>
+      <div id="app">
+        <navigationBar />
+       
+      </div>
+
     </nav>
-    
-    <router-view /> 
+
+    <router-view />
   </div>
 </template>
 
@@ -23,9 +36,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }
