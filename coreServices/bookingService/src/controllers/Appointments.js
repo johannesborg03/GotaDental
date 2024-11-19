@@ -9,10 +9,10 @@ const mongoose = require('mongoose');
 
 
 // Get all appointments for a patient
-router.get('/api/appointments/:patient_id', async function (req, res) {
+router.get('/api/appointments/:patient_username', async function (req, res) {
     try {
         // Find the patient by the patient_id
-        const patient = await Patient.findOne({ _id: req.params.patient_id });
+        const patient = await Patient.findOne({ _id: req.params.patient_username });
         if (!patient) {
             return res.status(404).json({ message: "Patient not found" });
         }
@@ -31,10 +31,10 @@ router.get('/api/appointments/:patient_id', async function (req, res) {
 });
 
 // Get a specific appointment for a patient
-router.get('/api/appointments/:patient_id/:appointment_id', async function (req, res) {
+router.get('/api/appointments/:patient_username/:appointment_id', async function (req, res) {
     try {
         // Find the patient by the patient_id
-        const patient = await Patient.findOne({ _id: req.params.patient_id });
+        const patient = await Patient.findOne({ _id: req.params.patient_username });
         if (!patient) {
             return res.status(404).json({ message: "Patient not found" });
         }
@@ -161,12 +161,12 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
 
 
 // Cancel an appointment and associated booking by a patient
-router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', async function (req, res) {
+router.delete('/api/patients/:patient_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
-        const { patient_id, appointment_id } = req.params;
+        const { patient_username, appointment_id } = req.params;
 
         // Find the appointment
-        const appointment = await Appointment.findOne({ _id: appointment_id, patient_id: patient_id });
+        const appointment = await Appointment.findOne({ _id: appointment_id, patient_username: patient_username });
         if (!appointment) {
             return res.status(404).json({ message: "Appointment not found for this patient" });
         }
