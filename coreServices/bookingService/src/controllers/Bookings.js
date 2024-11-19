@@ -10,10 +10,10 @@ const Office = require('../models/Office');
 // Create a booking and associated appointment
 router.post('/api/bookings', async function (req, res) {
     try {
-        const { patient_id, dentist_username, office_id, appointment_datetime } = req.body;
+        const { patient_username, dentist_username, office_id, appointment_datetime } = req.body;
 
         // Validate the patient, dentist, and office
-        const patient = await Patient.findById(patient_id);
+        const patient = await Patient.findById(patient_username);
         const dentist = await Dentist.findById(dentist_username);
         const office = await Office.findById(office_id);
 
@@ -32,7 +32,7 @@ router.post('/api/bookings', async function (req, res) {
         const booking = new Booking({
             booking_id: new mongoose.Types.ObjectId().toString(),
             booking_state: 1, // Assuming 1 means booked
-            patient_id,
+            patient_username,
             dentist_username,
             office_id,
             appointment_datetime
@@ -43,7 +43,7 @@ router.post('/api/bookings', async function (req, res) {
         // Create a new appointment linked to the booking
         const appointment = new Appointment({
             _id: booking._id, // Use booking ID as appointment ID
-            patient_id,
+            patient_username,
             dentist_username,
             office_id,
             datetime: appointment_datetime,
