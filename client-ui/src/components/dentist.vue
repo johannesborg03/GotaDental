@@ -1,74 +1,69 @@
 <template>
-  <div class="dentist-interface">
-    <h1>Dentist Interface</h1>
-
-
-    <div class="slot-registration">
-      <h2>Slot Registration</h2>
-      <label for="slot-date">Date:</label>
-      <input type="date" v-model="slotDate" />
-
-      <label for="slot-time">Time:</label>
-      <input type="time" v-model="slotTime" />
-
-      <button @click="registerSlot">Register Slot</button>
-
-      <p v-if="slotMessage" class="message">{{ slotMessage }}</p>
+  <div class="container py-4">
+    <div class="mb-4 text-center">
+      <h1 class="text-primary">Dentist Interface</h1>
     </div>
 
-    <div class="booking-notification">
-      <h2>Booking Notifications</h2>
-      <ul>
-        <li v-for="(notification, index) in notifications" :key="index">
-          {{ notification.message }} - {{ notification.time }}
-        </li>
-      </ul>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title text-secondary">Register a Slot</h2>
+        <form @submit.prevent="registerSlot" class="needs-validation" novalidate>
+
+          <div class="mb-3">
+            <label for="slotDate" class="form-label">Select Date:</label>
+            <input type="date" id="slotDate" class="form-control" v-model="slotDate" required />
+            <div class="invalid-feedback">Please select a valid date.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="slotTime" class="form-label">Select Time:</label>
+            <input type="time" id="slotTime" class="form-control" v-model="slotTime" required />
+            <div class="invalid-feedback">Please select a valid time.</div>
+          </div>
+
+          <div>
+            <button class="btn btn-primary w-100" type="submit">
+              <i class="bi bi-calendar-check"></i> Register Slot
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-
 </template>
 
+
 <script>
-import { publishMessage } from '../mqttClient';
+import { connectClient, publishMessage } from '../mqttClient';
 
 export default {
   data() {
     return {
-      slotDate: "",
-      slotTime: "",
-      slotMessage: "",
-      //notifications: [{ message: this.slotMessage, time: this.slotTime },],
+      slotDate: '',
+      slotTime: '',
     };
   },
   methods: {
-    async registerSlot() {
+    registerSlot() {
       if (!this.slotDate || !this.slotTime) {
-        this.slotMessage = 'Please select both date and time.';
+        alert('Please select a valid date and time!');
         return;
       }
+
+      const brokerUrl = 'ws://localhost:15675/ws';
+      connectClient(brokerUrl);
 
       const slotDetails = {
         date: this.slotDate,
         time: this.slotTime,
-        dentistId: 'dentist_456', // Replace with dynamic ID 
       };
 
-      // Help publish slot to the RabbitMQ Broker
-      await publishMessage('appointment_exchange', slotDetails, `slots.update`);
+      publishMessage('slots/update', slotDetails);
+      console.log('Slot published:', slotDetails);
 
-      this.slotMessage = `Slot registered for ${this.slotDate} at ${this.slotTime}`;
       this.slotDate = '';
       this.slotTime = '';
     },
   },
-  mounted() {
-    // Subscribe to the appointment requests for this specific dentist
-    subscribeToTopic('appointment_exchange', 'appointments.patient_123', (msg) => {
-      const message = JSON.parse(msg);
-      this.notifications.push({ message: `Booking: ${message.date} at ${message.time}`, time: message.time });
-    });
-  },
 };
 </script>
-
-<style></style>

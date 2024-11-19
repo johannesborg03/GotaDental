@@ -1,110 +1,46 @@
 <template>
     <div class="container py-4">
-        <!-- Account Section -->
-        <div class="mb-4">
-            <h1 class="text-primary">Your Account</h1>
+        <div class="mb-4 text-center">
+            <h1 class="text-primary">Available Slots</h1>
         </div>
-        <!-- Booking Appointment Section -->
-        <div class="card mb-4 shadow-sm">
+
+        <!-- Available Slots Section -->
+        <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title">Book an Appointment</h2>
-                <form @submit.prevent="bookAppointment">
-                    <!-- Date Input -->
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Select Date:</label>
-                        <input type="date" id="date" class="form-control" v-model="bookingDate" required />
-                    </div>
-                    <!-- Time Input -->
-                    <div class="mb-3">
-                        <label for="time" class="form-label">Select Time:</label>
-                        <input type="time" id="time" class="form-control" v-model="bookingTime" required />
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div>
-                        <button class="btn btn-primary w-100" type="submit">
-                            <i class="bi bi-calendar-check"></i> Book Dentist Slot
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Notification Message -->
-                <p v-if="bookingNotification" class="mt-3 alert alert-success">
-                    {{ bookingNotification }}
-                </p>
-            </div>
-        </div>
-
-        <div class="available-slots">
-            <h2>Available Slots</h2>
-            <ul>
-                <li v-for="(slot, index) in availableSlots" :key="index">
-                    {{ slot.date }} at {{ slot.time }}
-                </li>
-            </ul>
-        </div>
-
-        <!-- Notifications Section -->
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title">Notifications</h2>
+                <h2 class="card-title text-secondary">Book a Slot</h2>
                 <ul class="list-group">
-                    <li v-for="(notification, index) in notifications" :key="index" class="list-group-item">
-                        <i class="bi bi-bell"></i>
-                        {{ notification.message }} - {{ notification.date }}
+                    <li v-for="(slot, index) in availableSlots" :key="index"
+                        class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-calendar-event text-primary"></i>
+                            {{ slot.date }} at {{ slot.time }}
+                        </span>
                     </li>
                 </ul>
-
+                <div v-if="availableSlots.length === 0" class="text-center mt-3 text-muted">
+                    <i>No slots available</i>
+                </div>
             </div>
         </div>
     </div>
-
 </template>
 
+
 <script>
-import { subscribeToTopic } from '../mqttClient';
+import { connectClient, subscribeToTopic } from '../mqttClient';
 
 export default {
     data() {
         return {
-            //bookingDate: '',
-            //bookingTime: '',
-            //bookingNotification: '',
-            //notifications: [],
             availableSlots: [],
         };
     },
-    /*
-    methods: {
-        async bookAppointment() {
-            if (!this.bookingDate || !this.bookingTime) {
-                this.bookingNotification = 'Please select a valid date and time!';
-                return;
-            }
-
-            //const topic = 'appointments/requests';
-            const message = {
-                patientId: 'patient_123', //Change later to retrieve the patient id
-                date: this.bookingDate,
-                time: this.bookingTime,
-            };
-
-            await publishMessage('appointment_exchange', message, `appointments.patient_123`);
-
-            this.bookingNotification = `Appointment requested for ${this.bookingDate} at ${this.bookingTime}`;
-
-            this.bookingDate = '';
-            this.bookingTime = '';
-        },
-    },
-        */
-
     mounted() {
-        // Subscribe to slot updates
-        subscribeToTopic('appointment_exchange', 'slots.update', (message) => {
-            const slot = JSON.parse(message);
+        const brokerUrl = 'ws://localhost:15675/ws';
+        const client = connectClient(brokerUrl);
 
-            // Dynamically add the slot to the availableSlots array
+        subscribeToTopic('slots/update', (message) => {
+            const slot = JSON.parse(message);
             this.availableSlots.push(slot);
         });
     },
