@@ -13,6 +13,8 @@ module.exports = {
     "appointment/cancel",
     "notifications/send",
   ],
+
+  //Needs to be refactored 
   topicHandlers: {
     "auth/login/request": "api/auth/login",
     "auth/logout/request": "api/auth/logout",
