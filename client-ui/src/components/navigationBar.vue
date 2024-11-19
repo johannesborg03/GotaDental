@@ -5,13 +5,16 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <router-link to="/dentist.vue" class="nav-link">Dentist</router-link>
+                        <router-link to="/dentist" class="nav-link">Dentist</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/patientUI.vue" class="nav-link">Patient</router-link>
+                        <router-link to="/patient" class="nav-link">Patient</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/login.vue" class="nav-link">Login</router-link>
+                        <router-link to="/login" class="nav-link">Login</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link to="/register" class="nav-link">Register</router-link>
                     </li>
                 </ul>
             </div>
