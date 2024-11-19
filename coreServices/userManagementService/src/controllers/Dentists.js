@@ -10,7 +10,7 @@ var Dentist = require('../models/Dentist');
 router.post('/api/dentists', async function (req, res) {
     try {
         var dentist = new Dentist({
-            username: req.body.username,
+            username: req.body.dentist_username,
             name : req.body.name,
             email: req.body.email,
             date_of_birth : req.body.date_of_birth,
@@ -59,10 +59,10 @@ router.delete('/api/dentists', async (req, res) => {
 });
 
 // PUT to update a dentist by dentist_id
-router.put('/api/dentists/:username', async (req, res) => {
+router.put('/api/dentists/:dentist_username', async (req, res) => {
     try {
         const updatedDentist = await Dentist.findOneAndUpdate(
-            { username: req.params.username },  // Find dentist by username
+            { username: req.params.dentist_username },  // Find dentist by username
             {
                 name: req.body.name,
                 email: req.body.email,
@@ -84,10 +84,10 @@ router.put('/api/dentists/:username', async (req, res) => {
 });
 
 // PATCH to update a dentist by dentist_id
-router.patch('/api/dentists/:username', async (req, res) => {
+router.patch('/api/dentists/:dentist_username', async (req, res) => {
     try {
         const updatedDentist = await Dentist.findOneAndUpdate(
-            { username: req.params.username },  // Find dentist by dentist_id
+            { username: req.params.dentist_username },  // Find dentist by dentist_id
             req.body,  // Only update the fields provided in the request body
             { new: true }  // Return the updated document
         );
