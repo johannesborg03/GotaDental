@@ -34,7 +34,6 @@
 
 
 <script>
-import { connectClient, publishMessage } from '../mqttClient';
 
 export default {
   data() {
@@ -43,26 +42,34 @@ export default {
       slotTime: '',
     };
   },
+  
   methods: {
-    registerSlot() {
+    async registerSlot() {
       if (!this.slotDate || !this.slotTime) {
         alert('Please select a valid date and time!');
         return;
       }
-
-      const brokerUrl = 'ws://localhost:15675/ws';
-      connectClient(brokerUrl);
 
       const slotDetails = {
         date: this.slotDate,
         time: this.slotTime,
       };
 
-      publishMessage('slots/update', slotDetails);
-      console.log('Slot published:', slotDetails);
+      try {
+        const response = await fetch(`/api/dentists/1/slots`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(slotDetails),
+        });
 
-      this.slotDate = '';
-      this.slotTime = '';
+        const data = await response.json();
+        console.log('Slot registered successfully:', data);
+
+        this.slotDate = '';
+        this.slotTime = '';
+      } catch (err) {
+        console.error('Error registering slot:', err);
+      }
     },
   },
 };
