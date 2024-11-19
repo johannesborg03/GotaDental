@@ -27,22 +27,20 @@
 
 
 <script>
-import { connectClient, subscribeToTopic } from '../mqttClient';
-
 export default {
     data() {
         return {
             availableSlots: [],
         };
     },
-    mounted() {
-        const brokerUrl = 'ws://localhost:15675/ws';
-        const client = connectClient(brokerUrl);
-
-        subscribeToTopic('slots/update', (message) => {
-            const slot = JSON.parse(message);
-            this.availableSlots.push(slot);
-        });
+    async mounted() {
+        try {
+            const response = await fetch('http://localhost:3000/api/slots');
+            const slots = await response.json();
+            this.availableSlots = slots;
+        } catch (err) {
+            console.error('Error fetching slots:', err);
+        }
     },
 };
 </script>

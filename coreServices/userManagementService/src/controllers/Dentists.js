@@ -1,6 +1,7 @@
 var express = require ('express');
 var router = express.Router();
-
+//const Dentist = require('../models/Dentist');
+var { publishMessage } = require('../events/publisher');
 
 
 var Dentist = require('../models/Dentist');
@@ -38,6 +39,29 @@ router.post('/api/dentists', async function (req, res) {
         });
     }
 });
+
+// Register a new time slot for a dentist and publish it to RabbitMQ
+router.post('/:dentist_id/slots', async (req, res) => {
+    try {
+        const { dentist_id } = req.params;
+        const { date, time } = req.body;
+
+        if (!date || !time) {
+            return res.status(400).json({ message: 'Date and time are required' });
+        }
+
+        const slotDetails = { dentist_id, date, time };
+
+        // Publish the slot to RabbitMQ
+        await publishMessage('slots/update', slotDetails);
+
+        res.status(200).json({ message: 'Slot published successfully', slot: slotDetails });
+    } catch (err) {
+        console.error('Error while publishing slot:', err);
+        res.status(500).json({ message: 'Error publishing slot', error: err.message });
+    }
+});
+
 // GET all dentists
 router.get('/api/dentists', async (req, res) => {
     try {
