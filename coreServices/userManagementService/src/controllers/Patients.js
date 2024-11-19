@@ -1,6 +1,7 @@
 var express = require ('express');
 var router = express.Router();
-
+const Patient = require('../models/Patient');
+const { subscribeToTopic } = require('../events/subscriber');
 
 
 var Patient = require('../models/Patient');
@@ -45,6 +46,21 @@ router.get('/api/patients', async (req, res) => {
         res.status(200).json(patients);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching patients', error: error.message });
+    }
+});
+
+// Subscribe to the slot updates
+router.get('/api/slots', async (req, res) => {
+    try {
+        const slots = [];
+        await subscribeToTopic('slots/update', (message) => {
+            slots.push(message);
+        });
+
+        res.status(200).json(slots);
+    } catch (err) {
+        console.error('Error while subscribing to slots:', err);
+        res.status(500).json({ message: 'Error fetching slots', error: err.message });
     }
 });
 
