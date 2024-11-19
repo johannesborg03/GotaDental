@@ -9,6 +9,12 @@ var dentistSchema = new mongoose.Schema({
         max : 25,
         unique : true
     },
+    password : {
+        type : String,
+        required : true,
+        min : 1, 
+        max : 25,
+    },
     name : {
         type : String,
         required : true,

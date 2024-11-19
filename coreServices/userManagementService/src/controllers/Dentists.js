@@ -11,6 +11,7 @@ router.post('/api/dentists', async function (req, res) {
     try {
         var dentist = new Dentist({
             username: req.body.dentist_username,
+            password: req.body.password,
             name : req.body.name,
             email: req.body.email,
             date_of_birth : req.body.date_of_birth,
@@ -64,6 +65,7 @@ router.put('/api/dentists/:dentist_username', async (req, res) => {
         const updatedDentist = await Dentist.findOneAndUpdate(
             { username: req.params.dentist_username },  // Find dentist by username
             {
+                password: req.body.password,
                 name: req.body.name,
                 email: req.body.email,
                 date_of_birth: req.body.date_of_birth,
