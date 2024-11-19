@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var dentistSchema = new mongoose.Schema({
-    username : {
+    dentist_username : {
         type : String,
         required : true,
         min : 1,
