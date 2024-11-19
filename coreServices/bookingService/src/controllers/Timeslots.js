@@ -7,13 +7,13 @@ var Office = require('../models/Office.js');
 const mongoose = require('mongoose');
 
 // Create a new timeslot for a specific dentist
-router.post('/api/timeslots/:dentist_id/timeslot', async function (req, res) {
+router.post('/api/timeslots/:dentist_username/timeslot', async function (req, res) {
     try {
 
-        const dentistID = req.params.dentist_id; 
+        const dentistID = req.params.dentist_username; 
 
         // Find the dentinst by dentist_id
-        const dentist = await Dentist.findOne({dentist_id: dentistID });
+        const dentist = await Dentist.findOne({dentist_username :dentist_username });
         if (!dentist) {
             return res.status(404).json({ message: "Dentist not found" });
         }
@@ -22,7 +22,7 @@ router.post('/api/timeslots/:dentist_id/timeslot', async function (req, res) {
         var timeslot = new Timeslot({
             timeslot_id: req.body.timeslot_id, 
             date_and_time: req.body.date_and_time,
-            dentist_id: dentistID,  
+            dentist_username: dentist_username,  
             timeslot_state: req.body.timeslot_state
         });
 
@@ -60,7 +60,7 @@ router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
         }
 
         //Find all timeslots for a dentist
-        const timeslots = await Timeslot.find({ dentist_id: { $in: dentistIds } });
+        const timeslots = await Timeslot.find({ dentist_username: { $in: dentistIds } });
         if (timeslots.length === 0) {
             return res.status(404).json({ message: "No timeslots found for the dentists" });
         }
@@ -78,7 +78,7 @@ router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
 });
 
 // Get a specific timeslot for a dentist in a specific office
-router.get('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function (req, res) {
+router.get('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async function (req, res) {
     try {
         // Find the office by the office_id
         const office = await Office.findOne({ office_id: req.params.office_id });
@@ -87,14 +87,14 @@ router.get('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
         }
 
         // Check if the dentist is part of the office
-        if (!office.dentists.includes(req.params.dentist_id)) {
+        if (!office.dentists.includes(req.params.dentist_username)) {
             return res.status(404).json({ message: "Dentist not found in this office" });
         }
 
         // Find the specific timeslot for the dentist
         const timeslot = await Timeslot.findOne({
             _id: req.params.timeslot_id,
-            dentist_id: req.params.dentist_id
+            dentist_username: req.params.dentist_username
         });
 
         if (!timeslot) {
@@ -114,7 +114,7 @@ router.get('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
 });
 
 // Update a timeslot for a dentist in a specific office 
-router.put('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function (req, res) {
+router.put('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async function (req, res) {
     try {
         const office = await Office.findOne({ office_id: req.params.office_id });
         if (!office) {
@@ -122,12 +122,12 @@ router.put('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
         }
 
          // Check if the dentist is part of the office
-         if (!office.dentists.includes(req.params.dentist_id)) {
+         if (!office.dentists.includes(req.params.dentist_username)) {
             return res.status(404).json({ message: "Dentist not found in this office" });
         }
 
         const updatedTimeslot = await Timeslot.findOneAndUpdate(
-            { timeslot_id: req.params.timeslot_id, dentist_id: req.params.dentist_id },req.body,{ new: true, runValidators: true }
+            { timeslot_id: req.params.timeslot_id, dentist_id: req.params.dentist_username },req.body,{ new: true, runValidators: true }
         );
 
         if (!updatedTimeslot) {
@@ -148,7 +148,7 @@ router.put('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function 
 
 
 // Delete a timeslot for a dentist in a specific office 
-router.delete('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async function (req, res) {
+router.delete('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async function (req, res) {
     try {
         const office = await Office.findOne({ office_id: req.params.office_id });
         if (!office) {
@@ -156,11 +156,11 @@ router.delete('/api/timeslots/:office_id/:dentist_id/:timeslot_id', async functi
         }
 
          // Check if the dentist is part of the office
-         if (!office.dentists.includes(req.params.dentist_id)) {
+         if (!office.dentists.includes(req.params.dentist_username)) {
             return res.status(404).json({ message: "Dentist not found in this office" });
         }
 
-        const deletedTimeslot = await Timeslot.findOneAndDelete({timeslot_id: req.params.timeslot_id,dentist_id: req.params.dentist_id});
+        const deletedTimeslot = await Timeslot.findOneAndDelete({timeslot_id: req.params.timeslot_id,dentist_username: req.params.dentist_username});
 
         if (!deletedTimeslot) {
             return res.status(404).json({ message: "Timeslot not found" });
