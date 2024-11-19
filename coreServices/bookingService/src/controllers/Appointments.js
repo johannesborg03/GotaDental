@@ -63,10 +63,10 @@ router.get('/api/appointments/:patient_id/:appointment_id', async function (req,
 });
 
 // Get all appointments for a dentist
-router.get('/api/appointments/:dentist_id', async function (req, res) {
+router.get('/api/appointments/:dentist_username', async function (req, res) {
     try {
         // Find the dentist by the dentist_id
-        const dentist = await Dentist.findOne({ _id: req.params.dentist_id });
+        const dentist = await Dentist.findOne({ _id: req.params.dentist_username });
         if (!dentist) {
             return res.status(404).json({ message: "Dentist not found" });
         }
@@ -88,10 +88,10 @@ router.get('/api/appointments/:dentist_id', async function (req, res) {
 
 
 // Get a specific appointment for a dentist
-router.get('/api/appointments/:dentist_id/:appointment_id', async function (req, res) {
+router.get('/api/appointments/:dentist_username/:appointment_id', async function (req, res) {
     try {
         // Find the dentist by the dentist_id
-        const dentist = await Dentist.findOne({ _id: req.params.dentist_id });
+        const dentist = await Dentist.findOne({ _id: req.params.dentist_username });
         if (!dentist) {
             return res.status(404).json({ message: "Dentist not found" });
         }
@@ -123,7 +123,7 @@ router.get('/api/appointments/:dentist_id/:appointment_id', async function (req,
 router.post('/api/appointments/:appointment_id/notes', async function (req, res) {
     try {
         const appointmentID = req.params.appointment_id;
-        const dentistID = req.body.dentist_id; 
+        const dentist_username = req.body.dentist_username; 
 
         // Find the appointment by appointment_id
         const appointment = await Appointment.findOne({ _id: appointmentID });
@@ -132,13 +132,13 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
         }
 
         // Verify that the dentist is associated with the appointment
-        if (!appointment.dentist_id.equals(dentistID)) {
+        if (!appointment.dentist_id.equals(dentist_username)) {
             return res.status(403).json({ message: "Dentist not authorized for this appointment" });
         }
 
         // Add a note to the appointment
         const note = {
-            dentist_id: dentistID,
+            dentist_username: dentist_username,
             content: req.body.content,
             date: new Date()
         };
@@ -182,7 +182,7 @@ router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', a
 
         // Optionally, update the timeslot state back to available
         const timeslot = await Timeslot.findOne({
-            dentist_id: booking.dentist_id,
+            dentist_username: booking.dentist_username,
             date_and_time: booking.appointment_datetime
         });
 
@@ -206,12 +206,12 @@ router.delete('/api/patients/:patient_id/appointments/:appointment_id/cancel', a
 });
 
 // Cancel an appointment and associated booking by a dentist
-router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', async function (req, res) {
+router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
-        const { dentist_id, appointment_id } = req.params;
+        const { dentist_username, appointment_id } = req.params;
 
         // Find the appointment
-        const appointment = await Appointment.findOne({ _id: appointment_id, dentist_id: dentist_id });
+        const appointment = await Appointment.findOne({ _id: appointment_id, dentist_username: dentist_username });
         if (!appointment) {
             return res.status(404).json({ message: "Appointment not found for this dentist" });
         }
@@ -227,7 +227,7 @@ router.delete('/api/dentists/:dentist_id/appointments/:appointment_id/cancel', a
 
         // Optionally, update the timeslot state back to available
         const timeslot = await Timeslot.findOne({
-            dentist_id: dentist_id,
+            dentist_username: dentist_username,
             date_and_time: booking.appointment_datetime
         });
 
