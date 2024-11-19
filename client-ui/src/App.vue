@@ -1,5 +1,11 @@
 <script>
+import navigationBar from './components/navigationBar.vue';
 
+export default {
+  components: {
+    navigationBar,
+  }
+}
 
 </script>
 
@@ -12,7 +18,11 @@
       <div>
         <a href="/login" class="nav-link">Login</a>
       </div>
-      
+      <div id="app">
+        <navigationBar />
+       
+      </div>
+
     </nav>
 
     <router-view />
