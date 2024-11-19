@@ -1,7 +1,7 @@
 var express = require ('express');
 var router = express.Router();
-const Patient = require('../models/Patient');
-const { subscribeToTopic } = require('../events/subscriber');
+//const Patient = require('../models/Patient');
+var { subscribeToTopic } = require('../events/subscriber');
 
 
 var Patient = require('../models/Patient');

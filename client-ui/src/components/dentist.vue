@@ -42,7 +42,7 @@ export default {
       slotTime: '',
     };
   },
-  
+
   methods: {
     async registerSlot() {
       if (!this.slotDate || !this.slotTime) {
@@ -56,7 +56,7 @@ export default {
       };
 
       try {
-        const response = await fetch(`/api/dentists/1/slots`, {
+        const response = await fetch(`http://localhost:3000/api/dentists/1/slots`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(slotDetails),

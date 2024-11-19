@@ -1,7 +1,7 @@
 var express = require ('express');
 var router = express.Router();
-const Dentist = require('../models/Dentist');
-const { publishMessage } = require('../events/publisher');
+//const Dentist = require('../models/Dentist');
+var { publishMessage } = require('../events/publisher');
 
 
 var Dentist = require('../models/Dentist');
@@ -41,7 +41,7 @@ router.post('/api/dentists', async function (req, res) {
 });
 
 // Register a new time slot for a dentist and publish it to RabbitMQ
-router.post('/api/dentists/:dentist_id/slots', async (req, res) => {
+router.post('/:dentist_id/slots', async (req, res) => {
     try {
         const { dentist_id } = req.params;
         const { date, time } = req.body;

@@ -35,7 +35,7 @@ export default {
     },
     async mounted() {
         try {
-            const response = await fetch('/api/slots');
+            const response = await fetch('http://localhost:3000/api/slots');
             const slots = await response.json();
             this.availableSlots = slots;
         } catch (err) {
