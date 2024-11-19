@@ -31,7 +31,7 @@ router.get('/api/offices', async function (req, res) {
 // Get basic details for a specific office
 router.get('/api/offices/:office_id', async function (req, res) {
     try {
-        const office = await Office.findOne({ office_id: req.params.office_id }).populate('dentist_id', 'name'); 
+        const office = await Office.findOne({ office_id: req.params.office_id }).populate('dentist_username', 'name'); 
 
         if (!office) {
             return res.status(404).json({ message: "Office not found" });
@@ -43,7 +43,7 @@ router.get('/api/offices/:office_id', async function (req, res) {
                 office_id: office.office_id,
                 office_name: office.office_name,
                 office_address: office.office_address,
-                dentist_name: office.dentist_id.name
+                dentist_name: office.dentist_username.name
             }
         });
     } catch (error) {

@@ -11,7 +11,8 @@ var Patient = require('../models/Patient');
 router.post('/api/patients', async function (req, res) {
     try {
         var patient = new Patient({
-            patient_id: req.body.dentist_id,
+            patient_username: req.body.patient_username,
+            password: req.body.password,
             name : req.body.name,
             email: req.body.email,
             notified : req.body.notified,
@@ -35,7 +36,7 @@ router.post('/api/patients', async function (req, res) {
         }
         res.status(500).json({
             message : "Server error while creating dentist",
-            error : error.message
+            error : err.message
         });
     }
 });
@@ -75,12 +76,13 @@ router.delete('/api/patients', async (req, res) => {
 });
 
 // PUT to update a dentist by dentist_id
-router.put('/api/patients/:patient_id', async (req, res) => {
+router.put('/api/patients/:patient_username', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
-            { patient_id: req.params.patient_id },  // Find patient by patient_id
+            { patient_username: req.params.patient_username },  // Find patient by patient_username
             {
                 name: req.body.name,
+                password: req.body.password,
                 email: req.body.email,
                 notified : req.body.notified,
                 booking_id: req.body.booking_id,  // Optional
@@ -100,10 +102,10 @@ router.put('/api/patients/:patient_id', async (req, res) => {
 });
 
 // PATCH to update a dentist by dentist_id
-router.patch('/api/patients/:patient_id', async (req, res) => {
+router.patch('/api/patients/:patient_username', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
-            { patient_id: req.params.patient_id },  // Find patient by patient_id
+            { patient_username: req.params.patient_username },  // Find patient by patient_id
             req.body,  // Only update the fields provided in the request body
             { new: true }  // Return the updated document
         );

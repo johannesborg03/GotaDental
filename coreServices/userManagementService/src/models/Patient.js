@@ -2,12 +2,18 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var patientSchema = new mongoose.Schema({
-    patient_id : {
+    patient_username : {
         type : String,
         required : true,
         min : 1,
         max : 50,
         unique : true
+    },
+    password : {
+        type : String,
+        required: true,
+        min : 1,
+        max : 25,
     },
     name : {
         type : String,
