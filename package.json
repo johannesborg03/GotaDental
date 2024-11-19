@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "rabbitmq-stream-js-client": "^0.4.2"
+  }
+}

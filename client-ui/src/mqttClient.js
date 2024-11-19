@@ -1,49 +1,66 @@
 import mqtt from 'mqtt';
 
-const mqttClient = mqtt.connect('ws://localhost:9001', {
-    clientId: `mqttjs_${Math.random().toString(16).substr(2, 8)}`,
-    clean: true, // Clean session
-    reconnectPeriod: 1000, // Reconnect every second if disconnected
-});
+let client;
 
-mqttClient.on('connect', () => {
-    console.log('Connected to MQTT broker');
-});
 
-mqttClient.on('error', (error) => {
-    console.error('Connection error:', error);
-});
+export function connectClient(brokerUrl, options = {}) {
+    console.log('Connecting to MQTT broker at:', brokerUrl);
 
-mqttClient.on('close', () => {
-    console.log('MQTT connection closed');
-});
+    client = mqtt.connect(brokerUrl, {
+        reconnectPeriod: 5000, // Retry every 5 seconds
+        ...options,
+    });
 
-// Publish a message to a topic
+    client.on('connect', () => {
+        console.log('Connected to MQTT broker:', brokerUrl);
+    });
+
+    client.on('error', (err) => {
+        console.error('MQTT Connection Error:', err.message);
+    });
+
+    client.on('close', () => {
+        console.warn('Disconnected from MQTT broker');
+    });
+
+    return client;
+}
+
 export function publishMessage(topic, message) {
-    mqttClient.publish(topic, message, (err) => {
+    if (!client || client.disconnected) {
+        console.error('MQTT client is not connected. Call connectClient() first.');
+        return;
+    }
+
+    const payload = typeof message === 'string' ? message : JSON.stringify(message);
+
+    client.publish(topic, payload, (err) => {
         if (err) {
-            console.error('Publish error:', err);
+            console.error(`Error publishing to topic ${topic}:`, err.message);
         } else {
-            console.log(`Message "${message}" published to topic "${topic}"`);
+            console.log(`Message published to topic ${topic}:`, payload);
         }
     });
 }
 
-// Subscribe to a topic and handle messages
-export function subscribeToTopic(topic, messageHandler) {
-    mqttClient.subscribe(topic, (err) => {
+export function subscribeToTopic(topic, callback) {
+    if (!client || client.disconnected) {
+        console.error('MQTT client is not connected. Call connectClient() first.');
+        return;
+    }
+
+    client.subscribe(topic, (err) => {
         if (err) {
-            console.error('Subscription error:', err);
+            console.error(`Error subscribing to topic ${topic}:`, err.message);
         } else {
-            console.log(`Subscribed to topic "${topic}"`);
+            console.log(`Subscribed to topic ${topic}`);
         }
     });
 
-    mqttClient.on('message', (receivedTopic, message) => {
+    client.on('message', (receivedTopic, message) => {
         if (receivedTopic === topic) {
-            messageHandler(message.toString());
+            const payload = message.toString();
+            callback(payload);
         }
     });
 }
-
-export default mqttClient;
