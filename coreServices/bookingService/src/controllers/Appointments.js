@@ -1,10 +1,10 @@
-var express = require('express');
+const express = require('express');
 const router = express.Router();
-var Booking = require('../models/Booking.js');
-// var Dentist = require('../models/Dentist.js'); 
-// var Patient = require('../../userManagementDB/models/Patient.js');
+var Dentist = require('../models/Dentist.js'); 
+var Patient = require('../../userManagementDB/models/Patient.js');
 var Appointment = require('../models/Appointment.js');
-
+const Timeslot = require('../models/timeslot');
+const Office = require('../models/Office');
 const mongoose = require('mongoose');
 
 // POST route to create a new appointment
@@ -19,12 +19,12 @@ router.post('/api/appointments', async (req, res) => {
 
         // Create a new appointment
         const newAppointment = new Appointment({
-            patient_id,
-            dentist_id,
+            patient_username,
+            dentist_username,
+            notes: notes || "", // Set default notes if not provided
+            state: 0, // Default state: pending
             office_id,
             date_and_time,
-            notes: notes || "", // Set default notes if not provided
-            state: 0 // Default state: pending
         });
 
         // Save the appointment to the database
