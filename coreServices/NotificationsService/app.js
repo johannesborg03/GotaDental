@@ -1,7 +1,6 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
-var userRoutes = require('./src/apiRoutes/userRoutes'); 
 
 require('dotenv').config();
 
@@ -9,10 +8,11 @@ require('dotenv').config();
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3000;
 
-// Controllers:
-//var dentistsController = require('./src/controllers/Dentists');
-//var patientsController = require('./src/controllers/Patients')
-//--
+
+//Require controllers here
+
+
+//------
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
@@ -30,15 +30,9 @@ app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+//App.use controllers here:
 
-
-//app.use each controller:
-//app.use(dentistsController);
-//app.use(patientsController);
-//--
-
-app.use(userRoutes);
-
+//----
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
