@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 var userRoutes = require('./src/apiRoutes/userRoutes'); 
 
+require('dotenv').config();
 
 // Variables
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
