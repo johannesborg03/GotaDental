@@ -1,0 +1,1 @@
+// Consumes events from RabbitMQ
