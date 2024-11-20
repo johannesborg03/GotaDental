@@ -6,9 +6,6 @@ var cors = require('cors');
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3000;
 
-var appointmentsController = require('./coreServices/bookingService/src/controllers/Appointments');
-var bookingsController = require('./coreServices/bookingService/src/controllers/Bookings');
-var officesController = require('./coreServices/bookingService/src/controllers/Offices');
 var timeslotsController = require('./coreServices/bookingService/src/controllers/Timeslots');
 
 // Connect to MongoDB
@@ -28,9 +25,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 
-app.use(appointmentsController);
-app.use(bookingsController);
-app.use(officesController);
 app.use(timeslotsController);
 
 // 404 Handler
