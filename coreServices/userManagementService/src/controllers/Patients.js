@@ -7,6 +7,7 @@ var { subscribeToTopic } = require('../events/subscriber');
 var Patient = require('../models/Patient');
 
 
+
 // Create new patient (POST):
 router.post('/api/patients', async function (req, res) {
     try {
