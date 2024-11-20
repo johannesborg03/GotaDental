@@ -4,6 +4,10 @@ var Timeslot = require('../models/timeslot.js'); // Gets red when its a big T
 // var Dentist = require('../models/Dentist.js'); 
 var Office = require('../models/Office.js'); 
 
+var Dentist = require('../models/Dentist.js'); 
+var Patient = require('../../userManagementDB/models/Patient.js');
+
+
 const mongoose = require('mongoose');
 
 // Create a new timeslot for a specific dentist
@@ -12,7 +16,7 @@ router.post('/api/timeslots/:dentist_username/timeslot', async function (req, re
 
         const dentistID = req.params.dentist_username; 
 
-        // Find the dentinst by dentist_id
+        // Find the dentinst by dentist_username
         const dentist = await Dentist.findOne({dentist_username :dentist_username });
         if (!dentist) {
             return res.status(404).json({ message: "Dentist not found" });
