@@ -7,6 +7,41 @@ var Appointment = require('../models/Appointment.js');
 
 const mongoose = require('mongoose');
 
+// POST route to create a new appointment
+router.post('/api/appointments', async (req, res) => {
+    try {
+        const { patient_username, dentist_username, office_id, date_and_time, notes } = req.body;
+
+        // Validate required fields
+        if (!patient_username || !dentist_username || !office_id|| !date_and_time) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Create a new appointment
+        const newAppointment = new Appointment({
+            patient_id,
+            dentist_id,
+            office_id,
+            date_and_time,
+            notes: notes || "", // Set default notes if not provided
+            state: 0 // Default state: pending
+        });
+
+        // Save the appointment to the database
+        await newAppointment.save();
+
+        res.status(201).json({
+            message: "Appointment created successfully",
+            appointment: newAppointment
+        });
+    } catch (error) {
+        console.error("Error while creating appointment:", error);
+        res.status(500).json({
+            message: "Server error while creating appointment",
+            error: error.message
+        });
+    }
+});
 
 
 // Get all appointments for a patient
