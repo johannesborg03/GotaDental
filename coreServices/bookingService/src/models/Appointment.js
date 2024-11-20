@@ -3,19 +3,29 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var appointmentSchema = new mongoose.Schema({
-    appointment_id : {
-        type : String,
-        required : true,
-        unique : true
+    patient_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Patient',
+        required: true,
+    },
+    dentist_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dentist',
+        required: true,
     },
     notes: {
         type: String,
          default: ''
     },
-
-    Booking: {
+    state: {
+        type: Number,
+        required: true,
+        enum: [0, 1], // 0 for pending, 1 for confirmed
+    },
+    office_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref : 'Booking'
+        ref: 'Office',
+        required: true,
     },
 
     date_and_time: {
