@@ -13,10 +13,10 @@ var appointmentSchema = new mongoose.Schema({
         ref: 'Dentist',
         required: true,
     },
-    notes: {
+    notes: [{
         type: String,
          default: ''
-    },
+    }],
     state: {
         type: Number,
         required: true,
