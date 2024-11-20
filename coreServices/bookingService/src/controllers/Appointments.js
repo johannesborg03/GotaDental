@@ -1,11 +1,47 @@
-var express = require('express');
+const express = require('express');
 const router = express.Router();
-var Booking = require('../models/Booking.js');
-// var Dentist = require('../models/Dentist.js'); 
-// var Patient = require('../../userManagementDB/models/Patient.js');
+var Dentist = require('../models/Dentist.js'); 
+var Patient = require('../../userManagementDB/models/Patient.js');
 var Appointment = require('../models/Appointment.js');
-
+const Timeslot = require('../models/timeslot');
+const Office = require('../models/Office');
 const mongoose = require('mongoose');
+
+// POST route to create a new appointment
+router.post('/api/appointments', async (req, res) => {
+    try {
+        const { patient_username, dentist_username, office_id, date_and_time, notes } = req.body;
+
+        // Validate required fields
+        if (!patient_username || !dentist_username || !office_id|| !date_and_time) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Create a new appointment
+        const newAppointment = new Appointment({
+            patient_username,
+            dentist_username,
+            notes: notes || "", // Set default notes if not provided
+            state: 0, // Default state: pending
+            office_id,
+            date_and_time,
+        });
+
+        // Save the appointment to the database
+        await newAppointment.save();
+
+        res.status(201).json({
+            message: "Appointment created successfully",
+            appointment: newAppointment
+        });
+    } catch (error) {
+        console.error("Error while creating appointment:", error);
+        res.status(500).json({
+            message: "Server error while creating appointment",
+            error: error.message
+        });
+    }
+});
 
 
 // Get all appointments for a patient
@@ -25,6 +61,26 @@ router.get('/api/appointments/:patient_username', async function (req, res) {
     } catch (error) {
         res.status(500).json({
             message: "Server error while retrieving appointments",
+            error: error.message,
+        });
+    }
+});
+
+// Get a specific appointment overall
+router.get('/api/appointments/:appointment_id', async function (req, res) {
+    try {
+        const appointment = await Appointment.findById(req.params.appointment_id);
+        if (!appointment) {
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+
+        res.status(200).json({
+            message: "Appointment retrieved successfully",
+            appointment: appointment
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error while retrieving the appointment",
             error: error.message,
         });
     }
@@ -86,7 +142,7 @@ router.get('/api/appointments/:dentist_username', async function (req, res) {
     }
 });
 
-
+//This probably should be in dentist controller?
 // Get a specific appointment for a dentist
 router.get('/api/appointments/:dentist_username/:appointment_id', async function (req, res) {
     try {
@@ -161,6 +217,7 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
 
 
 // Cancel an appointment and associated booking by a patient
+//This probably should be in patient controller?
 router.delete('/api/patients/:patient_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { patient_username, appointment_id } = req.params;
@@ -206,6 +263,7 @@ router.delete('/api/patients/:patient_username/appointments/:appointment_id/canc
 });
 
 // Cancel an appointment and associated booking by a dentist
+//Should probably be in dentist controller?
 router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { dentist_username, appointment_id } = req.params;
