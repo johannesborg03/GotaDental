@@ -1,10 +1,10 @@
 var express = require ('express');
 var router = express.Router();
 //const Patient = require('../models/Patient');
-// var { subscribeToTopic } = require('../events/subscriber');
+var { subscribeToTopic } = require('../events/subscriber');
 
 
-var Patient = require('../models/Patient');
+
 
 
 // Create new patient (POST):
