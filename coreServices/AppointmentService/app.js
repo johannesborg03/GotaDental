@@ -12,9 +12,6 @@ var port = process.env.PORT || 3000;
 var appointmentsController = require('./coreServices/bookingService/src/controllers/Appointments');
 
 
-var dentistsController = require('../userManagementService/src/controllers/Dentists');
-var patientsController = require('../userManagementService/src/controllers/Patients')
-
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
     console.log(`Connected to MongoDB with URI: ${mongoURI}`);
@@ -33,10 +30,6 @@ app.use(cors()); // Enable CORS
 
 
 app.use(appointmentsController);
-
-
-app.use(dentistsController);
-app.use(patientsController);
 
 
 // 404 Handler
