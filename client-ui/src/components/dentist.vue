@@ -45,8 +45,34 @@ export default {
   },
 
   mounted() {
-    const storedUsername = localStorage.getItem('username');
-    this.username = storedUsername; 
+  const routeUsername = this.$route.params.username;
+
+  // Prefer route username; fallback to stored username
+  const username = routeUsername || storedUsername;
+
+  if (username) {
+    this.fetchUserData(username);
+  } else {
+    console.log('No username available in route or localStorage.');
+  }
+  },
+
+  methods: {
+    async fetchUserData() {
+      try {
+  
+        const response = await fetch(`http://localhost:3000/api/users/${username}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
+        const userData = await response.json();
+        console.log('Fetched user data:', userData);
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
   }
 };
 </script>
