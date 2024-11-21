@@ -61,7 +61,7 @@ export default {
     async fetchUserData() {
       try {
   
-        const response = await fetch(`http://localhost:3000/api/users/${username}`);
+        const response = await fetch(`http://localhost:3005/api/dentist/${username}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch user data: ${response.status}`);
         }

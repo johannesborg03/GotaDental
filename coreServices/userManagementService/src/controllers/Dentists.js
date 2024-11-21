@@ -41,16 +41,16 @@ router.post('/api/dentists', async function (req, res) {
 });
 
 // Register a new time slot for a dentist and publish it to RabbitMQ
-router.post('/:dentist_id/slots', async (req, res) => {
+router.post('/:dentist_username/timeslots', async (req, res) => {
     try {
-        const { dentist_id } = req.params;
+        const {dentist_username } = req.params;
         const { date, time } = req.body;
 
         if (!date || !time) {
             return res.status(400).json({ message: 'Date and time are required' });
         }
 
-        const slotDetails = { dentist_id, date, time };
+        const slotDetails = { dentist_username, date, time };
 
         // Publish the slot to RabbitMQ
         await publishMessage('slots/update', slotDetails);
