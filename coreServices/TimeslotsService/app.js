@@ -9,7 +9,7 @@ require('dotenv').config();
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3003;
 
-var timeslotsController = require('./coreServices/bookingService/src/controllers/Timeslots');
+var timeslotsController = require('./src/controllers/Timeslots.js');
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
