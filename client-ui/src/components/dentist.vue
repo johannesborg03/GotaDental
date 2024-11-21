@@ -44,8 +44,9 @@ export default {
     };
   },
 
-  methods: {
-
+  mounted() {
+    const storedUsername = localStorage.getItem('username');
+    this.username = storedUsername; 
   }
 };
 </script>
