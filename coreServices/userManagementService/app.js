@@ -6,7 +6,7 @@ var userRoutes = require('./src/apiRoutes/userRoutes');
 require('dotenv').config();
 
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
+var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/userManagementService/group10';
 var port = process.env.PORT || 3004;
 
 // Controllers:
