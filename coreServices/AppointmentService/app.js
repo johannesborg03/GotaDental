@@ -9,7 +9,7 @@ require('dotenv').config();
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3000;
 
-var appointmentsController = require('./coreServices/bookingService/src/controllers/Appointments');
+var appointmentsController = require('./src/controllers/Appointments');
 
 
 // Connect to MongoDB

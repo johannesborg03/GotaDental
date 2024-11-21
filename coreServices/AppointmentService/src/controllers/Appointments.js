@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-var Booking = require('../models/Booking.js');
 var Dentist = require('../../../userManagementService/src/models/Dentist.js');
 var Patient = require('../../../userManagementService/src/models/Patient.js');
 var Appointment = require('../models/Appointment.js');
