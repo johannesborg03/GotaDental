@@ -40,37 +40,12 @@ export default {
     return {
       slotDate: '',
       slotTime: '',
+      username: '', // Username fetched from route or localStorage // should be change to ssn 
     };
   },
 
   methods: {
-    async registerSlot() {
-      if (!this.slotDate || !this.slotTime) {
-        alert('Please select a valid date and time!');
-        return;
-      }
 
-      const slotDetails = {
-        date: this.slotDate,
-        time: this.slotTime,
-      };
-
-      try {
-        const response = await fetch(`http://localhost:3000/api/dentists/1/slots`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(slotDetails),
-        });
-
-        const data = await response.json();
-        console.log('Slot registered successfully:', data);
-
-        this.slotDate = '';
-        this.slotTime = '';
-      } catch (err) {
-        console.error('Error registering slot:', err);
-      }
-    },
-  },
+  }
 };
 </script>
