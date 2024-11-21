@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-var Dentist = require('../models/Dentist.js'); 
-var Patient = require('../../userManagementDB/models/Patient.js');
-var Appointment = require('../models/Appointment.js');
-const Timeslot = require('../models/timeslot');
-const Office = require('../models/Office');
 const mongoose = require('mongoose');
+
+var Dentist = require('../../../userManagementService/src/models/Dentist.js');
+var Patient = require('../../../userManagementService/src/models/Patient.js');
+var Timeslot = require('../../../TimeslotsService/src/models/Timeslot.js');
+var Appointment = require('../models/Appointment.js');
+
 
 // POST route to create a new appointment
 router.post('/api/appointments', async (req, res) => {
@@ -215,9 +216,7 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
     }
 }); 
 
-
-// Cancel an appointment and associated booking by a patient
-//This probably should be in patient controller?
+// Cancel an appointment by a patient
 router.delete('/api/patients/:patient_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { patient_username, appointment_id } = req.params;
@@ -228,19 +227,12 @@ router.delete('/api/patients/:patient_username/appointments/:appointment_id/canc
             return res.status(404).json({ message: "Appointment not found for this patient" });
         }
 
-        // Find and delete the associated booking
-        const booking = await Booking.findByIdAndDelete(appointment.booking_id);
-        if (!booking) {
-            return res.status(404).json({ message: "Booking not found" });
-        }
-
         // Delete the appointment
         await Appointment.deleteOne({ _id: appointment_id });
 
-        // Optionally, update the timeslot state back to available
         const timeslot = await Timeslot.findOne({
-            dentist_username: booking.dentist_username,
-            date_and_time: booking.appointment_datetime
+            dentist_username: appointment.dentist_username,
+            date_and_time: appointment.date_and_time
         });
 
         if (timeslot) {
@@ -249,21 +241,20 @@ router.delete('/api/patients/:patient_username/appointments/:appointment_id/canc
         }
 
         res.status(200).json({
-            message: "Appointment and booking canceled successfully by patient",
-            appointment: appointment,
-            booking: booking
+            message: "Appointment canceled successfully by patient",
+            appointment: appointment
         });
     } catch (error) {
-        console.error("Error while canceling appointment and booking by patient:", error);
+        console.error("Error while canceling appointment by patient:", error);
         res.status(500).json({
-            message: "Server error while canceling appointment and booking by patient",
+            message: "Server error while canceling appointment by patient",
             error: error.message
         });
     }
 });
 
-// Cancel an appointment and associated booking by a dentist
-//Should probably be in dentist controller?
+
+// Cancel an appointment by a dentist
 router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/cancel', async function (req, res) {
     try {
         const { dentist_username, appointment_id } = req.params;
@@ -274,19 +265,12 @@ router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/canc
             return res.status(404).json({ message: "Appointment not found for this dentist" });
         }
 
-        // Find and delete the associated booking
-        const booking = await Booking.findByIdAndDelete(appointment.booking_id);
-        if (!booking) {
-            return res.status(404).json({ message: "Booking not found" });
-        }
-
         // Delete the appointment
         await Appointment.deleteOne({ _id: appointment_id });
 
-        // Optionally, update the timeslot state back to available
         const timeslot = await Timeslot.findOne({
             dentist_username: dentist_username,
-            date_and_time: booking.appointment_datetime
+            date_and_time: appointment.date_and_time
         });
 
         if (timeslot) {
@@ -295,14 +279,13 @@ router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/canc
         }
 
         res.status(200).json({
-            message: "Appointment and booking canceled successfully by dentist",
-            appointment: appointment,
-            booking: booking
+            message: "Appointment canceled successfully by dentist",
+            appointment: appointment
         });
     } catch (error) {
-        console.error("Error while canceling appointment and booking by dentist:", error);
+        console.error("Error while canceling appointment by dentist:", error);
         res.status(500).json({
-            message: "Server error while canceling appointment and booking by dentist",
+            message: "Server error while canceling appointment by dentist",
             error: error.message
         });
     }

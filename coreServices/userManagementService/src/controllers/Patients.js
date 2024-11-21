@@ -1,18 +1,17 @@
 var express = require ('express');
 var router = express.Router();
 //const Patient = require('../models/Patient');
-var { subscribeToTopic } = require('../events/subscriber');
+// var { subscribeToTopic } = require('../events/subscriber');
 
 
 var Patient = require('../models/Patient');
+
+
 // Create new patient (POST):
-
-
 router.post('/api/patients', async function (req, res) {
     try {
         var patient = new Patient({
-            patient_username: req.body.patient_username,
-            password: req.body.password,
+            patient_id: req.body.patient_id,
             name : req.body.name,
             email: req.body.email,
             notified : req.body.notified,

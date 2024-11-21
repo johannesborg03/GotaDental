@@ -12,7 +12,7 @@ var appointmentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Dentist',
         required: true,
-    },//
+    },
     notes: [{
         type: String,
          default: ''

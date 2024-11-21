@@ -18,7 +18,7 @@ var officeSchema = new mongoose.Schema({
         required : true,
     },
 
-    dentist_id: {
+    dentist_username: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Dentist',
         required: true

@@ -1,14 +1,11 @@
 var express = require('express');
 const router = express.Router();
-var Timeslot = require('../models/timeslot.js'); // Gets red when its a big T
-// var Dentist = require('../models/Dentist.js'); 
-var Office = require('../models/Office.js'); 
-
-var Dentist = require('../models/Dentist.js'); 
-var Patient = require('../../userManagementDB/models/Patient.js');
-
 
 const mongoose = require('mongoose');
+
+var Timeslot = require('../models/Timeslot.js'); 
+var Dentist = require('../../../userManagementService/src/models/Dentist.js');
+var Office = require('../../../OfficesService/src/models/Office.js')
 
 // Create a new timeslot for a specific dentist
 router.post('/api/timeslots/:dentist_username/timeslot', async function (req, res) {

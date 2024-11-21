@@ -6,10 +6,10 @@ require('dotenv').config();
 
 
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
+var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
 var port = process.env.PORT || 3000;
 
-var appointmentsController = require('./coreServices/bookingService/src/controllers/Appointments');
+var appointmentsController = require('./src/controllers/Appointments');
 
 
 // Connect to MongoDB
@@ -30,6 +30,7 @@ app.use(cors()); // Enable CORS
 
 
 app.use(appointmentsController);
+
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

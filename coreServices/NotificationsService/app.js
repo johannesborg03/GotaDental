@@ -5,8 +5,8 @@ var cors = require('cors');
 require('dotenv').config();
 
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
-var port = process.env.PORT || 3000;
+var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
+var port = process.env.PORT || 3001;
 
 
 //Require controllers here

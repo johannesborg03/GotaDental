@@ -6,13 +6,15 @@ var userRoutes = require('./src/apiRoutes/userRoutes');
 require('dotenv').config();
 
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
-var port = process.env.PORT || 3000;
+var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/userManagementService';
+var port = process.env.PORT || 3004;
 
 // Controllers:
-//var dentistsController = require('./src/controllers/Dentists');
-//var patientsController = require('./src/controllers/Patients')
+var dentistsController = require('./src/controllers/Dentists');
+var patientsController = require('./src/controllers/Patients')
 //--
+
+
 
 // Connect to MongoDB
 mongoose.connect(mongoURI).then(() => {
@@ -33,12 +35,10 @@ app.use(cors()); // Enable CORS
 
 
 //app.use each controller:
-//app.use(dentistsController);
-//app.use(patientsController);
-//--
+app.use(dentistsController);
+app.use(patientsController);
 
-app.use(userRoutes);
-
+//app.use(userRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
