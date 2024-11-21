@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // Variables
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3003;
 
 var timeslotsController = require('./coreServices/bookingService/src/controllers/Timeslots');
 
