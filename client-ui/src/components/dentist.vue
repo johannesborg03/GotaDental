@@ -96,6 +96,19 @@ export default {
           body: JSON.stringify(slotDetails),
         });
 
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Slot registered successfully:', data);
+          alert('Time slot registered successfully!');
+
+          // Reset form fields
+          this.slotDate = '';
+          this.slotTime = '';
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to register slot: ${errorData.message}`);
+        }
+
       } catch (error) {
         console.error('Error registering slot:', error);
         alert('An error occurred while registering the time slot. Please try again later.');
