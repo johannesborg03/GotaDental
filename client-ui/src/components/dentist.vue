@@ -72,7 +72,16 @@ export default {
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
-    }
+    },
+
+     // Register a time slot for the specified username
+     async registerSlot() {
+      // Validate required fields
+      if (!this.slotDate || !this.slotTime) {
+        alert('Please select a valid date and time!');
+        return;
+      }
   }
+}
 };
 </script>

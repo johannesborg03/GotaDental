@@ -5,8 +5,6 @@ var router = express.Router();
 var { publishMessage } = require('../events/publisher');
 
 // Create new Dentist (POST):
-
-
 router.post('/api/dentists', async function (req, res) {
     try {
         var dentist = new Dentist({
