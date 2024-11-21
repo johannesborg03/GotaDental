@@ -89,6 +89,13 @@ export default {
           time: this.slotTime,
         };
 
+         // Make the POST request to register the time slot
+         const response = await fetch(`http://localhost:3000/api/timeslot/${this.username}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(slotDetails),
+        });
+
       } catch (error) {
         console.error('Error registering slot:', error);
         alert('An error occurred while registering the time slot. Please try again later.');
