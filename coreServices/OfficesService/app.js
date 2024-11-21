@@ -8,7 +8,7 @@ require('dotenv').config();
 var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10';
 var port = process.env.PORT || 3002;
 
-var officesController = require('./coreServices/bookingService/src/controllers/Offices');
+var officesController = require('./src/controllers/Offices');
 
 
 // Connect to MongoDB
