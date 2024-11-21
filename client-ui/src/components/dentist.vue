@@ -81,7 +81,21 @@ export default {
         alert('Please select a valid date and time!');
         return;
       }
+
+      try {
+      // Construct the slot details
+        const slotDetails = {
+          date: this.slotDate,
+          time: this.slotTime,
+        };
+
+      } catch (error) {
+        console.error('Error registering slot:', error);
+        alert('An error occurred while registering the time slot. Please try again later.');
+      }
   }
+
+  
 }
 };
 </script>
