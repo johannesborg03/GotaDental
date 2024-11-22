@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const bookingDbConnection = require('../utils/dbConnect');
 
 var Schema = mongoose.Schema;
 
@@ -36,6 +37,6 @@ var appointmentSchema = new mongoose.Schema({
    
 });
 
-var Appointment = mongoose.model('Appointment', appointmentSchema);
+var Appointment = bookingDbConnection.model('Appointment', appointmentSchema);
 
 module.exports = Appointment;
