@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const bookingDbConnection = require('../utils/dbConnect');
+const { bookingDbConnection }  = require('../utils/dbConnect');
 
 var Schema = mongoose.Schema;
 
