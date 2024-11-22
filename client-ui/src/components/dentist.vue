@@ -32,36 +32,26 @@
   </div>
 </template>
 
-
 <script>
-
 export default {
   data() {
     return {
       slotDate: '',
       slotTime: '',
-      username: '', // Username fetched from route or localStorage // should be change to ssn 
+      username: '', // should be change to ssn 
     };
   },
 
   mounted() {
-  const routeUsername = this.$route.params.username;
-
-  // Prefer route username; fallback to stored username
-  const username = routeUsername || storedUsername;
-
-  if (username) {
-    this.fetchUserData(username);
-  } else {
-    console.log('No username available in route or localStorage.');
-  }
-  },
+  this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
+  this.fetchUserData(); 
+},
 
   methods: {
     async fetchUserData() {
       try {
   
-        const response = await fetch(`http://localhost:3005/api/dentist/${username}`);
+        const response = await fetch(`http://localhost:3005/api/dentist/${this.username}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch user data: ${response.status}`);
         }
@@ -114,8 +104,6 @@ export default {
         alert('An error occurred while registering the time slot. Please try again later.');
       }
   }
-
-  
 }
 };
 </script>

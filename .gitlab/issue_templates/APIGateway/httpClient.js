@@ -1,13 +1,12 @@
 const axios = require('axios');
 
-function postToEndpoint(endpoint, data) {
-  return axios.post(endpoint, data)
-    .then(response => {
-      console.log('HTTP request successful:', response.data);
-    })
-    .catch(error => {
-      console.error('Error making HTTP request:', error);
-    });
-}
+//  Reusable Axios instance with default configuration
+const httpClient = axios.create({
+  baseURL: 'http://localhost:3000/api', // Change the port  
+  timeout: 5000, // Timeout in milliseconds
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 module.exports = { postToEndpoint };
