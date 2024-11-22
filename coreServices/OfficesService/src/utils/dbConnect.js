@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config(); // Load environment variables from .env
 
 // Connect to Shared Database
-const bookingDbConnection = mongoose.createConnection(process.env.SHARED_DB_URI, {
+const bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
    
 });
 
