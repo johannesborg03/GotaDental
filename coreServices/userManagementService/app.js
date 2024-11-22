@@ -6,12 +6,12 @@ var userRoutes = require('./src/apiRoutes/userRoutes');
 require('dotenv').config();
 
 // Import reusable database connection utility
-const connectToDatabase = require('./src/utils/dbConnect');
+//const connectToDatabase = require('./src/utils/userDbConnect');
 
 // Variables
 var port = process.env.PORT || 3004; // Use the port defined in .env
-const dentistDbUri = process.env.DENTIST_DB_URI; // Dentist Database URI
-const patientDbUri = process.env.PATIENT_DB_URI; // Patient Database URI
+//const dentistDbUri = process.env.DENTIST_DB_URI; // Dentist Database URI
+//const patientDbUri = process.env.PATIENT_DB_URI; // Patient Database URI
 
 // Controllers:
 var dentistsController = require('./src/controllers/Dentists');
@@ -21,8 +21,8 @@ var patientsController = require('./src/controllers/Patients')
 
 
 // Connect to Both Databases
-connectToDatabase(dentistDbUri, 'Dentist Database');
-connectToDatabase(patientDbUri, 'Patient Database');
+//connectToDatabase(dentistDbUri, 'Dentist Database');
+//connectToDatabase(patientDbUri, 'Patient Database');
 
 // Create Express app
 var app = express();

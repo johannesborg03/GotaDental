@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const { patientDbConnection } = require('../utils/userDbConnect');
 var Schema = mongoose.Schema;
 
 var patientSchema = new mongoose.Schema({
@@ -28,9 +29,6 @@ var patientSchema = new mongoose.Schema({
         type : Boolean,
         required : true
     },
-    booking_id : {
-        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Booking, Should this be deleted?
-    },
     appointments : [{
         type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'      // Reference to Appointments
     }]
@@ -39,7 +37,7 @@ var patientSchema = new mongoose.Schema({
 }); 
 
 
-var Patient = mongoose.model('Patient', patientSchema);
+var Patient = patientDbConnection.model('Patient', patientSchema);
 module.exports = Patient;
  
 
