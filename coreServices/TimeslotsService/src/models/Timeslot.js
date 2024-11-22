@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const { bookingDbConnection }  = require('../utils/dbConnect');
 
 var Schema = mongoose.Schema;
 
@@ -34,6 +35,5 @@ var timeslotSchema = new mongoose.Schema({
    
 });
 
-var Timeslot = mongoose.model('Timeslot', timeslotSchema);
-
+var Timeslot = bookingDbConnection.model('Timeslot', timeslotSchema);
 module.exports = Timeslot;
