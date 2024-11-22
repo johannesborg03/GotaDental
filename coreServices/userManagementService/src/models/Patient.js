@@ -37,9 +37,7 @@ var patientSchema = new mongoose.Schema({
 }); 
 
 
-var Patient = patientDbConnection.model('Patient', patientSchema);
-module.exports = Patient;
- 
+module.exports = (connection) => connection.model('Patient', patientSchema);
 
 
 

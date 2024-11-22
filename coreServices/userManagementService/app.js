@@ -3,6 +3,23 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 var userRoutes = require('./src/apiRoutes/userRoutes'); 
 
+const { connectToDentistDB } = require('./src/utils/userDbConnect');
+const { connectToPatientDB } = require('./src/utils/userDbConnect');
+
+
+const DentistModel = require('./src/models/Dentist'); // Model loader
+// Initialize the database connection
+const dentistDbConnection = connectToDentistDB();
+// Load the Dentist model
+const Dentist = DentistModel(dentistDbConnection);
+
+
+const PatientModel = require('./src/models/Patient'); // Model loader
+// Initialize the database connection
+const patientDbConnection = connectToPatientDB();
+// Load the Patient model
+const Patient = PatientModel(patientDbConnection);
+
 require('dotenv').config();
 
 // Import reusable database connection utility

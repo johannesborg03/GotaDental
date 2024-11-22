@@ -1,33 +1,46 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const dentistDbConnection = mongoose.createConnection(process.env.DENTIST_DB_URI, {
-   
-});
+let patientDbConnection = null;
+// Function to initialize the database connection
+const connectToPatientDB = () => {
+    if (!patientDbConnection) {
+        patientDbConnection = mongoose.createConnection(process.env.PATIENT_DB_URI, {
+        });
 
-const patientDbConnection = mongoose.createConnection(process.env.PATIENT_DB_URI, {
+        patientDbConnection.on('connected', () => {
+            console.log('UserManagementService Connected to Patient Database');
+        });
 
-});
+        patientDbConnection.on('error', (err) => {
+            console.error(`UserManagementService Failed to connect to Patient Database: ${err.message}`);
+            process.exit(1);
+        });
+    }
+    return patientDbConnection;
+};
 
-dentistDbConnection.once('connected', () => {
-    console.log('Connected to Dentist Database');
-});
+//   
 
-dentistDbConnection.on('error', (err) => {
-    console.error(`Failed to connect to Dentist Database: ${err.message}`);
-    process.exit(1);
-});
+let dentistDbConnection = null;
+// Function to initialize the database connection
+const connectToDentistDB = () => {
+    if (!dentistDbConnection) {
+        dentistDbConnection = mongoose.createConnection(process.env.DENTIST_DB_URI, {
+        });
 
+        dentistDbConnection.on('connected', () => {
+            console.log('UserManagementService Connected to Dentist Database');
+        });
 
-patientDbConnection.once('connected', () => {
-    console.log('Connected to Patient Database');
-});
+        dentistDbConnection.on('error', (err) => {
+            console.error(`UserManagementService Failed to connect to Dentist Database: ${err.message}`);
+            process.exit(1);
+        });
+    }
+    return dentistDbConnection;
+};
 
-patientDbConnection.on('error', (err) => {
-    console.error(`Failed to connect to Patient Database: ${err.message}`);
-    process.exit(1);
-});
-
-module.exports = { dentistDbConnection, patientDbConnection };
+module.exports = { connectToPatientDB, connectToDentistDB };
 
 

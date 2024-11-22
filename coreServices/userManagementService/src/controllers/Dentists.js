@@ -4,7 +4,8 @@ var router = express.Router();
 //var { publishMessage } = require('../events/publisher');
 
 
-var Dentist = require('../models/Dentist');
+const Dentist = require('../models/Dentist'); // Import the Dentist model
+
 // Create new Dentist (POST):
 
 
