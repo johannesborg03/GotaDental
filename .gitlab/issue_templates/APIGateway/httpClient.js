@@ -9,4 +9,16 @@ const httpClient = axios.create({
   },
 });
 
+// POST for registering a new time slot for a dentist 
+async function postSlot(username, slotDetails) {
+  const endpoint = `/timeslot/${username}`; 
+  try {
+    const response = await httpClient.post(endpoint, slotDetails);
+    console.log('Slot registered successfully:', response.data);
+    return response.data; // Return for further use
+  } catch (error) {
+    console.error('Error registering slot:', error.message);  
+    throw error;
+}
+}
 module.exports = { postToEndpoint };
