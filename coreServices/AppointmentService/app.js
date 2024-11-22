@@ -1,8 +1,19 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+const { connectToBookingDB } = require('./src/utils/dbConnect');
+
+const AppointmentModel = require('./src/models/Appointment'); // Model loader
+
 
 require('dotenv').config();
+
+// Initialize the database connection
+const bookingDbConnection = connectToBookingDB();
+
+// Load the Appointment model
+const Appointment = AppointmentModel(bookingDbConnection);
+
 
 
 // Variables

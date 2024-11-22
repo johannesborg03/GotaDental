@@ -37,6 +37,4 @@ var appointmentSchema = new mongoose.Schema({
    
 });
 
-var Appointment = bookingDbConnection.model('Appointment', appointmentSchema);
-
-module.exports = Appointment;
+module.exports = (connection) => connection.model('Appointment', appointmentSchema);

@@ -4,8 +4,9 @@ const mongoose = require('mongoose');
 
 //var Dentist = require('../../../userManagementService/src/models/Dentist.js');
 //var Patient = require('../../../userManagementService/src/models/Patient.js');
-var Timeslot = require('../../../TimeslotsService/src/models/Timeslot.js');
-var Appointment = require('../models/Appointment.js');
+
+//var Timeslot = require('../../../TimeslotsService/src/models/Timeslot.js');
+
 
 
 // POST route to create a new appointment

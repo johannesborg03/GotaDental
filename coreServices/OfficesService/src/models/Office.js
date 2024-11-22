@@ -45,6 +45,4 @@ var officeSchema = new mongoose.Schema({
    
 });
 
-var Office = bookingDbConnection.model('Office', officeSchema);
-
-module.exports = Office;
+module.exports = (connection) => connection.model('Office', officeSchema);

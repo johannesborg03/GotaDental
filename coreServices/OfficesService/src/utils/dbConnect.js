@@ -1,20 +1,27 @@
 const mongoose = require('mongoose');
 require('dotenv').config(); // Load environment variables from .env
 
-// Connect to Shared Database
-const bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
-   
-});
+let bookingDbConnection = null;
 
-// Event Listeners
-bookingDbConnection.on('connected', () => {
-    console.log('OfficeService Connected to Shared Database');
-});
 
-bookingDbConnection.on('error', (err) => {
-    console.error(`Failed to connect to Shared Database: ${err.message}`);
-    process.exit(1);
-});
+// Function to initialize the database connection
+const connectToBookingDB = () => {
+    if (!bookingDbConnection) {
+        bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
+        });
+
+        bookingDbConnection.on('connected', () => {
+            console.log('OfficeService Connected to Booking Database');
+        });
+
+        bookingDbConnection.on('error', (err) => {
+            console.error(`OfficeService Failed to connect to Booking Database: ${err.message}`);
+            process.exit(1);
+        });
+    }
+    return bookingDbConnection;
+};
+
 
 // Export the shared connection
-module.exports = { bookingDbConnection };
+module.exports = { connectToBookingDB };

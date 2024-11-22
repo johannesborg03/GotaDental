@@ -35,5 +35,4 @@ var timeslotSchema = new mongoose.Schema({
    
 });
 
-var Timeslot = bookingDbConnection.model('Timeslot', timeslotSchema);
-module.exports = Timeslot;
+module.exports = (connection) => connection.model('Timeslot', timeslotSchema);
