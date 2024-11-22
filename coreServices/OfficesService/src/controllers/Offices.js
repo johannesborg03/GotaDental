@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const Office = require('../models/Office');
+var Office = require('../models/Office'); // Import the Office model
 
 // Get all offices with location data
 router.get('/api/offices', async function (req, res) {
