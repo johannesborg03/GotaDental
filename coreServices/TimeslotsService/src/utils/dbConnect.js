@@ -8,7 +8,7 @@ const bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI
 
 // Event Listeners
 bookingDbConnection.on('connected', () => {
-    console.log('Connected to Shared Database');
+    console.log('TimeslotService Connected to Shared Database');
 });
 
 bookingDbConnection.on('error', (err) => {

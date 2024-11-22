@@ -6,19 +6,11 @@ require('dotenv').config();
 
 
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3001;
 
 var appointmentsController = require('./src/controllers/Appointments');
 
 
-// Connect to MongoDB
-mongoose.connect(mongoURI).then(() => {
-    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
-}).catch(err => {
-    console.error(`Failed to connect to MongoDB: ${err.message}`);
-    process.exit(1);
-});
 
 // Create Express app
 var app = express();
