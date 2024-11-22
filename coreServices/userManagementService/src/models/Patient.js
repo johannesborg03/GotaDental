@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
-const { patientDbConnection } = require('../utils/userDbConnect');
+const { connectToPatientDB } = require('../utils/userDbConnect');
+
+// Initialize the connection
+const patientDbConnection = connectToPatientDB();
 var Schema = mongoose.Schema;
 
 var patientSchema = new mongoose.Schema({
@@ -37,7 +40,7 @@ var patientSchema = new mongoose.Schema({
 }); 
 
 
-module.exports = (connection) => connection.model('Patient', patientSchema);
+module.exports = patientDbConnection.model('Patient', patientSchema);
 
 
 
