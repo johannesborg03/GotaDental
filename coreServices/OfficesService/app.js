@@ -1,23 +1,27 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+const { connectToBookingDB } = require('./src/utils/dbConnect');
+
+const OfficeModel = require('./src/models/Office'); // Model loader
+
 
 require('dotenv').config();
 
+// Initialize the database connection
+const bookingDbConnection = connectToBookingDB();
+
+// Load the Appointment model
+const Office = OfficeModel(bookingDbConnection);
+
+
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
 var port = process.env.PORT || 3002;
 
 var officesController = require('./src/controllers/Offices');
 
 
-// Connect to MongoDB
-mongoose.connect(mongoURI).then(() => {
-    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
-}).catch(err => {
-    console.error(`Failed to connect to MongoDB: ${err.message}`);
-    process.exit(1);
-});
+
 
 // Create Express app
 var app = express();

@@ -11,11 +11,11 @@ var Patient = require('../models/Patient');
 router.post('/api/patients', async function (req, res) {
     try {
         var patient = new Patient({
-            patient_id: req.body.patient_id,
+            patient_username: req.body.patient_username,
+            password: req.body.password,
             name : req.body.name,
             email: req.body.email,
             notified : req.body.notified,
-            booking_id : req.body.booking_id,
             appointments : req.body.appointments
         });
 
@@ -84,7 +84,6 @@ router.put('/api/patients/:patient_username', async (req, res) => {
                 password: req.body.password,
                 email: req.body.email,
                 notified : req.body.notified,
-                booking_id: req.body.booking_id,  // Optional
                 appointments: req.body.appointments,    // Optional
             },
             { new: true }  // Return the updated document

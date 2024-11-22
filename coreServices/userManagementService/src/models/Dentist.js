@@ -1,4 +1,8 @@
 var mongoose = require('mongoose');
+const { connectToDentistDB } = require('../utils/userDbConnect');
+
+// Initialize the connection
+const dentistDbConnection = connectToDentistDB();
 var Schema = mongoose.Schema;
 
 var dentistSchema = new mongoose.Schema({
@@ -27,14 +31,13 @@ var dentistSchema = new mongoose.Schema({
     date_of_birth : {
         type: Date,
     },
-    booking_id : {
-        type: mongoose.Schema.Types.ObjectId, ref: 'Booking'      // Reference to Booking, Should this be deleted?
-    },
+    appointments : [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'      // Reference to Appointments
+    }],
     timeslots : [{
         type: mongoose.Schema.Types.ObjectId, ref: 'Timeslot'      // Reference to Appointments
     }]
 });
 
 
-var Dentist = mongoose.model('Dentist', dentistSchema);
-module.exports = Dentist;
+module.exports = dentistDbConnection.model('Dentist', dentistSchema);

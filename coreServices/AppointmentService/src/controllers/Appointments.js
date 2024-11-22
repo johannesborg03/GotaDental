@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-var Dentist = require('../../../userManagementService/src/models/Dentist.js');
-var Patient = require('../../../userManagementService/src/models/Patient.js');
-var Timeslot = require('../../../TimeslotsService/src/models/Timeslot.js');
-var Appointment = require('../models/Appointment.js');
+//var Dentist = require('../../../userManagementService/src/models/Dentist.js');
+//var Patient = require('../../../userManagementService/src/models/Patient.js');
 
+//var Timeslot = require('../../../TimeslotsService/src/models/Timeslot.js');
+
+var Appointment = require('../models/Appointment'); // Import the Appointment model
 
 // POST route to create a new appointment
 router.post('/api/appointments', async (req, res) => {

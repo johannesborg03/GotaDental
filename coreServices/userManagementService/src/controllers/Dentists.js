@@ -4,7 +4,8 @@ var router = express.Router();
 //var { publishMessage } = require('../events/publisher');
 
 
-var Dentist = require('../models/Dentist');
+var Dentist = require('../models/Dentist'); // Import the Dentist model
+
 // Create new Dentist (POST):
 
 
@@ -16,7 +17,7 @@ router.post('/api/dentists', async function (req, res) {
             name : req.body.name,
             email: req.body.email,
             date_of_birth : req.body.date_of_birth,
-            booking_id : req.body.booking_id,
+            appointments : req.body.appointments,
             timeslots : req.body.timeslots,
         });
 
@@ -93,7 +94,7 @@ router.put('/api/dentists/:dentist_username', async (req, res) => {
                 name: req.body.name,
                 email: req.body.email,
                 date_of_birth: req.body.date_of_birth,
-                booking_id: req.body.booking_id,  // Optional
+                appointments : req.body.appointments, //optional
                 timeslots: req.body.timeslots,    // Optional
             },
             { new: true }  // Return the updated document

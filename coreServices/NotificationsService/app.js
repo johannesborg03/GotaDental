@@ -1,11 +1,21 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+const { connectToBookingDB } = require('./src/utils/dbConnect');
+const NotificationModel = require('./src/models/Notification'); // Model loader
+
 
 require('dotenv').config();
 
+// Initialize the database connection
+const bookingDbConnection = connectToBookingDB();
+
+// Load the Appointment model
+const Notification = NotificationModel(bookingDbConnection);
+
+
+
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
 var port = process.env.PORT || 3001;
 
 

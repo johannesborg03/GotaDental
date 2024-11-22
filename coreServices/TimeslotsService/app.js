@@ -1,23 +1,26 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+const { connectToBookingDB } = require('./src/utils/dbConnect');
+
+const TimeslotModel = require('./src/models/Timeslot'); // Model loader
 
 //ENV port
 require('dotenv').config();
 
+// Initialize the database connection
+const bookingDbConnection = connectToBookingDB();
+
+// Load the Appointment model
+const Timeslot = TimeslotModel(bookingDbConnection);
+
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/group10'; // Change to 'mongodb://localhost:27017/Bookings'
+
 var port = process.env.PORT || 3003;
 
 var timeslotsController = require('./src/controllers/Timeslots.js');
 
-// Connect to MongoDB
-mongoose.connect(mongoURI).then(() => {
-    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
-}).catch(err => {
-    console.error(`Failed to connect to MongoDB: ${err.message}`);
-    process.exit(1);
-});
+
 
 // Create Express app
 var app = express();

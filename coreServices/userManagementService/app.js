@@ -3,11 +3,32 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 var userRoutes = require('./src/apiRoutes/userRoutes'); 
 
+const { connectToDentistDB } = require('./src/utils/userDbConnect');
+const { connectToPatientDB } = require('./src/utils/userDbConnect');
+
+
+const DentistModel = require('./src/models/Dentist'); // Model loader
+// Initialize the database connection
+const dentistDbConnection = connectToDentistDB();
+// Load the Dentist model
+const Dentist = DentistModel(dentistDbConnection);
+
+
+const PatientModel = require('./src/models/Patient'); // Model loader
+// Initialize the database connection
+const patientDbConnection = connectToPatientDB();
+// Load the Patient model
+const Patient = PatientModel(patientDbConnection);
+
 require('dotenv').config();
 
+// Import reusable database connection utility
+//const connectToDatabase = require('./src/utils/userDbConnect');
+
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/userManagementService';
-var port = process.env.PORT || 3004;
+var port = process.env.PORT || 3004; // Use the port defined in .env
+//const dentistDbUri = process.env.DENTIST_DB_URI; // Dentist Database URI
+//const patientDbUri = process.env.PATIENT_DB_URI; // Patient Database URI
 
 // Controllers:
 var dentistsController = require('./src/controllers/Dentists');
@@ -16,13 +37,9 @@ var patientsController = require('./src/controllers/Patients')
 
 
 
-// Connect to MongoDB
-mongoose.connect(mongoURI).then(() => {
-    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
-}).catch(err => {
-    console.error(`Failed to connect to MongoDB: ${err.message}`);
-    process.exit(1);
-});
+// Connect to Both Databases
+//connectToDatabase(dentistDbUri, 'Dentist Database');
+//connectToDatabase(patientDbUri, 'Patient Database');
 
 // Create Express app
 var app = express();
