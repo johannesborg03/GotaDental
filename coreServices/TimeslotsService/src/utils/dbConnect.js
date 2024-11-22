@@ -7,11 +7,11 @@ const bookingDbConnection = mongoose.createConnection(process.env.SHARED_DB_URI,
 });
 
 // Event Listeners
-sharedDbConnection.on('connected', () => {
+bookingDbConnection.on('connected', () => {
     console.log('Connected to Shared Database');
 });
 
-sharedDbConnection.on('error', (err) => {
+bookingDbConnection.on('error', (err) => {
     console.error(`Failed to connect to Shared Database: ${err.message}`);
     process.exit(1);
 });
