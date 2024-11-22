@@ -17,4 +17,4 @@ bookingDbConnection.on('error', (err) => {
 });
 
 // Export the shared connection
-module.exports = bookingDbConnection;
+module.exports = { bookingDbConnection };
