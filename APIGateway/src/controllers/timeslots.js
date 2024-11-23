@@ -1,4 +1,4 @@
-const { publishMessage } = require('../services/mqttService');
+const { publishMessage } = require('../mqttService');
 
 async function registerSlot(req, res) {
   try {
