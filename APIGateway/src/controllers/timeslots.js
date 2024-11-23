@@ -1,20 +1,30 @@
-const { publishMessage } = require('../mqttService');
+const { publishMessage } = require('../mqttService'); 
 
 async function registerSlot(req, res) {
+  const { username } = req.params;
+  const { date, time } = req.body;
+
+  const slotDetails = {
+    username,
+    date,
+    time,
+  };
+
   try {
-    const { username } = req.params;
-    const { date, time } = req.body;
+    await publishMessage('timeslot_topic', slotDetails);
 
-    const slotDetails = { username, date, time };
-
-    // Publish to RabbitMQ
-    await publishMessage('timeslot_topic', slotDetails); 
-
-    res.status(200).json({ message: 'Timeslot registered successfully', data: slotDetails });
+    res.status(200).json({
+      message: 'Time slot registered successfully',
+      slotDetails,
+    });
   } catch (error) {
-    console.error('Error registering timeslot:', error);
-    res.status(500).json({ message: 'Error registering timeslot' });
+    console.error('Error publishing to RabbitMQ:', error);
+    res.status(500).json({
+      message: 'Failed to register time slot',
+    });
   }
 }
 
-module.exports = { registerSlot };
+module.exports = {
+  registerSlot,
+};
