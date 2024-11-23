@@ -8,6 +8,17 @@ async function connectRabbitMQ() {
     console.log('RabbitMQ connected');
 }
 
+async function publishMessage(topic, message) {
+    if (!channel) {
+        console.error('Channel is not initialized');
+        return;
+    }
+    const payload = Buffer.from(JSON.stringify(message));
+    channel.assertExchange(topic, 'fanout', { durable: false });
+    channel.publish(topic, '', payload);
+    console.log(`Published message to topic "${topic}":`, message);
+}
+
 async function subscribeToTopic(topic, callback) {
     const connection = await amqp.connect('amqp://localhost');
     const channel = await connection.createChannel();
