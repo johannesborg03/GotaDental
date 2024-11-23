@@ -52,10 +52,10 @@ app.use(cors()); // Enable CORS
 
 
 //app.use each controller:
-app.use(dentistsController);
-app.use(patientsController);
+// app.use(dentistsController);
+// app.use(patientsController);
 
-//app.use(userRoutes);
+app.use(userRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

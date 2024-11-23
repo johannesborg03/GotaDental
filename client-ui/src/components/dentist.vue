@@ -32,45 +32,78 @@
   </div>
 </template>
 
-
 <script>
-
 export default {
   data() {
     return {
       slotDate: '',
       slotTime: '',
+      username: '', // should be change to ssn 
     };
   },
 
+  mounted() {
+  this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
+  this.fetchUserData(); 
+},
+
   methods: {
-    async registerSlot() {
+    async fetchUserData() {
+      try {
+  
+        const response = await fetch(`http://localhost:3005/api/dentist/${this.username}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
+        const userData = await response.json();
+        console.log('Fetched user data:', userData);
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    },
+
+     // Register a time slot for the specified username
+     async registerSlot() {
+      // Validate required fields
       if (!this.slotDate || !this.slotTime) {
         alert('Please select a valid date and time!');
         return;
       }
 
-      const slotDetails = {
-        date: this.slotDate,
-        time: this.slotTime,
-      };
-
       try {
-        const response = await fetch(`http://localhost:3000/api/dentists/1/slots`, {
+      // Construct the slot details
+        const slotDetails = {
+          date: this.slotDate,
+          time: this.slotTime,
+        };
+
+         // Make the POST request to register the time slot
+         const response = await fetch(`http://localhost:3005/api/timeslot/${this.username}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(slotDetails),
         });
 
-        const data = await response.json();
-        console.log('Slot registered successfully:', data);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Slot registered successfully:', data);
+          alert('Time slot registered successfully!');
 
-        this.slotDate = '';
-        this.slotTime = '';
-      } catch (err) {
-        console.error('Error registering slot:', err);
+          // Reset form fields
+          this.slotDate = '';
+          this.slotTime = '';
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to register slot: ${errorData.message}`);
+        }
+
+      } catch (error) {
+        console.error('Error registering slot:', error);
+        alert('An error occurred while registering the time slot. Please try again later.');
       }
-    },
-  },
+  }
+}
 };
 </script>
