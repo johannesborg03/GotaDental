@@ -21,4 +21,17 @@ async function postSlot(username, slotDetails) {
     throw error;
 }
 }
+
+// GET request for fetching all slots for a dentist 
+async function getAllSlots(username) {
+  const endpoint = `/timeslot/${username}`;
+  try {
+    const response = await httpClient.get(endpoint);
+    console.log('Fetched all slots:', response.data);
+    return response.data; // Return the slots data
+  } catch (error) {
+    console.error('Error fetching slots:', error.message); 
+    throw error; 
+  }
+}
 module.exports = { postToEndpoint };
