@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
-const { bookingDbConnection } = require('../utils/dbConnect');
+const { connectToBookingDB } = require('../utils/dbConnect');
+
+// Initialize the connection
+const bookingDbConnection = connectToBookingDB();
 
 var Schema = mongoose.Schema;
 
@@ -16,12 +19,12 @@ const notificationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["booking_confirmation", "booking_cancellation", "reminder", "system_message"],
+        enum: ["appointment_confirmation", "appointment_cancellation", "reminder", "available_timeslot"],
         required: true,
     },
     message: {
         type: String,
-        required: true,
+        required: false,
     },
     timestamp: {
         type: Date,
@@ -34,11 +37,4 @@ const notificationSchema = new mongoose.Schema({
 });
 
 
-
-
-
-
-
-var Notification = bookingDbConnection.model('Notification', notificationSchema);
-
-module.exports = Notification;
+module.exports = bookingDbConnection.model('Notification', notificationSchema);
