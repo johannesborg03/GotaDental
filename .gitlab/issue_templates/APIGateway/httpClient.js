@@ -34,4 +34,4 @@ async function getAllSlots(username) {
     throw error; 
   }
 }
-module.exports = { postToEndpoint };
+module.exports = { postSlot, getAllSlots };
