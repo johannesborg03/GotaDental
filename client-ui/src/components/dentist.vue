@@ -80,7 +80,7 @@ export default {
         };
 
          // Make the POST request to register the time slot
-         const response = await fetch(`http://localhost:3000/api/timeslot/${this.username}`, {
+         const response = await fetch(`http://localhost:3005/api/timeslot/${this.username}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(slotDetails),
