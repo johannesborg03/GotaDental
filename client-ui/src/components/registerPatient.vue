@@ -59,11 +59,11 @@ export default {
                 alert(response.data.message);
                 this.$router.push('/login');
             } catch (err) {
-                console.error('Error registering user:', err);
+                console.error('Error registering patient:', err);
                 if (err.response && err.response.data) {
-                    alert(err.response.data.message || 'Registration failed');
+                    alert(err.response.data.message || 'Failed to register');
                 } else {
-                    alert('An error occurred. Please try again.');
+                    alert('An error has occurred. Please try again.');
                 }
             }
         },
