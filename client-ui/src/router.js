@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import registerUser from './components/registerPatient.vue';
+import registerPatient from './components/registerPatient.vue';
 import login from './components/login.vue';
 import dentist from './components/dentist.vue';
 import patientUI from './components/patientUI.vue';
@@ -7,9 +7,9 @@ import registerDentist from './components/registerDentist.vue';
 
 const routes = [
     {
-        path: '/register',
-        name: 'Register',
-        component: registerUser,
+        path: '/registerPatient',
+        name: 'RegisterPatient',
+        component: registerPatient,
     },
 
     {
