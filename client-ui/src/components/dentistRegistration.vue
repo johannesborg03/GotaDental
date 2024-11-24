@@ -15,6 +15,18 @@
                 />
 
         </div>
+        <div class="form-group mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input
+              type="email"
+              id="email"
+              v-model="formData.email"
+              class="form-control"
+              placeholder="Enter your email"
+              required
+            />
+
+        </div>
 
     </div>
 </div>
