@@ -38,6 +38,24 @@
 </template>
 
 <script>
+import axios from "axios"
+
+export default {
+    name: "DentistREgistration",
+    data() {
+        return {
+            formData:{
+            name: "",
+            email: "",
+            password: ""
+            },
+
+            errorMessage:"",
+            successMessage:"",
+        };
+    },
+    
+}
 
 </script>
 
