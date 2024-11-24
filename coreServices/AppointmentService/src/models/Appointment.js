@@ -7,7 +7,7 @@ const bookingDbConnection = connectToBookingDB();
 var Schema = mongoose.Schema;
 
 var appointmentSchema = new mongoose.Schema({
-    patient_username: {
+    patient_ssn: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Patient',
         required: true,
