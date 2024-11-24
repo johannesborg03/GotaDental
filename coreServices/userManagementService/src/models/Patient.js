@@ -6,7 +6,7 @@ const patientDbConnection = connectToPatientDB();
 var Schema = mongoose.Schema;
 
 var patientSchema = new mongoose.Schema({
-    patient_username : {
+    patient_ssn : {
         type : String,
         required : true,
         min : 1,

@@ -12,16 +12,16 @@ var Appointment = require('../models/Appointment'); // Import the Appointment mo
 // POST route to create a new appointment
 router.post('/api/appointments', async (req, res) => {
     try {
-        const { patient_username, dentist_username, office_id, date_and_time, notes } = req.body;
+        const { patient_ssn, dentist_username, office_id, date_and_time, notes } = req.body;
 
         // Validate required fields
-        if (!patient_username || !dentist_username || !office_id|| !date_and_time) {
+        if (!patient_ssn || !dentist_username || !office_id|| !date_and_time) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
         // Create a new appointment
         const newAppointment = new Appointment({
-            patient_username,
+            patient_ssn,
             dentist_username,
             notes: notes || "", // Set default notes if not provided
             state: 0, // Default state: pending
@@ -47,10 +47,10 @@ router.post('/api/appointments', async (req, res) => {
 
 
 // Get all appointments for a patient
-router.get('/api/appointments/:patient_username', async function (req, res) {
+router.get('/api/appointments/:patient_ssn', async function (req, res) {
     try {
-        // Find the patient by the patient_id
-        const patient = await Patient.findOne({ _id: req.params.patient_username });
+        // Find the patient by the patient_ssn
+        const patient = await Patient.findOne({ _id: req.params.patient_ssn });
         if (!patient) {
             return res.status(404).json({ message: "Patient not found" });
         }
@@ -89,10 +89,10 @@ router.get('/api/appointments/:appointment_id', async function (req, res) {
 });
 
 // Get a specific appointment for a patient
-router.get('/api/appointments/:patient_username/:appointment_id', async function (req, res) {
+router.get('/api/appointments/:patient_ssn/:appointment_id', async function (req, res) {
     try {
         // Find the patient by the patient_id
-        const patient = await Patient.findOne({ _id: req.params.patient_username });
+        const patient = await Patient.findOne({ _id: req.params.patient_ssn });
         if (!patient) {
             return res.status(404).json({ message: "Patient not found" });
         }
@@ -218,12 +218,12 @@ router.post('/api/appointments/:appointment_id/notes', async function (req, res)
 }); 
 
 // Cancel an appointment by a patient
-router.delete('/api/patients/:patient_username/appointments/:appointment_id/cancel', async function (req, res) {
+router.delete('/api/patients/:patient_ssn/appointments/:appointment_id/cancel', async function (req, res) {
     try {
-        const { patient_username, appointment_id } = req.params;
+        const { patient_ssn, appointment_id } = req.params;
 
         // Find the appointment
-        const appointment = await Appointment.findOne({ _id: appointment_id, patient_username: patient_username });
+        const appointment = await Appointment.findOne({ _id: appointment_id, patient_ssn: patient_ssn });
         if (!appointment) {
             return res.status(404).json({ message: "Appointment not found for this patient" });
         }
