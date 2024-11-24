@@ -36,13 +36,13 @@ export default {
             username: '',
             email: '',
             password: '',
-            ConfirmPassword: '',
+            confirmPassword: '',
             terms: false,
         };
     },
     methods: {
         async submitForm() {
-            if (this.password !== this.ConfirmPassword) {
+            if (this.password !== this.confirmPassword) {
                 alert('Password do not match');
                 this.password = ''
                 this.confirmPassword = ''
