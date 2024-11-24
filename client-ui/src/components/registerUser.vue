@@ -7,8 +7,7 @@
                     required />
             </div>
             <div class="mb-3">
-                <input type="email" id="email" v-model="email" placeholder="Enter email" class="email-input"
-                    required />
+                <input type="email" id="email" v-model="email" placeholder="Enter email" class="email-input" required />
             </div>
             <div class="mb-3">
                 <input type="password" id="password" v-model="password" placeholder="Enter password"
@@ -28,6 +27,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 
 export default {
     data() {
@@ -40,7 +41,7 @@ export default {
         };
     },
     methods: {
-        submitForm() {
+        async submitForm() {
             if (this.password !== this.ConfirmPassword) {
                 alert('Password do not match');
                 this.password = ''
@@ -48,24 +49,24 @@ export default {
                 return;
             }
 
-            const topic = 'users/registration';
-            const message = JSON.stringify({
-                username: this.username,
-                email: this.email,
-            });
+            try {
+                const response = await axios.post('http://localhost:3000/api/patients', {
+                    patient_username: this.username,
+                    email: this.email,
+                    password: this.password,
+                });
 
-            // Publish the registration details
-            publishMessage(topic, message);
-
-            alert('User registered successfully!');
-
-            // Reset form fields
-            this.username = '';
-            this.email = '';
-            this.password = '';
-            this.confirmPassword = '';
-            this.terms = false;
-        }
-    }
-}
+                alert(response.data.message);
+                this.$router.push('/login');
+            } catch (err) {
+                console.error('Error registering user:', err);
+                if (err.response && err.response.data) {
+                    alert(err.response.data.message || 'Registration failed');
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            }
+        },
+    },
+};
 </script>
