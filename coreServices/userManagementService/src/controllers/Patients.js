@@ -74,11 +74,11 @@ router.delete('/api/patients', async (req, res) => {
     }
 });
 
-// PUT to update a dentist by dentist_id
-router.put('/api/patients/:patient_username', async (req, res) => {
+// PUT to update a patient with patient ssn
+router.put('/api/patients/:patient_ssn', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
-            { patient_username: req.params.patient_username },  // Find patient by patient_username
+            { patient_ssn: req.params.patient_ssn },  // Find patient by patient_ssn
             {
                 name: req.body.name,
                 password: req.body.password,
@@ -100,10 +100,10 @@ router.put('/api/patients/:patient_username', async (req, res) => {
 });
 
 // PATCH to update a dentist by dentist_id
-router.patch('/api/patients/:patient_username', async (req, res) => {
+router.patch('/api/patients/:patient_ssn', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
-            { patient_username: req.params.patient_username },  // Find patient by patient_id
+            { patient_ssn: req.params.patient_ssn },  // Find patient by patient_ssn
             req.body,  // Only update the fields provided in the request body
             { new: true }  // Return the updated document
         );
