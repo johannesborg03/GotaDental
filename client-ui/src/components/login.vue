@@ -12,7 +12,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
             <div class="mt-3 text-center">
-                <p>Don't have an account? <a href="/register">Register as Dentist</a> or <a href="/register">Register as
+                <p>Don't have an account? <a href="/registerDentist">Register as Dentist</a> or <a href="/registerPatient">Register as
                         Patient</a></p>
             </div>
         </form>
@@ -38,9 +38,13 @@ export default {
                 });
 
                 localStorage.setItem('token', response.data.token);
-
-                alert('Login successful!');
-                this.$router.push('/patient'); 
+                if (this.username.endsWith('.dentist')) {
+                    // Redirect to dentist homepage if user is a dentist 
+                    this.$router.push('/dentist');
+                } else {
+                    // Redirect to patient homepage if user is a patient
+                    this.$router.push('/patient');
+                }
             } catch (err) {
                 console.error('Error during login:', err);
                 if (err.response && err.response.data) {

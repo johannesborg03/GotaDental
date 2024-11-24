@@ -12,12 +12,7 @@ export default {
 <template>
   <div>
     <nav>
-      <div>
-        <a href="/register" class="nav-link">Register</a>
-      </div>
-      <div>
-        <a href="/login" class="nav-link">Login</a>
-      </div>
+      
       <div id="app">
         <navigationBar />
        
