@@ -3,7 +3,7 @@
         <h1 class="text-primary mb-4 text-center">Register Patient</h1>
         <form @submit.prevent="submitForm" class="registration-form">
             <div class="mb-3">
-                <input type="text" id="username" v-model="username" placeholder="Enter username" class="username-input"
+                <input type="text" id="SSN" v-model="username" placeholder="Enter your SSN" class="ssn-input"
                     required />
             </div>
             <div class="mb-3">
@@ -33,7 +33,7 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            username: '',
+            ssn: '',
             email: '',
             password: '',
             confirmPassword: '',
@@ -51,7 +51,7 @@ export default {
 
             try {
                 const response = await axios.post('http://localhost:3000/api/patients', {
-                    patient_username: this.username,
+                    patient_ssn: this.ssn,
                     email: this.email,
                     password: this.password,
                 });
