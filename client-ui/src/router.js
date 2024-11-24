@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import registerUser from './components/registerUser.vue';
+import registerUser from './components/registerPatient.vue';
 import login from './components/login.vue';
 import dentist from './components/dentist.vue';
 import patientUI from './components/patientUI.vue';
