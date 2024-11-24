@@ -11,7 +11,7 @@ var { subscribeToTopic } = require('../events/subscriber');
 router.post('/api/patients', async function (req, res) {
     try {
         var patient = new Patient({
-            patient_username: req.body.patient_username,
+            patient_ssn: req.body.patient_ssn,
             password: req.body.password,
             name : req.body.name,
             email: req.body.email,
