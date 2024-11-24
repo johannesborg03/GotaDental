@@ -3,7 +3,7 @@ import registerUser from './components/registerPatient.vue';
 import login from './components/login.vue';
 import dentist from './components/dentist.vue';
 import patientUI from './components/patientUI.vue';
-
+import registerDentist from './components/registerDentist.vue';
 
 const routes = [
     {
@@ -27,6 +27,10 @@ const routes = [
     {    path: '/patient',
         name: 'Patient',
         component: patientUI,
+    },
+    {    path: '/registerDentist',
+        name: 'RegisterDentist',
+        component: registerDentist,
     },
     
 
