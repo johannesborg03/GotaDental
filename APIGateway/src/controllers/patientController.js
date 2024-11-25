@@ -1,14 +1,10 @@
 const mqtt = require('mqtt');
+const mqttClient = require('../mqttClient.js');
 
-// Connect to the MQTT broker
-const mqttClient = mqtt.connect('mqtt://localhost:1883');
-
-mqttClient.on('connect', () => {
-    console.log('API Gateway connected to MQTT broker');
-});
 
 // Controller for patient registration
 exports.registerPatient = (req, res) => {
+    console.log('Received data:', req.body); // Debug log
     const { ssn, email, name, password } = req.body;
 
     // Validate the input data

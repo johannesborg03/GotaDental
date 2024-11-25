@@ -1,9 +1,9 @@
 <template>
     <div class="container py-4">
         <h1 class="text-primary mb-4 text-center">Register Patient</h1>
-        <form @submit.prevent="submitForm" class="registration-form">
+        <form @submit.prevent="register" class="registration-form">
             <div class="mb-3">
-                <input type="text" id="SSN" v-model="username" placeholder="Enter your SSN" class="ssn-input"
+                <input type="text" id="ssn" v-model="ssn" placeholder="Enter your SSN" class="ssn-input"
                     required />
             </div>
             <div class="mb-3">
@@ -50,7 +50,7 @@ export default {
         async register() {
             console.log("Pressed");
             try {
-                const response = await axios.post('http://localhost:3000/api/patients', {
+                const response = await axios.post('http://localhost:4000/api/patients', {
                     ssn: this.ssn,
                     email: this.email,
                     name: this.name,
