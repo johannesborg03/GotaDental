@@ -3,7 +3,7 @@ import registerPatient from './components/registerPatient.vue';
 import login from './components/login.vue';
 import dentist from './components/dentist.vue';
 import patientUI from './components/patientUI.vue';
-import registerDentist from './components/registerDentist.vue';
+import registerDentist from './view/registerDentist.vue';
 
 const routes = [
     {
