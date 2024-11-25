@@ -48,7 +48,15 @@ export default {
     this.username = localStorage.getItem('username') || 'Guest';
   },
   methods: {
+    toggleMenu() {
+      this.menuVisible = !this.menuVisible;
+    },
     
+    logout() {
+      // Clear the localStorage on logout .
+      localStorage.removeItem('username');
+      this.$router.push('/LogIn');
+    }
   }
 }
 </script> 
