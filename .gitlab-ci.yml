@@ -23,7 +23,7 @@ build:
   tags: 
    - docker
   script:
-    - cd client-ui
+    - cd client
     - npm install
     - npm run build  # Build the Vue.js app with Vite
 
