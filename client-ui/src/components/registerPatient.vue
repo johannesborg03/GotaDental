@@ -10,12 +10,12 @@
                 <input type="email" id="email" v-model="email" placeholder="Enter email" class="email-input" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="password" v-model="password" placeholder="Enter password"
-                    class="password_input" required />
+                <input type="name" id="name" v-model="name" placeholder="Enter name"
+                    class="name_input" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="Confirm password"
-                    class="confirm-password-input" required />
+                <input type="password" id="Password" v-model="confirmPassword" placeholder="Enter password"
+                    class="password-input" required />
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" id="terms" class="checkbox-input" v-model="terms" required />
