@@ -67,3 +67,37 @@ export default {
   }
 }
 </script> 
+
+<style scoped>
+.brand {
+  color: #1289eb;
+  font-size: 24px;
+  margin-right: 5%;
+  margin-left: 5%;
+}
+.buttonsNav{
+  font-family: sans-serif;
+  gap: 30px;
+}
+.username {
+  font-size: 13px;
+  font-weight: bold;
+  color: #ffffff;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.buttonsNav a,
+router-link {
+  color: white;
+  text-decoration: none;
+}
+
+.custom-dropdown{
+padding-right: 30px;
+}
+
+.nav-collapse{
+margin-right: 5%;
+}
+
+</style>
