@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 
+
+
+
 const bodyParser = require('body-parser');
 const timeslotRoutes = require('./src/routes/timeslot'); 
 
@@ -12,8 +15,11 @@ app.use(bodyParser.json());
 
 app.use('/api/timeslot', timeslotRoutes);
 
+// Use the patient routes
+app.use('/api', patientRoutes); // Prefix all patient routes with '/api'
 
-const port = process.env.PORT || 3005;
+
+const port = process.env.PORT || 4000;
 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads

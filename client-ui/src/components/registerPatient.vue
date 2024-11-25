@@ -48,6 +48,7 @@ export default {
     },
     methods: {
         async register() {
+            console.log("Pressed");
             try {
                 const response = await axios.post('http://localhost:3000/api/patients', {
                     ssn: this.ssn,
