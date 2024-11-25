@@ -51,7 +51,14 @@ export default {
     toggleMenu() {
       this.menuVisible = !this.menuVisible;
     },
-    
+    goToSettings() {
+      const username = localStorage.getItem('username');
+      if (username) {
+        this.$router.push({ name: 'SettingsPage', params: { username: this.username } });
+      } else {
+        console.error('No username found in localStorage');
+      } 
+    },
     logout() {
       // Clear the localStorage on logout .
       localStorage.removeItem('username');
