@@ -31,6 +31,7 @@ import axios from 'axios';
 
 
 export default {
+    name: 'Create account',
     data() {
         return {
             input: {
@@ -46,18 +47,12 @@ export default {
     };
     },
     methods: {
-        async submitForm() {
-            if (this.password !== this.confirmPassword) {
-                alert('Password do not match');
-                this.password = ''
-                this.confirmPassword = ''
-                return;
-            }
-
+        async register() {
             try {
                 const response = await axios.post('http://localhost:3000/api/patients', {
-                    patient_ssn: this.ssn,
+                    ssn: this.ssn,
                     email: this.email,
+                    name: this.name,
                     password: this.password,
                 });
 
