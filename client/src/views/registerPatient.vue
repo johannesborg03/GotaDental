@@ -1,21 +1,21 @@
 <template>
     <div class="container py-4">
         <h1 class="text-primary mb-4 text-center">Register Patient</h1>
-        <form @submit.prevent="register" class="registration-form">
+        <form @submit.prevent="register" >
             <div class="mb-3">
-                <input type="text" id="ssn" v-model="ssn" placeholder="Enter your SSN" class="ssn-input"
+                <input type="text" id="ssn" v-model="ssn" placeholder="Enter your SSN" class="form-control"
                     required />
             </div>
             <div class="mb-3">
-                <input type="email" id="email" v-model="email" placeholder="Enter email" class="email-input" required />
+                <input type="email" id="email" v-model="email" placeholder="Enter email" class="form-control" required />
             </div>
             <div class="mb-3">
                 <input type="name" id="name" v-model="name" placeholder="Enter name"
-                    class="name_input" required />
+                    class="form-control" required />
             </div>
             <div class="mb-3">
                 <input type="password" id="password" v-model="password" placeholder="Enter password"
-                    class="password-input" required />
+                    class="form-control" required />
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" id="terms" class="checkbox-input" v-model="terms" required />

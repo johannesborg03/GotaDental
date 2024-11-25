@@ -3,7 +3,7 @@
 
 export default {
   components: {
-    navigationBar,
+    //navigationBar,
   }
 }
 
@@ -14,7 +14,6 @@ export default {
     <nav>
       
       <div id="app">
-        <navigationBar />
        
       </div>
 
