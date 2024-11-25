@@ -1,21 +1,21 @@
 <template>
     <div class="container py-4">
         <h1 class="text-primary mb-4 text-center">Register Patient</h1>
-        <form @submit.prevent="submitForm" class="registration-form">
+        <form @submit.prevent="register" class="registration-form">
             <div class="mb-3">
-                <input type="text" id="SSN" v-model="username" placeholder="Enter your SSN" class="ssn-input"
+                <input type="text" id="ssn" v-model="ssn" placeholder="Enter your SSN" class="ssn-input"
                     required />
             </div>
             <div class="mb-3">
                 <input type="email" id="email" v-model="email" placeholder="Enter email" class="email-input" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="password" v-model="password" placeholder="Enter password"
-                    class="password_input" required />
+                <input type="name" id="name" v-model="name" placeholder="Enter name"
+                    class="name_input" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="Confirm password"
-                    class="confirm-password-input" required />
+                <input type="password" id="password" v-model="password" placeholder="Enter password"
+                    class="password-input" required />
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" id="terms" class="checkbox-input" v-model="terms" required />
@@ -31,28 +31,29 @@ import axios from 'axios';
 
 
 export default {
+    name: 'Create account',
     data() {
         return {
+            input: {
             ssn: '',
             email: '',
+            name: '',
             password: '',
-            confirmPassword: '',
             terms: false,
-        };
+        },
+        message: "",  // To store any error message
+        showToast: false,  // Toast visibility flag
+        toastMessage: ""   // Toast message
+    };
     },
     methods: {
-        async submitForm() {
-            if (this.password !== this.confirmPassword) {
-                alert('Password do not match');
-                this.password = ''
-                this.confirmPassword = ''
-                return;
-            }
-
+        async register() {
+            console.log("Pressed");
             try {
-                const response = await axios.post('http://localhost:3000/api/patients', {
-                    patient_ssn: this.ssn,
+                const response = await axios.post('http://localhost:4000/api/patients', {
+                    ssn: this.ssn,
                     email: this.email,
+                    name: this.name,
                     password: this.password,
                 });
 

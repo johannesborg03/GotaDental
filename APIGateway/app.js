@@ -1,23 +1,48 @@
 const express = require('express');
 const cors = require('cors');
 
+const mqtt = require('mqtt');
+
+const mqttClient = require('./src/mqttClient');
+
+
 const bodyParser = require('body-parser');
 const timeslotRoutes = require('./src/routes/timeslot'); 
+const patientRoutes = require('./src/routes/patientRoutes'); 
 
 const app = express();
 require('dotenv').config();
 
+//app.options('*', cors()); // Enable preflight requests for all routes
+
+// Enable CORS for all routes
+app.use(cors({
+    origin: 'http://localhost:5173', // Replace with your frontend origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    credentials: true, // Allow cookies if needed
+}));
 // Middleware to parse JSON bodies of incoming requests
 app.use(bodyParser.json());
 
+
+
+
 app.use('/api/timeslot', timeslotRoutes);
 
+// Use the patient routes
+app.use('/api/patients', patientRoutes); // Prefix all patient routes with '/api'
 
-const port = process.env.PORT || 3005;
+//const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);
+//mqttClient = mqtt.connect('mqtt://localhost:1883')
+const port = process.env.PORT || 4000;
 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
+
+
+
 
 
 // 404 Handler
