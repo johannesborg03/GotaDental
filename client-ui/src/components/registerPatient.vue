@@ -14,7 +14,7 @@
                     class="name_input" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="Password" v-model="confirmPassword" placeholder="Enter password"
+                <input type="password" id="password" v-model="password" placeholder="Enter password"
                     class="password-input" required />
             </div>
             <div class="form-check mb-3">
@@ -33,12 +33,17 @@ import axios from 'axios';
 export default {
     data() {
         return {
+            input: {
             ssn: '',
             email: '',
+            name: '',
             password: '',
-            confirmPassword: '',
             terms: false,
-        };
+        },
+        message: "",  // To store any error message
+        showToast: false,  // Toast visibility flag
+        toastMessage: ""   // Toast message
+    };
     },
     methods: {
         async submitForm() {
