@@ -6,34 +6,15 @@ import patient from './views/patient.vue';
 import registerDentist from './views/registerDentist.vue';
 
 const routes = [
-    {
-        path: '/registerPatient',
-        name: 'RegisterPatient',
-        component: registerPatient,
-    },
+    { path: '/registerPatient', name: 'RegisterPatient', component: registerPatient,},
 
-    {
-        path: '/login',
-        name: 'Login',
-        component: login,
-    },
+    { path: '/login',name: 'Login',component: login, },
     
-    {
-        path: '/dentist',
-        name: 'Dentist',
-        component: dentist,
-    },
+    { path: '/dentist', name: 'Dentist', component: dentist, },
     
-    {    path: '/patient',
-        name: 'Patient',
-        component: patient,
-    },
-    {    path: '/registerDentist',
-        name: 'RegisterDentist',
-        component: registerDentist,
-    },
-    
+    { path: '/patient', name: 'Patient', component: patient,},
 
+    { path: '/registerDentist', name: 'RegisterDentist',component: registerDentist,},
 ];
 
 const router = createRouter({
