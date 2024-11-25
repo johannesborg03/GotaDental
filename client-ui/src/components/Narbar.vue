@@ -34,3 +34,21 @@
     </b-navbar>
   </template>
   
+
+  <script>
+export default {
+  name: 'Navbar',
+  data() {
+    return {
+      menuVisible: false,
+      username: '' 
+    };
+  },
+  mounted() {
+    this.username = localStorage.getItem('username') || 'Guest';
+  },
+  methods: {
+    
+  }
+}
+</script> 
