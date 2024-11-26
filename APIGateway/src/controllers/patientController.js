@@ -22,7 +22,9 @@ exports.registerPatient = async (req, res) => {
     try {
         // Publish the message to the topic (exchange)
         const response = await publishMessage(topic, patientData, correlationId);
+        
         if (response.error) {
+            
             return res.status(400).json({ message: response.error });
         }
 
