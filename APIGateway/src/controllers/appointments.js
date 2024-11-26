@@ -104,3 +104,26 @@ exports.cancelAppointmentByPatient = async (req, res) => {
         });
     }
 };
+
+// Controller to cancel an appointment by dentist
+exports.cancelAppointmentByDentist = async (req, res) => {
+    const { dentist_username, appointment_id } = req.params;
+
+    const correlationId = uuidv4();
+    const topic = `appointment/dentist/${dentist_username}/${appointment_id}/cancel`;
+
+    try {
+        const response = await publishMessage(topic, { dentist_username, appointment_id }, correlationId);
+
+        res.status(200).json({
+            message: 'Appointment canceled successfully by dentist',
+            appointment: response,
+        });
+    } catch (error) {
+        console.error('Error publishing to MQTT:', error);
+        res.status(500).json({
+            message: 'Failed to cancel appointment',
+            error: error.message,
+        });
+    }
+};
