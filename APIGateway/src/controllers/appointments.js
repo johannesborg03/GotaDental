@@ -18,19 +18,19 @@ exports.createAppointment = async (req, res) => {
     };
 
     const correlationId = uuidv4();
-    const topic = 'appointment/create';
+    const topic = "appointments/create";
 
     try {
         const response = await publishMessage(topic, appointmentData, correlationId);
 
         res.status(201).json({
-            message: 'Appointment created successfully',
+            message: "Appointment created successfully",
             appointment: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to create appointment',
+            message: "Failed to create appointment",
             error: error.message,
         });
     }
@@ -41,19 +41,19 @@ exports.getAppointmentsForPatient = async (req, res) => {
     const { patient_ssn } = req.params;
 
     const correlationId = uuidv4();
-    const topic = `appointment/patient/${patient_ssn}/retrieve`;
+    const topic = `appointments/patient/${patient_ssn}/retrieve`;
 
     try {
         const response = await publishMessage(topic, { patient_ssn }, correlationId);
 
         res.status(200).json({
-            message: 'Appointments retrieved successfully',
+            message: "Appointment retrieved successfully",
             appointments: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to retrieve appointments',
+            message: "Failed to retrieve appointments",
             error: error.message,
         });
     }
@@ -64,19 +64,19 @@ exports.getAppointmentById = async (req, res) => {
     const { appointment_id } = req.params;
 
     const correlationId = uuidv4();
-    const topic = `appointment/${appointment_id}/retrieve`;
+    const topic = `appointments/${appointment_id}/retrieve`;
 
     try {
         const response = await publishMessage(topic, { appointment_id }, correlationId);
 
         res.status(200).json({
-            message: 'Appointment retrieved successfully',
+            message: "Appointment retrieved successfully",
             appointment: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to retrieve appointment',
+            message: "Failed to retrieve appointment",
             error: error.message,
         });
     }
@@ -87,19 +87,19 @@ exports.cancelAppointmentByPatient = async (req, res) => {
     const { patient_ssn, appointment_id } = req.params;
 
     const correlationId = uuidv4();
-    const topic = `appointment/patient/${patient_ssn}/${appointment_id}/cancel`;
+    const topic = `appointments/patient/${patient_ssn}/${appointment_id}/cancel`;
 
     try {
         const response = await publishMessage(topic, { patient_ssn, appointment_id }, correlationId);
 
         res.status(200).json({
-            message: 'Appointment canceled successfully by patient',
+            message: "Appointment canceled successfully by patient",
             appointment: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to cancel appointment',
+            message: "Failed to cancel appointment",
             error: error.message,
         });
     }
@@ -110,19 +110,19 @@ exports.cancelAppointmentByDentist = async (req, res) => {
     const { dentist_username, appointment_id } = req.params;
 
     const correlationId = uuidv4();
-    const topic = `appointment/dentist/${dentist_username}/${appointment_id}/cancel`;
+    const topic = `appointments/dentist/${dentist_username}/${appointment_id}/cancel`;
 
     try {
         const response = await publishMessage(topic, { dentist_username, appointment_id }, correlationId);
 
         res.status(200).json({
-            message: 'Appointment canceled successfully by dentist',
+            message: "Appointment canceled successfully by dentist",
             appointment: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to cancel appointment',
+            message: "Failed to cancel appointment",
             error: error.message,
         });
     }
@@ -140,19 +140,19 @@ exports.addNoteToAppointment = async (req, res) => {
     };
 
     const correlationId = uuidv4();
-    const topic = `appointment/${appointment_id}/add-note`;
+    const topic = `appointments/${appointment_id}/notes`;
 
     try {
         const response = await publishMessage(topic, noteData, correlationId);
 
         res.status(201).json({
-            message: 'Note added successfully',
+            message: "Note added successfully",
             appointment: response,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error("Error publishing to MQTT:", error);
         res.status(500).json({
-            message: 'Failed to add note to appointment',
+            message: "Failed to add note to appointment",
             error: error.message,
         });
     }
