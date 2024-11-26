@@ -35,3 +35,26 @@ exports.createAppointment = async (req, res) => {
         });
     }
 };
+
+// Controller to retrieve all appointments for a patient
+exports.getAppointmentsForPatient = async (req, res) => {
+    const { patient_ssn } = req.params;
+
+    const correlationId = uuidv4();
+    const topic = `appointment/patient/${patient_ssn}/retrieve`;
+
+    try {
+        const response = await publishMessage(topic, { patient_ssn }, correlationId);
+
+        res.status(200).json({
+            message: 'Appointments retrieved successfully',
+            appointments: response,
+        });
+    } catch (error) {
+        console.error('Error publishing to MQTT:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve appointments',
+            error: error.message,
+        });
+    }
+};
