@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 //const mqttClient = require('../mqttClient.js');
-const { publishMessage, setupReplyQueue } = require('../utils/rabbitMQ');
+const { publishMessage, setupReplyQueue } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
 // Controller for patient registration

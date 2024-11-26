@@ -2,12 +2,15 @@
 
 const amqp = require('amqplib');
 
+let channel;
+
+
 //Subscribe to topics
 async function subscribeToTopic(topic, callback) {
     const connection = await amqp.connect('amqp://localhost');
     console.log('Connection established');
 
-    const channel = await connection.createChannel();
+    channel = await connection.createChannel();
     console.log('Channel created');
 
     await channel.assertExchange(topic, 'fanout', { durable: false });
