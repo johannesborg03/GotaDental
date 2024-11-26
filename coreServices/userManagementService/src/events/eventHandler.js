@@ -4,9 +4,7 @@ const mqtt = require('mqtt');
 const Patient = require('../models/Patient'); // Adjust the path to your model
 
 
-async function handlePatientRegistration(message) {
-
-
+async function handlePatientRegistration(message, replyTo, correlationId, channel) {
 
     console.log('Processing patient registration:', message);
 
@@ -17,13 +15,19 @@ async function handlePatientRegistration(message) {
         // Validate the input data
         if (!ssn || !email || !name || !password) {
             console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Invalid data' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+          
             return;
         }
+     
 
         // Check if the patient already exists
         const existingPatient = await Patient.findOne({ patient_ssn: ssn });
         if (existingPatient) {
             console.log(`Patient with SSN ${ssn} already exists.`);
+            const response = { success: false, error: `Patient with SSN ${ssn} already exists.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
 
@@ -38,9 +42,17 @@ async function handlePatientRegistration(message) {
         });
 
         await newPatient.save();
+
+        
+
         console.log(`Patient with SSN ${ssn} registered successfully.`);
+        // Respond with success
+        const response = { success: true, patient: newPatient };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     } catch (error) {
-        console.error('Error saving patient to database:', error);
+        console.error('Error processing patient registration:', error);
+        const response = { success: false, error: 'Internal server error while registering patient.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     }
 }
 

@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 //const mqttClient = require('../mqttClient.js');
-const { publishMessage } = require('../mqttService'); // Adjust the path to your RabbitMQ module
+const { publishMessage, setupReplyQueue } = require('../mqttService');
+const { v4: uuidv4 } = require('uuid');
 
 // Controller for patient registration
 exports.registerPatient = async (req, res) => {
@@ -12,16 +13,24 @@ exports.registerPatient = async (req, res) => {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const correlationId = uuidv4(); // Unique ID for this request
+    const topic = 'patients/register';
+
     // Prepare the message for the RabbitMQ broker
     const patientData = { ssn, email, name, password };
 
     try {
         // Publish the message to the topic (exchange)
-        await publishMessage('patients/register', patientData);
-        console.log('Published patient registration message:', patientData);
-        res.status(200).json({ message: 'Patient registration request sent successfully' });
+        const response = await publishMessage(topic, patientData, correlationId);
+        
+        if (response.error) {
+            
+            return res.status(400).json({ message: response.error });
+        }
+
+       res.status(201).json({ message: 'Patient registered successfully', data: response });
     } catch (error) {
-        console.error('Failed to publish patient registration:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        console.error('Error handling patient registration:', error);
+        res.status(500).json({ message: 'Server error while registering patient' });
     }
 };

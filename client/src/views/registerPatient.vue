@@ -56,11 +56,12 @@ export default {
                     name: this.name,
                     password: this.password,
                 });
+                
 
                 alert(response.data.message);
                 this.$router.push('/login');
             } catch (err) {
-                console.error('Error registering patient:', err);
+             //   console.error('Error registering patient:', err);
                 if (err.response && err.response.data) {
                     alert(err.response.data.message || 'Failed to register');
                 } else {
