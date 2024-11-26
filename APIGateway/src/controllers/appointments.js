@@ -58,3 +58,26 @@ exports.getAppointmentsForPatient = async (req, res) => {
         });
     }
 };
+
+// Controller to retrieve a specific appointment by ID
+exports.getAppointmentById = async (req, res) => {
+    const { appointment_id } = req.params;
+
+    const correlationId = uuidv4();
+    const topic = `appointment/${appointment_id}/retrieve`;
+
+    try {
+        const response = await publishMessage(topic, { appointment_id }, correlationId);
+
+        res.status(200).json({
+            message: 'Appointment retrieved successfully',
+            appointment: response,
+        });
+    } catch (error) {
+        console.error('Error publishing to MQTT:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve appointment',
+            error: error.message,
+        });
+    }
+};
