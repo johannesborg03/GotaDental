@@ -6,8 +6,6 @@ const Patient = require('../models/Patient'); // Adjust the path to your model
 
 async function handlePatientRegistration(message) {
 
-
-
     console.log('Processing patient registration:', message);
 
     // Extract data from the received message
@@ -24,6 +22,7 @@ async function handlePatientRegistration(message) {
         const existingPatient = await Patient.findOne({ patient_ssn: ssn });
         if (existingPatient) {
             console.log(`Patient with SSN ${ssn} already exists.`);
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
 
@@ -38,9 +37,16 @@ async function handlePatientRegistration(message) {
         });
 
         await newPatient.save();
+
+
         console.log(`Patient with SSN ${ssn} registered successfully.`);
+        // Respond with success
+        const response = { success: true, patient: newPatient };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     } catch (error) {
-        console.error('Error saving patient to database:', error);
+        console.error('Error processing patient registration:', error);
+        const response = { error: 'Internal server error while registering patient.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     }
 }
 
