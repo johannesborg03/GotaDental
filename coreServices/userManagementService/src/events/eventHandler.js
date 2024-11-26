@@ -1,6 +1,8 @@
 const { subscribeToTopic } = require('./subscriber');
 const mqtt = require('mqtt');
-//const mqttClient = require('../utils/mqttClient.js');
+
+const Patient = require('../models/Patient'); // Adjust the path to your model
+
 
 async function handlePatientRegistration(message) {
     console.log('Processing patient registration:', message);
