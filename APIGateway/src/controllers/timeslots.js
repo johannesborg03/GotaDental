@@ -1,8 +1,6 @@
 const { publishMessage, setupReplyQueue } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
-
-
 // Controller for timeslot registration
 exports.registerPatient = async (req, res) => {
   const { username } = req.params;
