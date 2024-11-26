@@ -50,6 +50,9 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 
+// Initialize RabbitMQ Subscriptions
+initializeSubscriptions();
+
 
 //app.use each controller:
 // app.use(dentistsController);
