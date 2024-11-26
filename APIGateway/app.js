@@ -3,7 +3,8 @@ const cors = require('cors');
 
 const mqtt = require('mqtt');
 
-const mqttClient = require('./src/mqttClient');
+//const mqttClient = require('./src/mqttClient');
+const { connectRabbitMQ } = require('./src/mqttService'); // Adjust path to your RabbitMQ module
 
 
 const bodyParser = require('body-parser');
@@ -42,7 +43,13 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 
-
+// Initialize RabbitMQ connection
+connectRabbitMQ().then(() => {
+    console.log('RabbitMQ connection established');
+}).catch((err) => {
+    console.error('Failed to connect to RabbitMQ:', err);
+    process.exit(1); // Exit if RabbitMQ connection fails
+});
 
 
 // 404 Handler

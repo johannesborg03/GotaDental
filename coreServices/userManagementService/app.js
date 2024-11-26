@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
 var userRoutes = require('./src/apiRoutes/userRoutes'); 
+const { initializeSubscriptions } = require('./src/events/eventHandler');
 
 const { connectToDentistDB } = require('./src/utils/userDbConnect');
 const { connectToPatientDB } = require('./src/utils/userDbConnect');
