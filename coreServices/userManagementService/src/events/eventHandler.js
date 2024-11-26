@@ -4,7 +4,8 @@ const mqtt = require('mqtt');
 
 async function handlePatientRegistration(message) {
     console.log('Processing patient registration:', message);
-    console.log('Recieved!!!')
+    
+
 
     // Save the patient data to the database
     // saveToPatientDatabase(message);
