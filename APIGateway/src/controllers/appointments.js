@@ -127,3 +127,33 @@ exports.cancelAppointmentByDentist = async (req, res) => {
         });
     }
 };
+
+// Controller to add a note to an appointment
+exports.addNoteToAppointment = async (req, res) => {
+    const { appointment_id } = req.params;
+    const { dentist_username, content } = req.body;
+
+    const noteData = {
+        appointment_id,
+        dentist_username,
+        content,
+    };
+
+    const correlationId = uuidv4();
+    const topic = `appointment/${appointment_id}/add-note`;
+
+    try {
+        const response = await publishMessage(topic, noteData, correlationId);
+
+        res.status(201).json({
+            message: 'Note added successfully',
+            appointment: response,
+        });
+    } catch (error) {
+        console.error('Error publishing to MQTT:', error);
+        res.status(500).json({
+            message: 'Failed to add note to appointment',
+            error: error.message,
+        });
+    }
+};
