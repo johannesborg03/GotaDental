@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
 var userRoutes = require('./src/apiRoutes/userRoutes'); 
+const { initializeSubscriptions } = require('./src/events/eventHandler');
 
 const { connectToDentistDB } = require('./src/utils/userDbConnect');
 const { connectToPatientDB } = require('./src/utils/userDbConnect');
@@ -49,6 +50,9 @@ app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+
+// Initialize RabbitMQ Subscriptions
+initializeSubscriptions();
 
 
 //app.use each controller:
