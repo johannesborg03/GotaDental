@@ -3,8 +3,8 @@
         <h1 class="text-primary mb-4 text-center">Login</h1>
         <form @submit.prevent="onSubmit" class="login-form">
             <div class="mb-3">
-                <input type="text" id="username_ssn" v-model="username" placeholder="Enter username or ssn" class="form-control"
-                    required />
+                <input type="text" id="username_ssn" v-model="username" placeholder="Enter username or ssn"
+                    class="form-control" required />
             </div>
             <div class="mb-3">
                 <input type="password" id="password" v-model="password" placeholder="Enter password"
@@ -12,7 +12,8 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
             <div class="mt-3 text-center">
-                <p>Don't have an account? <a href="/registerDentist">Register as Dentist</a> or <a href="/registerPatient">Register as
+                <p>Don't have an account? <a href="/registerDentist">Register as Dentist</a> or <a
+                        href="/registerPatient">Register as
                         Patient</a></p>
             </div>
         </form>
@@ -31,16 +32,19 @@ export default {
     },
     methods: {
         async onSubmit() {
+            console.log("Submitting login form...");
+            console.log("Data being sent:", {
+                username_ssn: this.username_ssn,
+                password: this.password,
+            });
             try {
 
-
-
-                
-                const response = await axios.post('http://localhost:3000/api/login', {
+                const response = await axios.post('http://localhost:4000/api/login', {
                     username_ssn: this.username_ssn,
                     password: this.password,
                 });
 
+                console.log("Received response:", response.data);
                 localStorage.setItem('token', response.data.token);
                 if (this.username_ssn.endsWith('.dentist')) {
                     // Redirect to dentist homepage if user is a dentist 

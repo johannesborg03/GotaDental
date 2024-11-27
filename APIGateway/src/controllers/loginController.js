@@ -17,6 +17,9 @@ exports.login = async (req, res) => {
     const loginData = { identifier: username_ssn, password };
     const correlationId = uuidv4(); // Unique ID for this request
 
+    console.log('Publishing to topic:', topic);
+    console.log('Login data:', loginData);
+
     try {
         // Publish the login request to RabbitMQ
         const response = await publishMessage(topic, loginData, correlationId);
