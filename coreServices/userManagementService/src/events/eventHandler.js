@@ -17,7 +17,18 @@ async function handlePatientLogin(message) {
     return { token: 'jwt-token-for-patient', userType: 'patient' };
 }
 
+// Handle dentist login
+async function handleDentistLogin(message) {
+    const { identifier, password } = message;
 
+    const dentist = await Dentist.findOne({ username: identifier });
+    if (!dentist || dentist.password !== password) {
+        return { error: 'Invalid username or password' };
+    }
+
+    // Return a success response with a token
+    return { token: 'jwt-token-for-dentist', userType: 'dentist' };
+}
 
 
 
