@@ -4,6 +4,24 @@ const mqtt = require('mqtt');
 const Patient = require('../models/Patient'); 
 const Dentist = require('../models/Dentist'); 
 
+// Handle patient login
+async function handlePatientLogin(message) {
+    const { identifier, password } = message;
+
+    const patient = await Patient.findOne({ patient_ssn: identifier });
+    if (!patient || patient.password !== password) {
+        return { error: 'Invalid SSN or password' };
+    }
+
+    // Return a success response with a token
+    return { token: 'jwt-token-for-patient', userType: 'patient' };
+}
+
+
+
+
+
+
 async function handlePatientRegistration(message, replyTo, correlationId, channel) {
 
     console.log('Processing patient registration:', message);
