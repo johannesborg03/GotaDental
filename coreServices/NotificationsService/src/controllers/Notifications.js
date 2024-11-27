@@ -14,7 +14,22 @@ router.post('/api/notifications', async (req, res) => {
             return res.status(400).json({ message: "Notification type is required" });
         }
 
-        
+        // Creating the new notification
+        const newNotification = new Notification({
+            patient_ssn,
+            dentist_username,
+            type,
+            message: message || "", 
+            appointment_id,
+        });
+
+        // Save the notification to the database
+        await newNotification.save();
+
+        res.status(201).json({
+            message: "Notification created successfully",
+            notification: newNotification
+        });
     } catch (error) {
         console.error("Error while creating notification:", error);
         res.status(500).json({
