@@ -5,7 +5,8 @@ const Patient = require('../models/Patient');
 const Dentist = require('../models/Dentist');
 
 // Handle patient login
-async function handlePatientLogin(message) {
+async function handlePatientLogin(message, replyTo, correlationId, channel) {
+    console.log('Received login message:', message);
     const { identifier, password } = message;
 
     const patient = await Patient.findOne({ patient_ssn: identifier });
@@ -18,7 +19,7 @@ async function handlePatientLogin(message) {
 }
 
 // Handle dentist login
-async function handleDentistLogin(message) {
+async function handleDentistLogin(message, replyTo, correlationId, channel) {
     const { identifier, password } = message;
 
     const dentist = await Dentist.findOne({ username: identifier });

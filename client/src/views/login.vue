@@ -3,7 +3,7 @@
         <h1 class="text-primary mb-4 text-center">Login</h1>
         <form @submit.prevent="onSubmit" class="login-form">
             <div class="mb-3">
-                <input type="text" id="username_ssn" v-model="username" placeholder="Enter username or ssn"
+                <input type="text" id="username_ssn" v-model="username_ssn" placeholder="Enter username or ssn"
                     class="form-control" required />
             </div>
             <div class="mb-3">
