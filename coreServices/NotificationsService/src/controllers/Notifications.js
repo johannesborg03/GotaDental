@@ -2,39 +2,27 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-var Notification = require('../models/Notification.js');
+var Notification = require('../models/Notification');
 
-
-exports.createNotification = async (req, res) => {
-    const { patient_ssn, dentist_username, type, message, appointment_id } = req.body;
-
-    if (!type) {
-        return res.status(400).json({ message: 'Notification type is required' });
-    }
-
+//Creating new notifications
+router.post('/api/notifications', async (req, res) => {
     try {
-        const notification = new Notification({
-            patient_ssn,
-            dentist_username,
-            type,
-            message,
-            appointment_id,
-        });
+        const { patient_ssn, dentist_username, type, message, appointment_id } = req.body;
 
-        const savedNotification = await notification.save();
-        res.status(201).json({
-            message: 'Notification created successfully',
-            notification: savedNotification,
-        });
-    } catch (err) {
-        console.error('Error creating notification:', err.message);
+        // Validate required fields
+        if (!type) {
+            return res.status(400).json({ message: "Notification type is required" });
+        }
+
+        
+    } catch (error) {
+        console.error("Error while creating notification:", error);
         res.status(500).json({
-            message: 'Server error while creating notification',
-            error: err.message,
+            message: "Server error while creating notification",
+            error: error.message
         });
     }
-};
-
+});
 
 
 
