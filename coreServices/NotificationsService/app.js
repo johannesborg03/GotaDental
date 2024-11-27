@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 const NotificationModel = require('./src/models/Notification'); // Model loader
+const notificationsRoutes = require('./src/apiRoutes/notificationsRoutes');
 
 
 require('dotenv').config();
@@ -34,7 +35,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 //App.use controllers here:
-
+app.use(notificationsRoutes);
 //----
 
 // 404 Handler
