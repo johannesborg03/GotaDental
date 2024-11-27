@@ -29,3 +29,14 @@ exports.createTimeslot = async (req, res) => {
       });
   }
 };
+
+
+// Controller to retrieve all timeslots for a specific office
+exports.getAllTimeslotsForOffice = async (req, res) => {
+  const { office_id } = req.params;
+
+  const correlationId = uuidv4();
+  const topic = `timeslot/office/${office_id}/retrieveAll`;
+
+  
+};
