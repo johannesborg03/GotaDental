@@ -1,8 +1,8 @@
 const { subscribeToTopic } = require('./subscriber');
 const mqtt = require('mqtt');
 
-const Patient = require('../models/Patient'); // Adjust the path to your model
-
+const Patient = require('../models/Patient'); 
+const Dentist = require('../models/Dentist'); 
 
 async function handlePatientRegistration(message, replyTo, correlationId, channel) {
 
