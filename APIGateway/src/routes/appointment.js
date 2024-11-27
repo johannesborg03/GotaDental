@@ -11,6 +11,12 @@ router.get('/api/appointments/patient/:patient_ssn', appointmentController.getAp
 // Route to retrieve a specific appointment by appointment ID
 router.get('/api/appointments/:appointment_id', appointmentController.getAppointmentById);
 
+// Route to cancel an appointment by a patient
+router.delete('/api/patients/:patient_ssn/appointments/:appointment_id/cancel', appointmentController.cancelAppointmentByPatient);
+
+// Route to cancel an appointment by a dentist
+router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/cancel', appointmentController.cancelAppointmentByDentist);
+
 // Route to add a note to an appointment
 router.post('/api/appointments/:appointment_id/notes', appointmentController.addNoteToAppointment);
 
