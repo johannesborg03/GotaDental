@@ -39,6 +39,21 @@ router.post('/api/notifications', async (req, res) => {
     }
 });
 
+// GET all notifications for a specific patient
+router.get('/api/notifications/patient/:patient_ssn', async (req, res) => {
+    try {
+        const { patient_ssn } = req.params;
 
+        const notifications = await Notification.find({ patient_ssn });
+
+        
+    } catch (error) {
+        console.error("Error while retrieving notifications:", error);
+        res.status(500).json({
+            message: "Server error while retrieving notifications",
+            error: error.message,
+        });
+    }
+});
 
 module.exports = router;
