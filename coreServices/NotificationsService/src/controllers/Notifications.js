@@ -64,7 +64,7 @@ router.get('/api/notifications/patient/:patient_ssn', async (req, res) => {
 });
 
 
-//Get all notifications for a specific dentist
+//Retrieving all notifications for a specific dentist
 router.get('/api/notifications/dentist/:dentist_username', async (req, res) => {
     try {
         const { dentist_username } = req.params;
@@ -108,6 +108,22 @@ router.delete('/api/notifications/:notification_id', async (req, res) => {
         console.error("Error while deleting notification:", error);
         res.status(500).json({
             message: "Server error while deleting notification",
+            error: error.message,
+        });
+    }
+});
+
+//Retrieving a specific notification
+router.get('/api/notifications/:notification_id', async (req, res) => {
+    try {
+        const { notification_id } = req.params;
+
+        const notification = await Notification.findById(notification_id);
+
+    } catch (error) {
+        console.error("Error while retrieving notification:", error);
+        res.status(500).json({
+            message: "Server error while retrieving notification",
             error: error.message,
         });
     }
