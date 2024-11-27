@@ -5,6 +5,9 @@
             <div class="mb-3">
                 <input type="text" id="ssn" v-model="ssn" placeholder="Enter your SSN" class="form-control"
                     required />
+                     <!-- Show error message if validation fails -->
+                <small v-if="errorMessage" class="text-danger">{{ errorMessage }}</small>
+           
             </div>
             <div class="mb-3">
                 <input type="email" id="email" v-model="email" placeholder="Enter email" class="form-control" required />
@@ -43,12 +46,13 @@ export default {
         },
         message: "",  // To store any error message
         showToast: false,  // Toast visibility flag
-        toastMessage: ""   // Toast message
+        toastMessage: "",   // Toast message
+        errorMessage: ""
     };
     },
     methods: {
         async register() {
-            console.log("Pressed");
+        
               // Validate SSN
               if (!/^\d{12}$/.test(this.ssn)) {
                 this.errorMessage = 'SSN needs to be exactly 12 digits!';
