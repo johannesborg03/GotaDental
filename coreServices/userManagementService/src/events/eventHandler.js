@@ -9,26 +9,43 @@ async function handlePatientLogin(message, replyTo, correlationId, channel) {
     console.log('Received login message:', message);
     const { identifier, password } = message;
 
-    const patient = await Patient.findOne({ patient_ssn: identifier });
-    if (!patient || patient.password !== password) {
-        return { error: 'Invalid SSN or password' };
-    }
+    try {
+        const patient = await Patient.findOne({ patient_ssn: identifier });
+        if (!patient || patient.password !== password) {
+            const errorResponse = { success: false, error: 'Invalid SSN or password' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
 
-    // Return a success response with a token
-    return { token: 'jwt-token-for-patient', userType: 'patient' };
+        const successResponse = { success: true, token: 'jwt-token-for-patient', userType: 'patient' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error during patient login:', error);
+        const errorResponse = { success: false, error: 'Internal server error during login.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
 }
 
 // Handle dentist login
 async function handleDentistLogin(message, replyTo, correlationId, channel) {
+    console.log('Received dentist login message:', message);
     const { identifier, password } = message;
 
-    const dentist = await Dentist.findOne({ username: identifier });
-    if (!dentist || dentist.password !== password) {
-        return { error: 'Invalid username or password' };
-    }
+    try {
+        const dentist = await Dentist.findOne({ username: identifier });
+        if (!dentist || dentist.password !== password) {
+            const errorResponse = { success: false, error: 'Invalid username or password' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
 
-    // Return a success response with a token
-    return { token: 'jwt-token-for-dentist', userType: 'dentist' };
+        const successResponse = { success: true, token: 'jwt-token-for-dentist', userType: 'dentist' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error during dentist login:', error);
+        const errorResponse = { success: false, error: 'Internal server error during login.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
 }
 
 
