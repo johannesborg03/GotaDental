@@ -5,34 +5,36 @@
     <BNavbarToggle target="nav-collapse" @click="toggleNavbar" />
     <BCollapse id="nav-collapse" is-nav v-bind:visible="isNavbarOpen">
 
-    <!-- nav buttons -->
-    <BNavbarNav class="d-flex gap-2">
-      <BNavItem class="buttonsNav">
-        <router-link to="/HomePage">Home</router-link>
-      </BNavItem>
-      <BNavItem class="buttonsNav">
-        <router-link to="/Offices">Offices</router-link>
-      </BNavItem>
-      <BNavItem class="buttonsNav">
-        <router-link to="/Appointment">Appointments</router-link>
-      </BNavItem>
-    </BNavbarNav>
+      <!-- nav buttons -->
+      <BNavbarNav class="d-flex gap-2">
+        <BNavItem class="buttonsNav">
+          <router-link to="/HomePage">Home</router-link>
+        </BNavItem>
+        <BNavItem class="buttonsNav">
+          <router-link to="/Offices">Offices</router-link>
+        </BNavItem>
+        <BNavItem class="buttonsNav">
+          <router-link to="/Appointment">Appointments</router-link>
+        </BNavItem>
+      </BNavbarNav>
 
-    <!-- Username-->
-    <BNavbarNav class="ms-auto mb-2 mb-lg-0">
-      <div class="d-none d-lg-flex align-items-center">
-      </div>
+      <!-- Username-->
+      <BNavbarNav class="ms-auto mb-2 mb-lg-0">
+        <div class="d-none d-lg-flex align-items-center">
+        </div>
 
-      <!-- Dropdown -->
-      <BDropdown class="custom-dropdown ml-3 text-center" variant="transparent" size="sm" right >
-        <template #button-content>
-          <span class="d-lg-none" style="margin-left: 26%; font-size: 16px; font-family: sans-serif; color: #FFFFFF;"> Account</span>
-        </template>
-        <BDropdownItem @click="goToSettings">Settings</BDropdownItem>
-        <BDropdownItem @click="logout">Logout</BDropdownItem>
-      </BDropdown>
-    </BNavbarNav>
-  </BCollapse>
+        <!-- Dropdown -->
+        <BDropdown class="custom-dropdown ml-3 text-center" variant="transparent" size="sm" right @show="toggleDropdown"
+          @hide="toggleDropdown">
+          <template #button-content>
+            <span class="d-lg-none"
+              style="margin-left: 26%; font-size: 16px; font-family: sans-serif; color: #FFFFFF;">Account</span>
+          </template>
+          <BDropdownItem @click="goToSettings">Settings</BDropdownItem>
+          <BDropdownItem @click="logout">Logout</BDropdownItem>
+        </BDropdown>
+      </BNavbarNav>
+    </BCollapse>
   </BNavbar>
 </template>
 
@@ -43,8 +45,8 @@ export default {
   data() {
     return {
       //menuVisible: false,
-      isNavbarOpen: false, 
-      isDropdownOpen: false, 
+      isNavbarOpen: false,
+      isDropdownOpen: false,
       username: ''
     };
   },
@@ -111,7 +113,7 @@ router-link {
 
 .buttonsNav a:hover,
 router-link:hover {
-  color: #1f0fd3;
+  color: #A8DAD7;
 }
 
 .custom-dropdown {
@@ -123,12 +125,12 @@ router-link:hover {
 }
 
 .custom-dropdown .dropdown-item {
-  color: #b70e0e;
+  color: #E0E0E0;
   background-color: transparent;
 }
 
 .custom-dropdown .dropdown-item:hover {
   color: #FFFFFF;
-  background-color: #12d729;
+  background-color: #004F58;
 }
 </style>
