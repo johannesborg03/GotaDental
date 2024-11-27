@@ -1,29 +1,31 @@
 const { publishMessage, setupReplyQueue } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
-// Controller for timeslot registration
-exports.registerPatient = async (req, res) => {
-  const { username } = req.params;
-  const { date, time } = req.body;
+// Controller to create a new timeslot
+exports.createTimeslot = async (req, res) => {
+  const { dentist_username } = req.params;
+  const { date_and_time, timeslot_state } = req.body;
 
-  const slotData= {
-    username, date,time 
+  // Prepare the data to send
+  const timeslotData = {
+      dentist_username, date_and_time, timeslot_state 
   };
 
-  const correlationId = uuidv4(); // Unique ID for this request
-  const topic = 'timeslot/dentist/register';
+  const correlationId = uuidv4(); 
+  const topic = 'timeslot/dentist/create'; 
 
   try {
-    const response = await publishMessage(topic, slotData, correlationId);
+      const response = await publishMessage(topic, timeslotData, correlationId);
 
-    res.status(200).json({
-      message: 'Time slot registered successfully',
-      slotDetails,
-    });
+      res.status(201).json({
+          message: 'Timeslot created successfully',
+          timeslot: response, 
+      });
   } catch (error) {
-    console.error('Error publishing to RabbitMQ:', error);
-    res.status(500).json({
-      message: 'Failed to register time slot',
-    });
+      console.error('Error publishing to MQTT:', error);
+      res.status(500).json({
+          message: 'Failed to create timeslot',
+          error: error.message,
+      });
   }
-}
+};
