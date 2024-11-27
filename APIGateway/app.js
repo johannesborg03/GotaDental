@@ -12,7 +12,7 @@ const timeslotRoutes = require('./src/routes/timeslot');
 const patientRoutes = require('./src/routes/patientRoutes'); 
 const dentistRoutes = require('./src/routes/dentistRoutes');
 const loginRoutes = require('./src/routes/loginRoutes');
-
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
 const app = express();
 require('dotenv').config();
@@ -38,6 +38,7 @@ app.use('/api/timeslot', timeslotRoutes);
 app.use('/api/patients', patientRoutes); // Prefix all patient routes with '/api'
 app.use('/api/dentists', dentistRoutes); // Prefix all patient routes with '/api'
 app.use('/api', loginRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 //const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);
 //mqttClient = mqtt.connect('mqtt://localhost:1883')
