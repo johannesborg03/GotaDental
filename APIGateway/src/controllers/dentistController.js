@@ -1,5 +1,5 @@
 const mqtt = require('mqtt');
-const { publishMessage } = require('../mqttService');
+const { publishMessage, setupReplyQueue } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
 exports.registerDentist = async (req, res) => {
