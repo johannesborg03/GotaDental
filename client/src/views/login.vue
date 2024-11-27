@@ -3,7 +3,7 @@
         <h1 class="text-primary mb-4 text-center">Login</h1>
         <form @submit.prevent="onSubmit" class="login-form">
             <div class="mb-3">
-                <input type="text" id="username" v-model="username" placeholder="Enter username" class="form-control"
+                <input type="text" id="username_ssn" v-model="username" placeholder="Enter username or ssn" class="form-control"
                     required />
             </div>
             <div class="mb-3">
@@ -25,7 +25,7 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            username: '',
+            username_ssn: '',
             password: '',
         };
     },
@@ -33,12 +33,12 @@ export default {
         async onSubmit() {
             try {
                 const response = await axios.post('http://localhost:3000/api/login', {
-                    username: this.username,
+                    username_ssn: this.username_ssn,
                     password: this.password,
                 });
 
                 localStorage.setItem('token', response.data.token);
-                if (this.username.endsWith('.dentist')) {
+                if (this.username_ssn.endsWith('.dentist')) {
                     // Redirect to dentist homepage if user is a dentist 
                     this.$router.push('/dentist');
                 } else {
