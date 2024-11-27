@@ -49,6 +49,14 @@ export default {
     methods: {
         async register() {
             console.log("Pressed");
+              // Validate SSN
+              if (!/^\d{12}$/.test(this.ssn)) {
+                this.errorMessage = 'SSN needs to be exactly 12 digits!';
+                return;
+            }
+
+            this.errorMessage = ''; // Clear error message if validation passes
+
             try {
                 const response = await axios.post('http://localhost:4000/api/patients', {
                     ssn: this.ssn,

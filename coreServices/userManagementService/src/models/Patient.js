@@ -9,8 +9,8 @@ var patientSchema = new mongoose.Schema({
     patient_ssn : {
         type : String,
         required : true,
-        min : 1,
-        max : 50,
+        min : 5,
+        max : 20,
         unique : true
     },
     password : {
