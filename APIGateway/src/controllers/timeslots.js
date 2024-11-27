@@ -38,5 +38,25 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
   const correlationId = uuidv4();
   const topic = `timeslot/office/${office_id}/retrieveAll`;
 
-  
+  try {
+      const response = await publishMessage(topic, { office_id }, correlationId);
+
+      if (!response || response.length === 0) {
+          return res.status(404).json({
+              message: 'No timeslots found for this office',
+              timeslots: [],
+          });
+      }
+
+      res.status(200).json({
+          message: 'Timeslots retrieved successfully',
+          timeslots: response,
+      });
+  } catch (error) {
+      console.error('Error publishing to MQTT:', error);
+      res.status(500).json({
+          message: 'Failed to retrieve timeslots',
+          error: error.message,
+      });
+  }
 };
