@@ -64,4 +64,26 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
 // Controller to retrieve a specific timeslot for a dentist
 exports.getTimeslotById = async (req, res) => {
   const { office_id, dentist_username, timeslot_id } = req.params;
-}
+
+  const correlationId = uuidv4();
+  const topic = `timeslot/${office_id}/${dentist_username}/${timeslot_id}/retrieve`;
+
+  try {
+      const response = await publishMessage(topic, { office_id, dentist_username, timeslot_id }, correlationId);
+
+      if (!response) {
+          return res.status(404).json({ message: 'Timeslot not found' });
+      }
+
+      res.status(200).json({
+          message: 'Timeslot retrieved successfully',
+          timeslot: response,
+      });
+  } catch (error) {
+      console.error('Error publishing to MQTT:', error);
+      res.status(500).json({
+          message: 'Failed to retrieve timeslot',
+          error: error.message,
+      });
+  }
+};
