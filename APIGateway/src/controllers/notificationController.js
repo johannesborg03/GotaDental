@@ -1,5 +1,5 @@
 const mqtt = require('mqtt');
-const { default: mqtt } = require('mqtt');
+
 const { publishMessage } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
@@ -23,8 +23,8 @@ exports.sendNotification = async (req, res) => {
         const response = await publishMessage(topic, notificationData, correlationId);
 
         // Check if the service returned an error
-        if (response && response.error) {
-            return res.status(500).json({ message: response.error });
+        if (response) {
+            return res.status(500).json({ message: 'Notification not found '});
         }
 
         res.status(200).json({
