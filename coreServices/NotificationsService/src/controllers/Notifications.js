@@ -87,4 +87,20 @@ router.get('/api/notifications/dentist/:dentist_username', async (req, res) => {
         });
     }
 });
+
+// Delete notification
+router.delete('/api/notifications/:notification_id', async (req, res) => {
+    try {
+        const { notification_id } = req.params;
+
+        const notification = await Notification.findById(notification_id);
+
+    } catch (error) {
+        console.error("Error while deleting notification:", error);
+        res.status(500).json({
+            message: "Server error while deleting notification",
+            error: error.message,
+        });
+    }
+});
 module.exports = router;
