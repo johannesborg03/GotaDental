@@ -104,4 +104,4 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions };
+module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin };
