@@ -1,17 +1,20 @@
-const { publishMessage } = require('../mqttService'); 
+const { publishMessage, setupReplyQueue } = require('../mqttService');
+const { v4: uuidv4 } = require('uuid');
 
-async function registerSlot(req, res) {
+// Controller for timeslot registration
+exports.registerPatient = async (req, res) => {
   const { username } = req.params;
   const { date, time } = req.body;
 
-  const slotDetails = {
-    username,
-    date,
-    time,
+  const slotData= {
+    username, date,time 
   };
 
+  const correlationId = uuidv4(); // Unique ID for this request
+  const topic = 'timeslot/dentist/register';
+
   try {
-    await publishMessage('timeslot_topic', slotDetails);
+    const response = await publishMessage(topic, slotData, correlationId);
 
     res.status(200).json({
       message: 'Time slot registered successfully',
@@ -24,7 +27,3 @@ async function registerSlot(req, res) {
     });
   }
 }
-
-module.exports = {
-  registerSlot,
-};
