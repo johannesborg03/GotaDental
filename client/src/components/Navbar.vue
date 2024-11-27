@@ -42,9 +42,9 @@ export default {
   name: 'Navbar',
   data() {
     return {
-      menuVisible: false,
-      isNavbarOpen: false, // Track navbar state
-      isDropdownOpen: false, // Track dropdown state
+      //menuVisible: false,
+      isNavbarOpen: false, 
+      isDropdownOpen: false, 
       username: ''
     };
   },
@@ -52,8 +52,11 @@ export default {
     this.username = localStorage.getItem('username') || 'Guest';
   },
   methods: {
-    toggleMenu() {
-      this.menuVisible = !this.menuVisible;
+    toggleNavbar() {
+      this.isNavbarOpen = !this.isNavbarOpen;
+    },
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
     },
     goToSettings() {
       const username = localStorage.getItem('username');
@@ -108,7 +111,7 @@ router-link {
 
 .buttonsNav a:hover,
 router-link:hover {
-  color: #A8DAD7;
+  color: #1f0fd3;
 }
 
 .custom-dropdown {
@@ -120,12 +123,12 @@ router-link:hover {
 }
 
 .custom-dropdown .dropdown-item {
-  color: #E0E0E0;
+  color: #b70e0e;
   background-color: transparent;
 }
 
 .custom-dropdown .dropdown-item:hover {
   color: #FFFFFF;
-  background-color: #004F58;
+  background-color: #12d729;
 }
 </style>
