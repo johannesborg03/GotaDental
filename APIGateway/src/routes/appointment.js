@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointments'); 
 
-router.post();
+// Route to create a new appointment
+router.post('/api/appointments', appointmentController.createAppointment);
+
+
 
 module.exports = router;
