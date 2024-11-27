@@ -46,7 +46,14 @@ router.get('/api/notifications/patient/:patient_ssn', async (req, res) => {
 
         const notifications = await Notification.find({ patient_ssn });
 
-        
+        if (notifications.length === 0) {
+            return res.status(404).json({ message: "No notifications found for this patient" });
+        }
+
+        res.status(200).json({
+            message: "Notifications retrieved successfully",
+            notifications,
+        });
     } catch (error) {
         console.error("Error while retrieving notifications:", error);
         res.status(500).json({
