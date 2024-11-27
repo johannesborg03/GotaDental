@@ -60,3 +60,8 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
       });
   }
 };
+
+// Controller to retrieve a specific timeslot for a dentist
+exports.getTimeslotById = async (req, res) => {
+  const { office_id, dentist_username, timeslot_id } = req.params;
+}
