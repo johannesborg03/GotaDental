@@ -120,6 +120,14 @@ router.get('/api/notifications/:notification_id', async (req, res) => {
 
         const notification = await Notification.findById(notification_id);
 
+        if (!notification) {
+            return res.status(404).json({ message: "Notification not found" });
+        }
+
+        res.status(200).json({
+            message: "Notification retrieved successfully",
+            notification,
+        });
     } catch (error) {
         console.error("Error while retrieving notification:", error);
         res.status(500).json({
