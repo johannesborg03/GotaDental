@@ -5,6 +5,9 @@ const appointmentController = require('../controllers/appointments');
 // Route to create a new appointment
 router.post('/api/appointments', appointmentController.createAppointment);
 
+// Route to add a note to an appointment
+router.post('/api/appointments/:appointment_id/notes', appointmentController.addNoteToAppointment);
+
 // Route to retrieve all appointments for a patient
 router.get('/api/appointments/patient/:patient_ssn', appointmentController.getAppointmentsForPatient);
 
@@ -16,8 +19,5 @@ router.delete('/api/patients/:patient_ssn/appointments/:appointment_id/cancel', 
 
 // Route to cancel an appointment by a dentist
 router.delete('/api/dentists/:dentist_username/appointments/:appointment_id/cancel', appointmentController.cancelAppointmentByDentist);
-
-// Route to add a note to an appointment
-router.post('/api/appointments/:appointment_id/notes', appointmentController.addNoteToAppointment);
 
 module.exports = router;
