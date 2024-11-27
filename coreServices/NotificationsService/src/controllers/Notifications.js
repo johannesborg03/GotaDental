@@ -39,7 +39,7 @@ router.post('/api/notifications', async (req, res) => {
     }
 });
 
-// GET all notifications for a specific patient
+//Retrieving all notifications for the specific patient
 router.get('/api/notifications/patient/:patient_ssn', async (req, res) => {
     try {
         const { patient_ssn } = req.params;
@@ -63,4 +63,21 @@ router.get('/api/notifications/patient/:patient_ssn', async (req, res) => {
     }
 });
 
+
+//Get all notifications for a specific dentist
+router.get('/api/notifications/dentist/:dentist_username', async (req, res) => {
+    try {
+        const { dentist_username } = req.params;
+
+        const notifications = await Notification.find({ dentist_username });
+
+        
+    } catch (error) {
+        console.error("Error while retrieving notifications:", error);
+        res.status(500).json({
+            message: "Server error while retrieving notifications",
+            error: error.message,
+        });
+    }
+});
 module.exports = router;
