@@ -19,7 +19,7 @@ router.post('/api/notifications', async (req, res) => {
             patient_ssn,
             dentist_username,
             type,
-            message: message || "", 
+            message: message || "",
             appointment_id,
         });
 
@@ -94,7 +94,16 @@ router.delete('/api/notifications/:notification_id', async (req, res) => {
         const { notification_id } = req.params;
 
         const notification = await Notification.findById(notification_id);
+        
+        if (!notification) {
+            return res.status(404).json({ message: "Notification not found" });
+        }
 
+        await Notification.deleteOne({ _id: notification_id });
+
+        res.status(200).json({
+            message: "Notification deleted successfully",
+        });
     } catch (error) {
         console.error("Error while deleting notification:", error);
         res.status(500).json({
