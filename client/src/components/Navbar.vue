@@ -2,8 +2,8 @@
   <BNavbar toggleable="lg" class="custom-navbar" expand="lg">
     <BNavbarBrand class="brand">Göta Dental</BNavbarBrand>
 
-    <BNavbarToggle target="nav-collapse"/>
-    <BCollapse id="nav-collapse" is-nav>
+    <BNavbarToggle target="nav-collapse" @click="toggleNavbar" />
+    <BCollapse id="nav-collapse" is-nav v-bind:visible="isNavbarOpen">
 
     <!-- nav buttons -->
     <BNavbarNav class="d-flex gap-2">
@@ -43,6 +43,8 @@ export default {
   data() {
     return {
       menuVisible: false,
+      isNavbarOpen: false, // Track navbar state
+      isDropdownOpen: false, // Track dropdown state
       username: ''
     };
   },
