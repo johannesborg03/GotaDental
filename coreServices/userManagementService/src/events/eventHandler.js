@@ -1,8 +1,8 @@
 const { subscribeToTopic } = require('./subscriber');
 const mqtt = require('mqtt');
 
-const Patient = require('../models/Patient'); 
-const Dentist = require('../models/Dentist'); 
+const Patient = require('../models/Patient');
+const Dentist = require('../models/Dentist');
 
 // Handle patient login
 async function handlePatientLogin(message) {
@@ -46,10 +46,10 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
             console.error('Invalid message data:', message);
             const response = { success: false, error: 'Invalid data' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-          
+
             return;
         }
-     
+
 
         // Check if the patient already exists
         const existingPatient = await Patient.findOne({ patient_ssn: ssn });
@@ -72,7 +72,7 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
 
         await newPatient.save();
 
-        
+
 
         console.log(`Patient with SSN ${ssn} registered successfully.`);
         // Respond with success
@@ -91,6 +91,12 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
 async function initializeSubscriptions() {
     try {
         await subscribeToTopic('patients/register', handlePatientRegistration);
+
+        await subscribeToTopic('patients/login', handlePatientLogin);
+        console.log('Subscribed to patients/login');
+
+        await subscribeToTopic('dentists/login', handleDentistLogin);
+        console.log('Subscribed to dentists/login');
         //console.log('Subscribed to "patients/register"');
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
@@ -98,6 +104,8 @@ async function initializeSubscriptions() {
 
         //   await subscribeToTopic('notifications/send', handleNotification);
         //   console.log('Subscribed to "notifications/send"');
+
+
         console.log('Subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing subscriptions:', error);
