@@ -15,6 +15,7 @@ router.get('/api/timeslot/:office_id/:dentist_username/:timeslot_id', timeslotCo
 // Update a timeslot for a dentist 
 router.update('api/timeslot/:office_id/:dentist_username/:timeslot_id/update', timeslotController.updateTimeslot)
 
+//Delete a timeslot for a dentist 
 router.delete('api/timeslot/:office_id/:dentist_username/:timeslot_id/delete', timeslotController.deleteTimeslot)
 
 module.exports = router;
