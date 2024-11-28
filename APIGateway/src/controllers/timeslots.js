@@ -6,6 +6,10 @@ exports.createTimeslot = async (req, res) => {
   const { dentist_username } = req.params;
   const { date_and_time, timeslot_state } = req.body;
 
+  if (!dentist_username || date_and_time || timeslot_state){
+  return res.status(400).json({ message: 'Missing required parameters or body' });
+  }
+
   // Prepare the data to send
   const timeslotData = {
       dentist_username, date_and_time, timeslot_state 
