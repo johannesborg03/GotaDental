@@ -13,7 +13,7 @@ router.get('/api/timeslot/:office_id/:dentist_username/:timeslot_id', timeslotCo
 //router.post('/:username', timeslotController.registerSlot);
 
 // Update a timeslot for a dentist 
-router.update('api/timeslot/:office_id/:dentist_username/:timeslot_id/update')
+router.update('api/timeslot/:office_id/:dentist_username/:timeslot_id/update', timeslotController.updateTimeslot)
 
 router.delete('api/timeslot/:office_id/:dentist_username/:timeslot_id/delete', timeslotController.deleteTimeslot)
 
