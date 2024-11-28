@@ -35,6 +35,10 @@ exports.createTimeslot = async (req, res) => {
 exports.getAllTimeslotsForOffice = async (req, res) => {
   const { office_id } = req.params;
 
+  if (!office_id){
+  return res.status(400).json({ message: 'Missing office_id' });
+  }
+
   const correlationId = uuidv4();
   const topic = `timeslot/office/${office_id}/retrieveAll`;
 
