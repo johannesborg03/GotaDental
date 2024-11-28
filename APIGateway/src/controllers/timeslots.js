@@ -142,7 +142,7 @@ return res.status(400).json({message: 'Missing required parameters'})
 }
 
 const correlationId = uuidv4();
-const topic = `timeslots/${office_id}/${dentist_username}/${timeslot_id}` 
+const topic = `timeslot/${office_id}/${dentist_username}/${timeslot_id}` 
 
 
 try {
