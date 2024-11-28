@@ -131,5 +131,39 @@ res.status(500).json({
     error: error.message,
 });
 }
+}
 
+exports.deleteTimeslot = async (req, res) => {
+
+const {dentist_username, timeslot_id, office_id} = req.params;
+
+if (!dentist_username || !timeslot_id || !office_id){
+return res.status(400).json({message: 'Missing required parameters'})
+}
+
+const correlationId = uuidv4();
+const topic = `timeslots/${office_id}/${dentist_username}/${timeslot_id}` 
+
+
+try {
+
+const response = await publishMessage (topic, {office_id, dentist_username, timeslot_id}, correlationId);
+
+if (!response){
+return res.status(404).json('Timeslot not found')
+}
+
+return res.status(200).json({
+    message: "Timeslot Deleted",
+    timeslot: response
+});
+
+
+} catch (error){
+    console.error('Error publishing to MQTT', error);
+    res.status(500).json({
+        message: 'Failed to delete timeslot',
+        error: error.message,
+    });
+    }
 };
