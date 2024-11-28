@@ -12,4 +12,7 @@ router.get('/api/timeslot/:office_id/timeslots', timeslotController.getAllTimesl
 router.get('/api/timeslot/:office_id/:dentist_username/:timeslot_id', timeslotController.getTimeslotById);
 //router.post('/:username', timeslotController.registerSlot);
 
+// Update a timeslot for a dentist 
+router.update('api/timeslot/:office_id/:dentist_username/:timeslot_id/update')
+
 module.exports = router;
