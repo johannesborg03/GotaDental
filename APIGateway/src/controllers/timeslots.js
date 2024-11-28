@@ -65,6 +65,10 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
 exports.getTimeslotById = async (req, res) => {
   const { office_id, dentist_username, timeslot_id } = req.params;
 
+  if (!office_id || dentist_username || timeslot_id){
+  return res.status(400).json({ message: 'Missing required parameters' });
+  }
+
   const correlationId = uuidv4();
   const topic = `timeslot/${office_id}/${dentist_username}/${timeslot_id}/retrieve`;
 
