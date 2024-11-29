@@ -69,18 +69,15 @@ export default {
         };
     },
     methods: {
-        validateUsername(username) {
-            // Regex to check if username ends with ".dentist"
-            const usernamePattern = /^[a-zA-Z0-9._%+-]+\.dentist$/;
-            return usernamePattern.test(username);
-        },
+        
         async registerDentist() {
             // Validate username format
-            if (!this.validateUsername(this.formData.username)) {
-                this.errorMessage = "User is not a dentist";
-                this.successMessage = "";
+              // Validate SSN
+              if (/^\d{12}$/.test(this.ssn)) {
+                this.errorMessage = 'username cant be a SSN!';
                 return;
             }
+                
             if (this.password !== this.confirmPassword) {
                 alert('Password do not match');
                 this.password = ''
