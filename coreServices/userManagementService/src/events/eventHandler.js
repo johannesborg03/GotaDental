@@ -32,7 +32,7 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
     const { identifier, password } = message;
 
     try {
-        const dentist = await Dentist.findOne({ username: identifier });
+        const dentist = await Dentist.findOne({ dentist_username: identifier });
         if (!dentist || dentist.password !== password) {
             const errorResponse = { success: false, error: 'Invalid username or password' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
