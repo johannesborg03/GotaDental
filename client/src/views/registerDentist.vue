@@ -20,6 +20,11 @@
                     <input type="email" id="email" v-model="formData.email" class="form-control"
                         placeholder="Enter your email" required />
                 </div>
+                <div class="form-group mb-3">
+
+                    <input type="text" id="date_of_birth" v-model="formData.date_of_birth" class="form-control"
+                        placeholder="Enter your date of birth (xxxx-xx-xx)" required />
+                </div>
 
                 <div class="form-group mb-3">
 
@@ -69,15 +74,15 @@ export default {
         };
     },
     methods: {
-        
+
         async registerDentist() {
             // Validate username format
-              // Validate SSN
-              if (/^\d{12}$/.test(this.ssn)) {
+            // Validate SSN
+            if (/^\d{12}$/.test(this.ssn)) {
                 this.errorMessage = 'username cant be a SSN!';
                 return;
             }
-                
+
             if (this.password !== this.confirmPassword) {
                 alert('Password do not match');
                 this.password = ''
