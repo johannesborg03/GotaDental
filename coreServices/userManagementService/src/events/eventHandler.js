@@ -161,12 +161,16 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 async function initializeSubscriptions() {
     try {
         await subscribeToTopic('patients/register', handlePatientRegistration);
-
+        onsole.log('Subscribed to patients/register');
+        
         await subscribeToTopic('patients/login', handlePatientLogin);
         console.log('Subscribed to patients/login');
 
         await subscribeToTopic('dentists/login', handleDentistLogin);
         console.log('Subscribed to dentists/login');
+
+        await subscribeToTopic('dentists/register', handleDentistRegistration);
+        console.log('Subscribed to dentists/register');
         //console.log('Subscribed to "patients/register"');
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
