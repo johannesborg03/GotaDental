@@ -122,35 +122,36 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 
 
         // Check if the patient already exists
-        const existingPatient = await Patient.findOne({ patient_ssn: ssn });
-        if (existingPatient) {
-            console.log(`Patient with SSN ${ssn} already exists.`);
-            const response = { success: false, error: `Patient with SSN ${ssn} already exists.` };
+        const existingDentist = await Dentist.findOne({ username: username });
+        if (existingDentist) {
+            console.log(`Dentist with username ${username} already exists.`);
+            const response = { success: false, error: `Dentist with username ${username} already exists.` };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
 
         // Create and save a new patient
-        const newPatient = new Patient({
-            patient_ssn: ssn,
-            email,
+        const newDentist = new Dentist({
+            dentist_username: username,
+            password,
             name,
-            password, // Note: Passwords should be hashed in a real-world scenario
-            notified: false, // Default value
+            email,
+            date_of_birth,
             appointments: [], // Empty array initially
+            timeslots: []
         });
 
-        await newPatient.save();
+        await newDentist.save();
 
 
 
-        console.log(`Patient with SSN ${ssn} registered successfully.`);
+        console.log(`Dentist with username ${username} registered successfully.`);
         // Respond with success
-        const response = { success: true, patient: newPatient };
+        const response = { success: true, patient: newDentist };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     } catch (error) {
-        console.error('Error processing patient registration:', error);
-        const response = { success: false, error: 'Internal server error while registering patient.' };
+        console.error('Error processing dentist registration:', error);
+        const response = { success: false, error: 'Internal server error while registering dentist.' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     }
 }
