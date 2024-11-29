@@ -27,9 +27,11 @@ var dentistSchema = new mongoose.Schema({
     },
     email : {
         type : String,
+        required : true,
     },
     date_of_birth : {
         type: Date,
+        required : true,
     },
     appointments : [{
         type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'      // Reference to Appointments
