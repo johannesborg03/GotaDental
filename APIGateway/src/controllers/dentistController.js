@@ -15,7 +15,7 @@ exports.registerDentist = async (req, res) => {
     const topic = 'dentists/register';
 
     // Prepare the message for the RabbitMQ broker
-    const dentistData = { ssn, email, name, password };
+    const dentistData = { name, username, email, password };
 
     try {
         // Publish the message to the topic (exchange)
