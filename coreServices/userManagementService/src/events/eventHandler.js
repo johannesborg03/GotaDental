@@ -108,11 +108,11 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     console.log('Processing dentist registration:', message);
 
     // Extract data from the received message
-    const { name, username, email, password } = message;
+    const { name, username, email, date_of_birth, password } = message;
 
     try {
         // Validate the input data
-        if (!name || !username || !email || !password) {
+        if (!name || !username || !email || !date_of_birth || !password)  {
             console.error('Invalid message data:', message);
             const response = { success: false, error: 'Invalid data' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
@@ -122,7 +122,7 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 
 
         // Check if the patient already exists
-        const existingDentist = await Dentist.findOne({ username: username });
+        const existingDentist = await Dentist.findOne({ dentist_username: username });
         if (existingDentist) {
             console.log(`Dentist with username ${username} already exists.`);
             const response = { success: false, error: `Dentist with username ${username} already exists.` };
@@ -162,7 +162,7 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 async function initializeSubscriptions() {
     try {
         await subscribeToTopic('patients/register', handlePatientRegistration);
-        onsole.log('Subscribed to patients/register');
+        console.log('Subscribed to patients/register');
 
         await subscribeToTopic('patients/login', handlePatientLogin);
         console.log('Subscribed to patients/login');

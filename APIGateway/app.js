@@ -34,7 +34,7 @@ app.use(bodyParser.json());
 
 app.use('/api/timeslot', timeslotRoutes);
 
-// Use the patient routes
+// Use the routes
 app.use('/api/patients', patientRoutes); // Prefix all patient routes with '/api'
 app.use('/api/dentists', dentistRoutes); // Prefix all patient routes with '/api'
 app.use('/api', loginRoutes);
