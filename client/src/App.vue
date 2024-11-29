@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Navbar v-if="!$route.meta.hideNavbar" />
+  <!-- <Navbar v-if="!$route.meta.hideNavbar" /> --> 
     <button class="btn btn-primary">
       <router-link to="/registerPatient" class="text-white text-decoration-none">Register Patient</router-link>
     </button>
