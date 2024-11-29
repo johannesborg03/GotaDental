@@ -1,13 +1,21 @@
 <template>
-  <div id="app">
-  <!-- <Navbar v-if="!$route.meta.hideNavbar" /> --> 
+  <div id="app" class="container m-4">
+  <!-- <Navbar v-if="!$route.meta.hideNavbar" /> -->
+   <div class="row justify-content-center">
+    <div class="col auto">
     <button class="btn btn-primary">
       <router-link to="/registerPatient" class="text-white text-decoration-none">Register Patient</router-link>
     </button>
+  </div>
+
+  <div class="col auto">
     <button class="btn btn-primary">
       <router-link to="/login" class="text-white text-decoration-none">Login</router-link>
     </button>
+  </div>
+  
     <router-view />
+  </div>
   </div>
 </template>
 
