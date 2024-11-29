@@ -66,6 +66,7 @@ export default {
                 name: "",
                 username: "", // Added username
                 email: "",
+                date_of_birth:"",
                 password: "",
                 confirmPassword: "",
             },
@@ -102,6 +103,7 @@ export default {
                     name: "",
                     username: "",
                     email: "",
+                    date_of_birth:"",
                     password: "",
                 };
             } catch (error) {
