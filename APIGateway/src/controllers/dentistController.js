@@ -4,10 +4,10 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.registerDentist = async (req, res) => {
     console.log('Received dentist data:', req.body);
-    const { name, username, email, password } = req.body;
+    const { name, username, email, date_of_birth, password } = req.body;
 
     // Validate the input data
-    if (!name || !username || !email || !password) {
+    if (!name || !username || !email || !date_of_birth || !password)  {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
