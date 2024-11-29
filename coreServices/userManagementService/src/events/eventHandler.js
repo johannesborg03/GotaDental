@@ -103,6 +103,58 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
     }
 }
 
+async function handleDentistRegistration(message, replyTo, correlationId, channel) {
+
+    console.log('Processing patient registration:', message);
+
+    // Extract data from the received message
+    const { ssn, email, name, password } = message;
+
+    try {
+        // Validate the input data
+        if (!ssn || !email || !name || !password) {
+            console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Invalid data' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+
+            return;
+        }
+
+
+        // Check if the patient already exists
+        const existingPatient = await Patient.findOne({ patient_ssn: ssn });
+        if (existingPatient) {
+            console.log(`Patient with SSN ${ssn} already exists.`);
+            const response = { success: false, error: `Patient with SSN ${ssn} already exists.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Create and save a new patient
+        const newPatient = new Patient({
+            patient_ssn: ssn,
+            email,
+            name,
+            password, // Note: Passwords should be hashed in a real-world scenario
+            notified: false, // Default value
+            appointments: [], // Empty array initially
+        });
+
+        await newPatient.save();
+
+
+
+        console.log(`Patient with SSN ${ssn} registered successfully.`);
+        // Respond with success
+        const response = { success: true, patient: newPatient };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    } catch (error) {
+        console.error('Error processing patient registration:', error);
+        const response = { success: false, error: 'Internal server error while registering patient.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    }
+}
+
 
 
 // Initialize all subscriptions

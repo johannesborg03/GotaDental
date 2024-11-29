@@ -89,7 +89,7 @@ export default {
                 this.errorMessage = "";
                 this.successMessage = "";
 
-                const response = await axios.post("http://localhost:3000/register", this.formData);
+                const response = await axios.post("http://localhost:4000/dentists", this.formData);
                 this.successMessage = response.data.message || "Registration successful!";
 
                 // Clear form after success
