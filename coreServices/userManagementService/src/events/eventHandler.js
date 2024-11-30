@@ -32,7 +32,7 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
     const { identifier, password } = message;
 
     try {
-        const dentist = await Dentist.findOne({ username: identifier });
+        const dentist = await Dentist.findOne({ dentist_username: identifier });
         if (!dentist || dentist.password !== password) {
             const errorResponse = { success: false, error: 'Invalid username or password' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
@@ -103,18 +103,75 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
     }
 }
 
+async function handleDentistRegistration(message, replyTo, correlationId, channel) {
+
+    console.log('Processing dentist registration:', message);
+
+    // Extract data from the received message
+    const { name, username, email, date_of_birth, password } = message;
+
+    try {
+        // Validate the input data
+        if (!name || !username || !email || !date_of_birth || !password)  {
+            console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Invalid data' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+
+            return;
+        }
+
+
+        // Check if the patient already exists
+        const existingDentist = await Dentist.findOne({ dentist_username: username });
+        if (existingDentist) {
+            console.log(`Dentist with username ${username} already exists.`);
+            const response = { success: false, error: `Dentist with username ${username} already exists.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Create and save a new patient
+        const newDentist = new Dentist({
+            dentist_username: username,
+            password,
+            name,
+            email,
+            date_of_birth,
+            appointments: [], // Empty array initially
+            timeslots: []
+        });
+
+        await newDentist.save();
+
+
+
+        console.log(`Dentist with username ${username} registered successfully.`);
+        // Respond with success
+        const response = { success: true, patient: newDentist };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    } catch (error) {
+        console.error('Error processing dentist registration:', error);
+        const response = { success: false, error: 'Internal server error while registering dentist.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    }
+}
+
 
 
 // Initialize all subscriptions
 async function initializeSubscriptions() {
     try {
         await subscribeToTopic('patients/register', handlePatientRegistration);
+        console.log('Subscribed to patients/register');
 
         await subscribeToTopic('patients/login', handlePatientLogin);
         console.log('Subscribed to patients/login');
 
         await subscribeToTopic('dentists/login', handleDentistLogin);
         console.log('Subscribed to dentists/login');
+
+        await subscribeToTopic('dentists/register', handleDentistRegistration);
+        console.log('Subscribed to dentists/register');
         //console.log('Subscribed to "patients/register"');
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
