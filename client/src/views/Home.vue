@@ -1,6 +1,6 @@
 <template>
-    <div id="app" class="container">
-        <Navbar v-if="!$route.meta.hideNavbar" />
+    
+       
         <div class="row justify-content-center">
             <div class="col-1">
                 <button class="btn btn-primary">
@@ -30,8 +30,7 @@
 
             <router-view />
         </div>
-    </div>
-
+    
 
 
 
