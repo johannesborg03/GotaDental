@@ -53,7 +53,7 @@ export default {
       //menuVisible: false,
       isNavbarOpen: false,
       isDropdownOpen: false,
-      username: ''
+      userIdentifier: ''
     };
   },
   mounted() {
@@ -76,8 +76,8 @@ export default {
     },
     logout() {
       // Clear the sessionStorage on logout .
-      localStorage.removeItem("userIdentifier"); // Remove user data from local storage
-      this.$router.push("/"); // Redirect to login page
+      localStorage.removeItem("userIdentifier"); // Remove user data from session storage
+      this.$router.push("/"); // Redirect to home page
     }
   }
 }
