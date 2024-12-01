@@ -16,6 +16,12 @@
         <BNavItem class="buttonsNav">
           <router-link to="/Appointment">Appointments</router-link>
         </BNavItem>
+        <BNavItem class="buttonsNav">
+
+          <button class="btn btn-danger" @click="logout">
+            Logout
+          </button>
+        </BNavItem>
       </BNavbarNav>
 
       <!-- Username-->
@@ -51,7 +57,7 @@ export default {
     };
   },
   mounted() {
-    this.username = localStorage.getItem('username') || 'Guest';
+    this.userIdentifier = sessionStorage.getItem('userIdentifier') || 'Guest';
   },
   methods: {
     toggleNavbar() {
@@ -61,17 +67,17 @@ export default {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
     goToSettings() {
-      const username = localStorage.getItem('username');
-      if (username) {
-        this.$router.push({ name: 'SettingsPage', params: { username: this.username } });
+      const userIdentifier = localStorage.getItem('userIdentifier');
+      if (userIdentifier) {
+        this.$router.push({ name: 'SettingsPage', params: { userIdentifier: this.userIdentifier } });
       } else {
-        console.error('No username found in localStorage');
+        console.error('No userIdentifier found in localStorage');
       }
     },
     logout() {
-      // Clear the localStorage on logout .
-      localStorage.removeItem('username');
-      this.$router.push('/LogIn');
+      // Clear the sessionStorage on logout .
+      localStorage.removeItem("userIdentifier"); // Remove user data from local storage
+      this.$router.push("/"); // Redirect to login page
     }
   }
 }

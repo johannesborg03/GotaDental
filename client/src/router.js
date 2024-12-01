@@ -8,7 +8,7 @@ import Home from './views/Home.vue';
 
 const routes = [
 
-    { path: '/Home', name: 'Home', component: Home, meta: { hideNavbar: true }},
+    { path: '/', name: 'Home', component: Home, meta: { hideNavbar: true }},
 
     { path: '/registerPatient', name: 'RegisterPatient', component: registerPatient, meta: { hideNavbar: true }},
 
