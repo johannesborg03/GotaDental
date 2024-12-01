@@ -4,8 +4,12 @@ import login from './views/login.vue';
 import dentist from './views/dentist.vue';
 import patient from './views/patient.vue';
 import registerDentist from './views/registerDentist.vue';
+import Home from './views/Home.vue';
 
 const routes = [
+
+    { path: '/', name: 'Home', component: Home, meta: { hideNavbar: true }},
+
     { path: '/registerPatient', name: 'RegisterPatient', component: registerPatient, meta: { hideNavbar: true }},
 
     { path: '/login',name: 'Login',component: login,meta: { hideNavbar: true } },

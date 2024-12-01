@@ -45,7 +45,7 @@ export default {
                 });
 
                 console.log("Received response:", response.data);
-                localStorage.setItem('token', response.data.token);
+                sessionStorage.setItem('userIdentifier', response.data.username_ssn);
                 if (this.username_ssn.endsWith('.dentist')) {
                     // Redirect to dentist homepage if user is a dentist 
                     this.$router.push('/dentist');
