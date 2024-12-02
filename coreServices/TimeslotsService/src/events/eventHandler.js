@@ -84,6 +84,40 @@ async function handleGetTimeslotById(message, replyTo, correlationId, channel) {
     }
 }
 
+// Handle updating a timeslot
+async function handleUpdateTimeslot(message, replyTo, correlationId, channel) {
+    console.log('Received update timeslot message:', message);
+
+    const { office_id, dentist_username, timeslot_id, date_and_time } = message;
+
+    try {
+        if (!office_id || !dentist_username || !timeslot_id || !date_and_time) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const updatedTimeslot = await Timeslot.findByIdAndUpdate(
+            timeslot_id,
+            { dentist_username, office_id, date_and_time },
+            { new: true }
+        );
+
+        if (!updatedTimeslot) {
+            const errorResponse = { success: false, error: 'Timeslot not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, timeslot: updatedTimeslot };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating timeslot:', error);
+        const errorResponse = { success: false, error: 'Failed to update timeslot' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 
 module.exports = {
     initializeTimeslotSubscriptions,
