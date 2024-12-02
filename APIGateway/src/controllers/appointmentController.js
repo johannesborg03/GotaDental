@@ -114,6 +114,12 @@ exports.getAppointmentById = async (req, res) => {
 exports.cancelAppointmentByPatient = async (req, res) => {
     const { patient_ssn, appointment_id } = req.params;
 
+    if (!appointment_id || !patient_ssn) {
+        return res.status(400).json({
+             message: "Appointment ID or Patient SSN is empty"
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/patient/${patient_ssn}/${appointment_id}/cancel`;
 
