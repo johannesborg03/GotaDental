@@ -118,6 +118,35 @@ async function handleUpdateTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+// Handle deleting a timeslot
+async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
+    console.log('Received delete timeslot message:', message);
+
+    const { dentist_username, timeslot_id, office_id } = message;
+
+    try {
+        if (!dentist_username || !timeslot_id || !office_id) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const deletedTimeslot = await Timeslot.findByIdAndDelete(timeslot_id);
+
+        if (!deletedTimeslot) {
+            const errorResponse = { success: false, error: 'Timeslot not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, timeslot: deletedTimeslot };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error deleting timeslot:', error);
+        const errorResponse = { success: false, error: 'Failed to delete timeslot' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
 
 module.exports = {
     initializeTimeslotSubscriptions,
