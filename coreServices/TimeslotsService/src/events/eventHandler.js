@@ -28,6 +28,32 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+
+// Handle retrieving all timeslots for an office
+async function handleGetAllTimeslots(message, replyTo, correlationId, channel) {
+    console.log('Received retrieve all timeslots message:', message);
+
+    const { office_id } = message;
+
+    try {
+        if (!office_id) {
+            const errorResponse = { success: false, error: 'Missing office_id' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const timeslots = await Timeslot.find({ office_id });
+        console.log('Retrieved timeslots:', timeslots);
+
+        const successResponse = { success: true, timeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving timeslots:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve timeslots' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 module.exports = {
     initializeTimeslotSubscriptions,
     handleCreateTimeslot,
