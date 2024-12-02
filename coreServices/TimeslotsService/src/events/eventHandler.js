@@ -166,7 +166,7 @@ async function initializeTimeslotSubscriptions() {
 module.exports = {
     initializeTimeslotSubscriptions,
     handleCreateTimeslot,
-    handleGetAllTimeslotsForOffice,
+    handleGetAllTimeslots,
     handleGetTimeslotById,
     handleUpdateTimeslot,
     handleDeleteTimeslot,
