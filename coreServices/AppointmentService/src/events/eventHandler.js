@@ -54,6 +54,35 @@ async function handleGetAppointmentsForPatient(message, replyTo, correlationId, 
     }
 }
 
+// Handle retrieving a specific appointment
+async function handleGetAppointmentById(message, replyTo, correlationId, channel) {
+    console.log('Received retrieve appointment message:', message);
+
+    const { appointment_id } = message;
+
+    try {
+        if (!appointment_id) {
+            const errorResponse = { success: false, error: 'Missing appointment_id' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const appointment = await Appointment.findById(appointment_id);
+        if (!appointment) {
+            const errorResponse = { success: false, error: 'Appointment not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, appointment };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving appointment:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve appointment' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 module.exports = {
     initializeAppointmentSubscriptions,
     handleCreateAppointment,
