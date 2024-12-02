@@ -141,6 +141,41 @@ async function handleCancelAppointmentByDentist(message, replyTo, correlationId,
     }
 }
 
+// Handle adding a note to an appointment
+async function handleAddNoteToAppointment(message, replyTo, correlationId, channel) {
+    console.log('Received add note to appointment message:', message);
+
+    const { appointment_id, content, dentist_username } = message;
+
+    try {
+        if (!appointment_id || !content || !dentist_username) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const appointment = await Appointment.findById(appointment_id);
+        if (!appointment) {
+            const errorResponse = { success: false, error: 'Appointment not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Add the note to the appointment
+        appointment.notes = appointment.notes + "\n" + content;  // Append the note to existing ones
+        await appointment.save();
+
+        const successResponse = { success: true, appointment };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error adding note to appointment:', error);
+        const errorResponse = { success: false, error: 'Failed to add note to appointment' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
+
 module.exports = {
     initializeAppointmentSubscriptions,
     handleCreateAppointment,
