@@ -179,6 +179,12 @@ exports.addNoteToAppointment = async (req, res) => {
         });
     }
 
+    if (!content || content.trim() === "") {
+        return res.status(400).json({
+            message: "Content cannot be empty."
+        });
+    }
+
     const noteData = {
         appointment_id,
         dentist_username,
