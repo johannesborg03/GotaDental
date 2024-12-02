@@ -54,12 +54,20 @@ exports.createAppointment = async (req, res) => {
 exports.getAppointmentsForPatient = async (req, res) => {
     const { patient_ssn } = req.params;
 
+
+    if (!patient_ssn) {
+        return res.status(400).json({
+            message: "Patient SSN is required and cannot be empty."
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/patient/${patient_ssn}/retrieve`;
 
     try {
         const response = await publishMessage(topic, { patient_ssn }, correlationId);
 
+        
         res.status(200).json({
             message: "Appointment retrieved successfully",
             appointments: response,
