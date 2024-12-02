@@ -57,7 +57,7 @@ exports.getAppointmentsForPatient = async (req, res) => {
 
     if (!patient_ssn) {
         return res.status(400).json({
-            message: "Patient SSN is required and cannot be empty."
+            message: "Patient SSN is empty."
         });
     }
 
@@ -84,6 +84,12 @@ exports.getAppointmentsForPatient = async (req, res) => {
 // Controller to retrieve a specific appointment by ID
 exports.getAppointmentById = async (req, res) => {
     const { appointment_id } = req.params;
+
+    if (!appointment_id) {
+        return res.status(400).json({
+             message: "Appointment ID is empty."
+        });
+    }
 
     const correlationId = uuidv4();
     const topic = `appointments/${appointment_id}/retrieve`;
