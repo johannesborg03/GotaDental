@@ -18,9 +18,23 @@ exports.createAppointment = async (req, res) => {
     };
 
     const correlationId = uuidv4();
+    const checkConflictTopic = "appointments/checkConflict";
     const topic = "appointments/create";
 
     try {
+          // Check for conflicts
+          const conflictResponse = await publishMessage(
+            checkConflictTopic,
+            { patient_ssn, dentist_username, date_and_time },
+            correlationId
+        );
+
+        if (conflictResponse.conflict) {
+            return res.status(409).json({
+                message: "Conflict: Dentist or patient already has an appointment at this time."
+            });
+        }
+        // Proceed to create the appointment if no conflicts
         const response = await publishMessage(topic, appointmentData, correlationId);
 
         res.status(201).json({

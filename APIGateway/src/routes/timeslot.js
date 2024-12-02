@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const timeslotController = require('../controllers/timeslots'); 
+const timeslotController = require('../controllers/timeslotController'); 
 
 // Create a new timeslot for a specific dentist
 //router.post('/api/timeslot/:dentist_username', timeslotController.createTimeslotForDentist);
