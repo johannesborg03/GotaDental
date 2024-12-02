@@ -151,6 +151,13 @@ if (!dentist_username || !timeslot_id || !office_id){
 return res.status(400).json({message: 'Missing required parameters'})
 }
 
+// Check if the timeslot_id exists in the system 
+const timeslotExists = await checkTimeslotExists(dentist_username, timeslot_id, office_id);
+
+if (!timeslotExists) {
+    return res.status(404).json({ message: 'Timeslot not found' });
+}
+
 const correlationId = uuidv4();
 const topic = `timeslot/${office_id}/${dentist_username}/${timeslot_id}` 
 
