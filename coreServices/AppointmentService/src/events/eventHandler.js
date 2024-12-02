@@ -83,6 +83,35 @@ async function handleGetAppointmentById(message, replyTo, correlationId, channel
     }
 }
 
+// Handle canceling an appointment by patient
+async function handleCancelAppointmentByPatient(message, replyTo, correlationId, channel) {
+    console.log('Received cancel appointment by patient message:', message);
+
+    const { patient_ssn, appointment_id } = message;
+
+    try {
+        if (!patient_ssn || !appointment_id) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const deletedAppointment = await Appointment.findByIdAndDelete(appointment_id);
+        if (!deletedAppointment) {
+            const errorResponse = { success: false, error: 'Appointment not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, appointment: deletedAppointment };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error canceling appointment by patient:', error);
+        const errorResponse = { success: false, error: 'Failed to cancel appointment' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 module.exports = {
     initializeAppointmentSubscriptions,
     handleCreateAppointment,
