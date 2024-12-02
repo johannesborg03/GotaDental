@@ -170,8 +170,14 @@ exports.cancelAppointmentByDentist = async (req, res) => {
 
 // Controller to add a note to an appointment
 exports.addNoteToAppointment = async (req, res) => {
-    const { appointment_id } = req.params;
-    const { dentist_username, content } = req.body;
+    const { appointment_id, dentist_username } = req.params;
+    const { content } = req.body;
+
+    if (!appointment_id || !dentist_username) {
+        return res.status(400).json({
+             message: "Appointment ID or dentist_username is empty"
+        });
+    }
 
     const noteData = {
         appointment_id,

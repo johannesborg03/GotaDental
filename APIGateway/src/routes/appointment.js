@@ -6,7 +6,7 @@ const appointmentController = require('../controllers/appointmentController');
 router.post('/api/appointments', appointmentController.createAppointment);
 
 // Route to add a note to an appointment
-router.post('/api/appointments/:appointment_id/notes', appointmentController.addNoteToAppointment);
+router.post('/api/appointments/:appointment_id/dentist_username/notes', appointmentController.addNoteToAppointment);
 
 // Route to retrieve all appointments for a patient
 router.get('/api/appointments/patient/:patient_ssn', appointmentController.getAppointmentsForPatient);
