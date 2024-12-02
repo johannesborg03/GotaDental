@@ -148,6 +148,21 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+// Initialize subscriptions
+async function initializeTimeslotSubscriptions() {
+    try {
+        await subscribeToTopic('timeslot/dentist/create', handleCreateTimeslot);
+        await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
+        await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
+        await subscribeToTopic('timeslot/update', handleUpdateTimeslot);
+        await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
+
+        console.log('Timeslot subscriptions initialized!');
+    } catch (error) {
+        console.error('Error initializing timeslot subscriptions:', error);
+    }
+}
+
 module.exports = {
     initializeTimeslotSubscriptions,
     handleCreateTimeslot,
