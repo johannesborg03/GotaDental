@@ -29,6 +29,31 @@ async function handleCreateAppointment(message, replyTo, correlationId, channel)
     }
 }
 
+// Handle retrieving all appointments for a patient
+async function handleGetAppointmentsForPatient(message, replyTo, correlationId, channel) {
+    console.log('Received retrieve all appointments message:', message);
+
+    const { patient_ssn } = message;
+
+    try {
+        if (!patient_ssn) {
+            const errorResponse = { success: false, error: 'Missing patient_ssn' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const appointments = await Appointment.find({ patient_ssn });
+        console.log('Retrieved appointments:', appointments);
+
+        const successResponse = { success: true, appointments };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving appointments:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve appointments' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 module.exports = {
     initializeAppointmentSubscriptions,
     handleCreateAppointment,
