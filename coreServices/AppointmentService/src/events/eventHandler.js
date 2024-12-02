@@ -112,6 +112,35 @@ async function handleCancelAppointmentByPatient(message, replyTo, correlationId,
     }
 }
 
+// Handle canceling an appointment by dentist
+async function handleCancelAppointmentByDentist(message, replyTo, correlationId, channel) {
+    console.log('Received cancel appointment by dentist message:', message);
+
+    const { dentist_username, appointment_id } = message;
+
+    try {
+        if (!dentist_username || !appointment_id) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const deletedAppointment = await Appointment.findByIdAndDelete(appointment_id);
+        if (!deletedAppointment) {
+            const errorResponse = { success: false, error: 'Appointment not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, appointment: deletedAppointment };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error canceling appointment by dentist:', error);
+        const errorResponse = { success: false, error: 'Failed to cancel appointment' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 module.exports = {
     initializeAppointmentSubscriptions,
     handleCreateAppointment,
