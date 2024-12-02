@@ -54,6 +54,37 @@ async function handleGetAllTimeslots(message, replyTo, correlationId, channel) {
     }
 }
 
+
+// Handle retrieving a specific timeslot
+async function handleGetTimeslotById(message, replyTo, correlationId, channel) {
+    console.log('Received retrieve timeslot message:', message);
+
+    const { office_id, dentist_username, timeslot_id } = message;
+
+    try {
+        if (!office_id || !dentist_username || !timeslot_id) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const timeslot = await Timeslot.findOne({ _id: timeslot_id, dentist_username, office_id });
+        if (!timeslot) {
+            const errorResponse = { success: false, error: 'Timeslot not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, timeslot };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving timeslot:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve timeslot' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
 module.exports = {
     initializeTimeslotSubscriptions,
     handleCreateTimeslot,
