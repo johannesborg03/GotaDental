@@ -10,10 +10,7 @@ exports.createAppointment = async (req, res) => {
     }
 
     const appointmentData = {
-        patient_ssn,
-        dentist_username,
-        office_id,
-        date_and_time,
+        patient_ssn, dentist_username, office_id,date_and_time, 
         notes: "" // Default empty notes
     };
 
@@ -186,9 +183,7 @@ exports.addNoteToAppointment = async (req, res) => {
     }
 
     const noteData = {
-        appointment_id,
-        dentist_username,
-        content,
+        appointment_id, dentist_username, content,
     };
 
     const correlationId = uuidv4();

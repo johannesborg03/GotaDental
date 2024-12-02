@@ -15,6 +15,16 @@ exports.createTimeslot = async (req, res) => {
       dentist_username, date_and_time, timeslot_state 
   };
 
+  // Check if a timeslot already exists for the dentist at the given date and time
+  const existingTimeslot = await checkTimeslotConflict(dentist_username, date_and_time);
+
+  if (existingTimeslot) {
+      return res.status(409).json({
+          message: 'Conflict: Timeslot already exists for this dentist at the given date and time.'
+      });
+  }
+
+  // If no conflict, proceed to create the timeslot
   const correlationId = uuidv4(); 
   const topic = 'timeslot/dentist/create'; 
 
