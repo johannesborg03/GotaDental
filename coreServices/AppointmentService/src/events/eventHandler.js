@@ -174,6 +174,21 @@ async function handleAddNoteToAppointment(message, replyTo, correlationId, chann
     }
 }
 
+// Initialize subscriptions
+async function initializeAppointmentSubscriptions() {
+    try {
+        await subscribeToTopic('appointments/create', handleCreateAppointment);
+        await subscribeToTopic('appointments/patient/retrieveAll', handleGetAppointmentsForPatient);
+        await subscribeToTopic('appointments/retrieve', handleGetAppointmentById);
+        await subscribeToTopic('appointments/patient/cancel', handleCancelAppointmentByPatient);
+        await subscribeToTopic('appointments/dentist/cancel', handleCancelAppointmentByDentist);
+        await subscribeToTopic('appointments/notes/add', handleAddNoteToAppointment);
+
+        console.log('Appointment subscriptions initialized!');
+    } catch (error) {
+        console.error('Error initializing appointment subscriptions:', error);
+    }
+}
 
 
 module.exports = {
