@@ -143,6 +143,12 @@ exports.cancelAppointmentByPatient = async (req, res) => {
 exports.cancelAppointmentByDentist = async (req, res) => {
     const { dentist_username, appointment_id } = req.params;
 
+    if (!appointment_id || !patient_ssn) {
+        return res.status(400).json({
+             message: "Appointment ID or dentist_username is empty"
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/dentist/${dentist_username}/${appointment_id}/cancel`;
 
