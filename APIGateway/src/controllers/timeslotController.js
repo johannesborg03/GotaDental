@@ -6,7 +6,7 @@ exports.createTimeslot = async (req, res) => {
   const { dentist_username } = req.params;
   const { date_and_time, timeslot_state } = req.body;
 
-  if (!dentist_username || date_and_time || timeslot_state){
+  if (!dentist_username || !date_and_time || !timeslot_state){
   return res.status(400).json({ message: 'Missing required parameters or body' });
   }
 
@@ -73,7 +73,7 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
 exports.getTimeslotById = async (req, res) => {
   const { office_id, dentist_username, timeslot_id } = req.params;
 
-  if (!office_id || dentist_username || timeslot_id){
+  if (!office_id ||! dentist_username || !timeslot_id){
   return res.status(400).json({ message: 'Missing required parameters' });
   }
 
