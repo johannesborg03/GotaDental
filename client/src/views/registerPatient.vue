@@ -63,6 +63,15 @@ export default {
                 return;
             }
 
+            //Validate password 
+            if (this.password != this.confirmPassword) {
+                console.log(this.password, this.confirmPassword);
+                alert('Password do not match');
+                this.password = ''
+                this.confirmPassword = ''
+                return;
+            }
+
             this.errorMessage = ''; // Clear error message if validation passes
 
             try {
