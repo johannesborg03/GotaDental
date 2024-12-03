@@ -12,7 +12,7 @@
                 <div class="form-group mb-3">
 
                     <input type="text" id="username" v-model="input.username" class="form-control"
-                        placeholder="Enter your username (e.g., myname.dentist)" required />
+                        placeholder="Enter a username" required />
                 </div>
 
                 <div class="form-group mb-3">
