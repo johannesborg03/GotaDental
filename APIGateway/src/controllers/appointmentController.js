@@ -10,17 +10,28 @@ exports.createAppointment = async (req, res) => {
     }
 
     const appointmentData = {
-        patient_ssn,
-        dentist_username,
-        office_id,
-        date_and_time,
+        patient_ssn, dentist_username, office_id,date_and_time, 
         notes: "" // Default empty notes
     };
 
     const correlationId = uuidv4();
+    const checkConflictTopic = "appointments/checkConflict";
     const topic = "appointments/create";
 
     try {
+          // Check for conflicts
+          const conflictResponse = await publishMessage(
+            checkConflictTopic,
+            { patient_ssn, dentist_username, date_and_time },
+            correlationId
+        );
+
+        if (conflictResponse.conflict) {
+            return res.status(409).json({
+                message: "Conflict: Dentist or patient already has an appointment at this time."
+            });
+        }
+        // Proceed to create the appointment if no conflicts
         const response = await publishMessage(topic, appointmentData, correlationId);
 
         res.status(201).json({
@@ -40,12 +51,20 @@ exports.createAppointment = async (req, res) => {
 exports.getAppointmentsForPatient = async (req, res) => {
     const { patient_ssn } = req.params;
 
+
+    if (!patient_ssn) {
+        return res.status(400).json({
+            message: "Patient SSN is empty."
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/patient/${patient_ssn}/retrieve`;
 
     try {
         const response = await publishMessage(topic, { patient_ssn }, correlationId);
 
+        
         res.status(200).json({
             message: "Appointment retrieved successfully",
             appointments: response,
@@ -62,6 +81,12 @@ exports.getAppointmentsForPatient = async (req, res) => {
 // Controller to retrieve a specific appointment by ID
 exports.getAppointmentById = async (req, res) => {
     const { appointment_id } = req.params;
+
+    if (!appointment_id) {
+        return res.status(400).json({
+             message: "Appointment ID is empty."
+        });
+    }
 
     const correlationId = uuidv4();
     const topic = `appointments/${appointment_id}/retrieve`;
@@ -86,6 +111,12 @@ exports.getAppointmentById = async (req, res) => {
 exports.cancelAppointmentByPatient = async (req, res) => {
     const { patient_ssn, appointment_id } = req.params;
 
+    if (!appointment_id || !patient_ssn) {
+        return res.status(400).json({
+             message: "Appointment ID or Patient SSN is empty"
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/patient/${patient_ssn}/${appointment_id}/cancel`;
 
@@ -109,6 +140,12 @@ exports.cancelAppointmentByPatient = async (req, res) => {
 exports.cancelAppointmentByDentist = async (req, res) => {
     const { dentist_username, appointment_id } = req.params;
 
+    if (!appointment_id || !patient_ssn) {
+        return res.status(400).json({
+             message: "Appointment ID or dentist_username is empty"
+        });
+    }
+
     const correlationId = uuidv4();
     const topic = `appointments/dentist/${dentist_username}/${appointment_id}/cancel`;
 
@@ -130,13 +167,23 @@ exports.cancelAppointmentByDentist = async (req, res) => {
 
 // Controller to add a note to an appointment
 exports.addNoteToAppointment = async (req, res) => {
-    const { appointment_id } = req.params;
-    const { dentist_username, content } = req.body;
+    const { appointment_id, dentist_username } = req.params;
+    const { content } = req.body;
+
+    if (!appointment_id || !dentist_username) {
+        return res.status(400).json({
+             message: "Appointment ID or dentist_username is empty"
+        });
+    }
+
+    if (!content || content.trim() === "") {
+        return res.status(400).json({
+            message: "Content cannot be empty."
+        });
+    }
 
     const noteData = {
-        appointment_id,
-        dentist_username,
-        content,
+        appointment_id, dentist_username, content,
     };
 
     const correlationId = uuidv4();

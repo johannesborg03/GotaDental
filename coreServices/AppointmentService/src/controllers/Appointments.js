@@ -178,10 +178,10 @@ router.get('/api/appointments/:dentist_username/:appointment_id', async function
 });
 
 // Post a note to an appointment by a dentist
-router.post('/api/appointments/:appointment_id/notes', async function (req, res) {
+router.post('/api/appointments/:appointment_id/:dentist_username/notes', async function (req, res) {
     try {
         const appointmentID = req.params.appointment_id;
-        const dentist_username = req.body.dentist_username; 
+        const dentist_username = req.params.dentist_username; 
 
         // Find the appointment by appointment_id
         const appointment = await Appointment.findOne({ _id: appointmentID });

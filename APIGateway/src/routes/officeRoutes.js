@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const officeController = require('../controllers/offices'); 
+const officeController = require('../controllers/officeController'); 
 
 // Route to retrieve all offices 
 router.get('/api/offices', officeController.getAllOffices);

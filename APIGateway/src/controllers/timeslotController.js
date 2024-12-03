@@ -6,7 +6,7 @@ exports.createTimeslot = async (req, res) => {
   const { dentist_username } = req.params;
   const { date_and_time, timeslot_state } = req.body;
 
-  if (!dentist_username || date_and_time || timeslot_state){
+  if (!dentist_username || !date_and_time || !timeslot_state){
   return res.status(400).json({ message: 'Missing required parameters or body' });
   }
 
@@ -15,6 +15,16 @@ exports.createTimeslot = async (req, res) => {
       dentist_username, date_and_time, timeslot_state 
   };
 
+  // Check if a timeslot already exists for the dentist at the given date and time
+  const existingTimeslot = await checkTimeslotConflict(dentist_username, date_and_time);
+
+  if (existingTimeslot) {
+      return res.status(409).json({
+          message: 'Conflict: Timeslot already exists for this dentist at the given date and time.'
+      });
+  }
+
+  // If no conflict, proceed to create the timeslot
   const correlationId = uuidv4(); 
   const topic = 'timeslot/dentist/create'; 
 
@@ -73,7 +83,7 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
 exports.getTimeslotById = async (req, res) => {
   const { office_id, dentist_username, timeslot_id } = req.params;
 
-  if (!office_id || dentist_username || timeslot_id){
+  if (!office_id ||! dentist_username || !timeslot_id){
   return res.status(400).json({ message: 'Missing required parameters' });
   }
 
@@ -139,6 +149,13 @@ const {dentist_username, timeslot_id, office_id} = req.params;
 
 if (!dentist_username || !timeslot_id || !office_id){
 return res.status(400).json({message: 'Missing required parameters'})
+}
+
+// Check if the timeslot_id exists in the system 
+const timeslotExists = await checkTimeslotExists(dentist_username, timeslot_id, office_id);
+
+if (!timeslotExists) {
+    return res.status(404).json({ message: 'Timeslot not found' });
 }
 
 const correlationId = uuidv4();
