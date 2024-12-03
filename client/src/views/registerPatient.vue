@@ -10,14 +10,18 @@
            
             </div>
             <div class="mb-3">
-                <input type="email" id="email" v-model="email" placeholder="Enter email" class="form-control" required />
+                <input type="email" id="email" v-model="email" placeholder="Enter your email" class="form-control" required />
             </div>
             <div class="mb-3">
-                <input type="name" id="name" v-model="name" placeholder="Enter name"
+                <input type="name" id="name" v-model="name" placeholder="Enter your name"
                     class="form-control" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="password" v-model="password" placeholder="Enter password"
+                <input type="password" id="password" v-model="password" placeholder="Enter a password"
+                    class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="Confirm password"
                     class="form-control" required />
             </div>
             <div class="form-check mb-3">
@@ -56,6 +60,15 @@ export default {
               // Validate SSN
               if (!/^\d{12}$/.test(this.ssn)) {
                 this.errorMessage = 'SSN needs to be exactly 12 digits!';
+                return;
+            }
+
+            //Validate password 
+            if (this.password != this.confirmPassword) {
+                console.log(this.password, this.confirmPassword);
+                alert('Password do not match');
+                this.password = ''
+                this.confirmPassword = ''
                 return;
             }
 
