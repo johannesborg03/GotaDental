@@ -5,7 +5,7 @@
             <form @submit.prevent="registerDentist">
                 <div class="form-group mb-3">
 
-                    <input type="text" id="name" v-model="input.name" class="form-control"
+                    <input type="name" id="name" v-model="input.name" class="form-control"
                         placeholder="Enter your full name" required />
                 </div>
 
@@ -17,7 +17,7 @@
 
                 <div class="form-group mb-3">
 
-                    <input type="text" id="email" v-model="input.email" class="form-control"
+                    <input type="email" id="email" v-model="input.email" class="form-control"
                         placeholder="Enter your email" required />
                 </div>
                 <div class="form-group mb-3">
