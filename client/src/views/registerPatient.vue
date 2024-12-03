@@ -10,10 +10,10 @@
            
             </div>
             <div class="mb-3">
-                <input type="email" id="email" v-model="email" placeholder="Enter email" class="form-control" required />
+                <input type="email" id="email" v-model="email" placeholder="Enter your email" class="form-control" required />
             </div>
             <div class="mb-3">
-                <input type="name" id="name" v-model="name" placeholder="Enter name"
+                <input type="name" id="name" v-model="name" placeholder="Enter your name"
                     class="form-control" required />
             </div>
             <div class="mb-3">
