@@ -38,20 +38,26 @@ export default {
     return {
       slotDate: '',
       slotTime: '',
-      username: '', // should be change to ssn 
+      username: '',
     };
   },
 
-  mounted() {
-  this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
-  this.fetchUserData(); 
+ mounted() {
+  const username = localStorage.getItem('userIdentifier');
+  console.log(username); 
+
+  if (username){
+  this.username = username; 
+  }
+
+  this.fetchUserData();
 },
 
   methods: {
     async fetchUserData() {
       try {
   
-        const response = await fetch(`http://localhost:3005/api/dentist/${this.username}`);
+        const response = await fetch(`http://localhost:4000/api/dentist/${this.username}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch user data: ${response.status}`);
         }
