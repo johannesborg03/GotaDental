@@ -17,7 +17,11 @@
                     class="form-control" required />
             </div>
             <div class="mb-3">
-                <input type="password" id="password" v-model="password" placeholder="Enter password"
+                <input type="password" id="password" v-model="password" placeholder="Enter a password"
+                    class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="Confirm password"
                     class="form-control" required />
             </div>
             <div class="form-check mb-3">

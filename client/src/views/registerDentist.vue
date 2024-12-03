@@ -27,7 +27,6 @@
                 </div>
 
                 <div class="form-group mb-3">
-
                     <input type="password" id="password" v-model="input.password" class="form-control"
                         placeholder="Enter a password" required />
                 </div>
