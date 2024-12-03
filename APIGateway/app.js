@@ -8,7 +8,7 @@ const { connectRabbitMQ } = require('./src/mqttService'); // Adjust path to your
 
 
 const bodyParser = require('body-parser');
-const timeslotRoutes = require('./src/routes/timeslot'); 
+const timeslotRoutes = require('./src/routes/timeslotRoutes'); 
 const patientRoutes = require('./src/routes/patientRoutes'); 
 const dentistRoutes = require('./src/routes/dentistRoutes');
 const loginRoutes = require('./src/routes/loginRoutes');
