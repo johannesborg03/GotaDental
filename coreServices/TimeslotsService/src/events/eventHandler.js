@@ -183,7 +183,7 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
 }
 
 // Initialize subscriptions
-async function initializeTimeslotSubscriptions() {
+async function initializeSubscriptions() {
     try {
         await subscribeToTopic('timeslot/dentist/create', handleCreateTimeslot);
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
@@ -198,7 +198,7 @@ async function initializeTimeslotSubscriptions() {
 }
 
 module.exports = {
-    initializeTimeslotSubscriptions,
+    initializeSubscriptions,
     handleCreateTimeslot,
     handleGetAllTimeslots,
     handleGetTimeslotById,
