@@ -18,9 +18,7 @@
         </BNavItem>
         <BNavItem class="buttonsNav">
 
-          <button class="btn btn-danger" @click="logout">
-            Logout
-          </button>
+         
         </BNavItem>
       </BNavbarNav>
 
