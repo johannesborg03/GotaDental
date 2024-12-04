@@ -64,14 +64,23 @@ export default {
       }
 
       try {
-      // Construct the slot details
+        // Combine date and time into a single Date object
+        const dateTimeString = `${this.slotDate}T${this.slotTime}:00`; // 'T' separates date and time
+        const dateTime = new Date(dateTimeString);
+
+        // Check if the dateTime is valid
+        if (isNaN(dateTime)) {
+          alert('Invalid date or time. Please check your input.');
+          return;
+        }
+
+        // Construct the slot details
         const slotDetails = {
-          date: this.slotDate,
-          time: this.slotTime,
+          date_and_time: dateTime, // Send the combined Date object
         };
 
-         // Make the POST request to register the time slot
-         const response = await fetch(`http://localhost:4000/api/timeslot/${this.username}`, {
+        // Make the POST request to register the time slot
+        const response = await fetch(`http://localhost:4000/api/timeslot/${this.username}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(slotDetails),
@@ -94,7 +103,7 @@ export default {
         console.error('Error registering slot:', error);
         alert('An error occurred while registering the time slot. Please try again later.');
       }
+    }
   }
-}
 };
 </script>
