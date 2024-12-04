@@ -44,7 +44,7 @@ exports.registerTimeSlot = async (req, res) => {
     }
 
     const correlationId = uuidv4(); 
-    const topic = 'slot/post'; 
+    const topic = 'dentists/slot/post'; 
 
     const slotDetails = { dentist_username, date, time };
 

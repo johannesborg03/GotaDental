@@ -224,7 +224,9 @@ async function initializeSubscriptions() {
 
         await subscribeToTopic('dentists/register', handleDentistRegistration);
         console.log('Subscribed to dentists/register');
-        //console.log('Subscribed to "patients/register"');
+
+        await subscribeToTopic('dentists/slot/post', handleTimeSlotRegistration);
+        console.log('Subscribed to "dentists/slot/post"');
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
