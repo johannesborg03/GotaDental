@@ -157,6 +157,58 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 }
 
 
+async function handleTimeSlotRegistration(message, replyTo, correlationId, channel) {
+    console.log('Processing time slot registration:', message);
+
+    const { dentist_username, date, time } = message;
+
+    try {
+      
+        if (!dentist_username || !date || !time) {
+            console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Invalid data. Dentist username, date, and time are required.' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        const dentist = await Dentist.findOne({ dentist_username });
+        if (!dentist) {
+            console.log(`Dentist with username ${dentist_username} not found.`);
+            const response = { success: false, error: `Dentist with username ${dentist_username} not found.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Check if the time slot already exists for the dentist on the given date and time
+        const existingSlot = await TimeSlot.findOne({ dentist_username, date, time });
+        if (existingSlot) {
+            console.log(`Time slot already exists for dentist ${dentist_username} on ${date} at ${time}.`);
+            const response = { success: false, error: `Time slot already exists for dentist ${dentist_username} on ${date} at ${time}.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Create and save the new time slot
+        const newTimeSlot = new TimeSlot({
+            dentist_username,
+            date,
+            time
+        });
+
+        await newTimeSlot.save();
+
+        console.log(`Time slot for dentist ${dentist_username} on ${date} at ${time} registered successfully.`);
+        
+        // Respond with success
+        const response = { success: true, timeSlot: newTimeSlot };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    } catch (error) {
+        console.error('Error processing time slot registration:', error);
+        const response = { success: false, error: 'Internal server error while registering time slot.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    }
+}
+
 
 // Initialize all subscriptions
 async function initializeSubscriptions() {
@@ -187,4 +239,4 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin };
+module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin, handleTimeSlotRegistration };
