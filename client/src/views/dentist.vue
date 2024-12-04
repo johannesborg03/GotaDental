@@ -50,25 +50,10 @@ export default {
   this.username = username; 
   }
 
-  this.fetchUserData();
+  
 },
 
   methods: {
-    async fetchUserData() {
-      try {
-  
-        const response = await fetch(`http://localhost:4000/api/dentist/${this.username}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.status}`);
-        }
-
-        const userData = await response.json();
-        console.log('Fetched user data:', userData);
-
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    },
 
      // Register a time slot for the specified username
      async registerSlot() {
@@ -86,7 +71,7 @@ export default {
         };
 
          // Make the POST request to register the time slot
-         const response = await fetch(`http://localhost:3005/api/timeslot/${this.username}`, {
+         const response = await fetch(`http://localhost:4000/api/timeslot/${this.username}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(slotDetails),
