@@ -32,21 +32,21 @@ exports.registerDentist = async (req, res) => {
     }
 };
 
-// API Gateway Route to handle registering a dentists time slot
+// API Gateway Route to handle registering a dentist's time slot
 exports.registerTimeSlot = async (req, res) => {
     console.log('Received time slot data:', req.body);
     const { dentist_username } = req.params;
-    const { date, time } = req.body;
+    const { date_and_time } = req.body;
 
-  
-    if (!date || !time) {
-        return res.status(400).json({ message: 'Missing required fields' });
+    // Check if the date_and_time is provided
+    if (!date_and_time) {
+        return res.status(400).json({ message: 'Missing required field: date_and_time' });
     }
 
     const correlationId = uuidv4(); 
     const topic = 'dentists/slot/post'; 
 
-    const slotDetails = { dentist_username, date, time };
+    const slotDetails = { dentist_username, date_and_time };
 
     try {
         const response = await publishMessage(topic, slotDetails, correlationId);
