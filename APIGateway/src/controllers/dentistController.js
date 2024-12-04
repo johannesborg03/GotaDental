@@ -38,7 +38,7 @@ exports.registerTimeSlot = async (req, res) => {
     const { dentist_username } = req.params;
     const { date_and_time } = req.body;
 
-    // Check if the date_and_time is provided
+    
     if (!date_and_time) {
         return res.status(400).json({ message: 'Missing required field: date_and_time' });
     }
