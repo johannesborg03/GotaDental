@@ -57,7 +57,6 @@ export default {
 
      // Register a time slot for the specified username
      async registerSlot() {
-      // Validate required fields
       if (!this.slotDate || !this.slotTime) {
         alert('Please select a valid date and time!');
         return;
@@ -74,9 +73,8 @@ export default {
           return;
         }
 
-        // Construct the slot details
         const slotDetails = {
-          date_and_time: dateTime, // Send the combined Date object
+          date_and_time: dateTime, 
         };
 
         // Make the POST request to register the time slot
