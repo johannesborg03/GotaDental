@@ -80,7 +80,7 @@ export default {
         console.log(dateTime)
 
         // Make the POST request to create the time slot
-        const response = await axios.post('http://localhost:4000/api/timeslot/dentist/create', {
+        const response = await axios.post('http://localhost:4000/api/create', {
           dentist_username: this.username, 
           date_and_time: dateTime, 
         });
