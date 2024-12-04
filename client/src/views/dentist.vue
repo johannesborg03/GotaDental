@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -42,21 +44,18 @@ export default {
     };
   },
 
- mounted() {
-  const username = localStorage.getItem('userIdentifier');
-  console.log(username); 
+  mounted() {
+    const username = localStorage.getItem('userIdentifier');
+    console.log(username);
 
-  if (username){
-  this.username = username; 
-  }
-
-  
-},
+    if (username) {
+      this.username = username;
+    }
+  },
 
   methods: {
 
-     // Register a time slot for the specified username
-     async registerSlot() {
+    async registerSlot() {
       if (!this.slotDate || !this.slotTime) {
         alert('Please select a valid date and time!');
         return;
@@ -74,27 +73,27 @@ export default {
         }
 
         const slotDetails = {
-          date_and_time: dateTime, 
+          date_and_time: dateTime,
+          dentist_username: this.username,
         };
 
-        // Make the POST request to register the time slot
-        const response = await fetch(`http://localhost:4000/api/timeslot/${this.username}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(slotDetails),
+        console.log(dateTime)
+
+        // Make the POST request to create the time slot
+        const response = await axios.post('http://localhost:4000/api/timeslot/dentist/create', {
+          dentist_username: this.username, 
+          date_and_time: dateTime, 
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Slot registered successfully:', data);
+        if (response.status === 201) {
+          console.log('Slot registered successfully:', response.data);
           alert('Time slot registered successfully!');
 
           // Reset form fields
           this.slotDate = '';
           this.slotTime = '';
         } else {
-          const errorData = await response.json();
-          alert(`Failed to register slot: ${errorData.message}`);
+          alert(`Failed to register slot: ${response.data.message}`);
         }
 
       } catch (error) {
