@@ -15,7 +15,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     // Explicitly include Bootstrap and its CSS
-    include: ['bootstrap', 'bootstrap/dist/css/bootstrap.css']
+    include: ['bootstrap', 'bootstrap/dist/css/bootstrap.css', 'leaflet']
   }
 });
 
