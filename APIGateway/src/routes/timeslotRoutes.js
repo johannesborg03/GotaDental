@@ -9,7 +9,7 @@ const timeslotController = require('../controllers/timeslotController');
 //router.get('/api/timeslot/:office_id/timeslots', timeslotController.getAllTimeslotsForOffice);
 
 // Get a specific timeslot for a dentist
-router.get('/api/timeslot/:office_id/:dentist_username/:timeslot_id', timeslotController.getTimeslotById);
+//router.get('/api/timeslot/:office_id/:dentist_username/:timeslot_id', timeslotController.getTimeslotById);
 //router.post('/:username', timeslotController.registerSlot);
 
 // Update a timeslot for a dentist 

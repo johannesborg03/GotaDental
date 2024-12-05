@@ -1,16 +1,12 @@
 <template>
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-
+  <div id="map" class="map-container"></div>
 
 
 
 </template>
 
 <script>
-import L from "leaflet"; // Import Leaflet
-import "leaflet/dist/leaflet.css";
+
 
 export default {
     name: "Map",
@@ -27,7 +23,9 @@ export default {
         this.initMap();
 },
 methods: {
+    
     initMap(){
+        try{
         // Create a Leaflet map instance and attach it to the #map div
         this.map = L.map("map").setView([51.505, -0.09], 13); // [lat, lng], zoom level
 
@@ -42,10 +40,14 @@ methods: {
         .addTo(this.map)
         .bindPopup("A sample marker.")
         .openPopup();
-    }
+    } catch (error) {
+    console.error("Error initializing the Leaflet map:", error);
+  }
+}
+}
 }
 
-}
+
 
 
 </script>
