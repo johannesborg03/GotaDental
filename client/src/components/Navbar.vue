@@ -17,6 +17,10 @@
           <router-link to="/Appointment">Appointments</router-link>
         </BNavItem>
         <BNavItem class="buttonsNav">
+          <router-link to="/Map">Map</router-link>
+        </BNavItem>
+
+        <BNavItem class="buttonsNav">
 
          
         </BNavItem>
