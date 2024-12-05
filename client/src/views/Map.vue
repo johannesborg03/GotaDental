@@ -8,7 +8,7 @@
 
 <script>
 import L from "leaflet"; // Import Leaflet
-
+import "leaflet/dist/leaflet.css";
 
 export default {
     name: "Map",
