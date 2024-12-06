@@ -48,10 +48,12 @@ export default {
                 
                 sessionStorage.setItem('userIdentifier', this.username_ssn);
 
-                if (this.username_ssn.endsWith('DT')) {
-                    // Redirect to dentist homepage if user is a dentist 
-                    this.$router.push('/dentist');
-                } else {
+                // Validate username format
+            if (!/^\d{12}$/.test(this.username_ss)) {
+                 // Redirect to dentist homepage if user is a dentist 
+                 this.$router.push('/dentist');
+        
+            } else {
                     // Redirect to patient homepage if user is a patient
                     this.$router.push('/patient');
                 }
