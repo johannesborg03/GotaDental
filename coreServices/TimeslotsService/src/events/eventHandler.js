@@ -1,30 +1,48 @@
 const { subscribeToTopic } = require('./subscriber');
 const Timeslot = require('../models/Timeslot');
 
-// Handle creating a new timeslot for a dentist
-async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
-    console.log('Received create timeslot message:', message);
 
-    const { dentist_username, date_and_time, timeslot_state } = message;
+async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
+    console.log('Processing create timeslot request:', message);
+
+    // Extract data from the received message
+    const { dentist_username, date_and_time } = message;
 
     try {
-        // Validate the input
-        if (!dentist_username || !date_and_time || !timeslot_state) {
-            const errorResponse = { success: false, error: 'Missing required fields' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+        // Validate the input data
+        if (!dentist_username || !date_and_time) {
+            console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
 
-        const newTimeslot = new Timeslot({ dentist_username, date_and_time, timeslot_state });
+        // Check if the timeslot already exists
+        const existingTimeslot = await Timeslot.findOne({ dentist_username, date_and_time });
+        if (existingTimeslot) {
+            console.log(`Timeslot for dentist ${dentist_username} on ${date_and_time} already exists.`);
+            const response = { success: false, error: `Timeslot for dentist ${dentist_username} on ${date_and_time} already exists.` };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Create a new timeslot
+        const newTimeslot = new Timeslot({
+            dentist_username,
+            date_and_time,
+            timeslot_state: 1, // Default state (1 for active)
+        });
+
+        // Save the new timeslot to the database
         await newTimeslot.save();
 
-        console.log('Timeslot created:', newTimeslot);
+        console.log('Timeslot created successfully:', newTimeslot);
         const successResponse = { success: true, timeslot: newTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error creating timeslot:', error);
-        const errorResponse = { success: false, error: 'Failed to create timeslot' };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+        const response = { success: false, error: 'Internal server error while creating timeslot.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     }
 }
 
@@ -185,7 +203,10 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
 // Initialize subscriptions
 async function initializeSubscriptions() {
     try {
-        await subscribeToTopic('timeslot/dentist/create', handleCreateTimeslot);
+        await subscribeToTopic('/create', handleCreateTimeslot);
+        console.log('Subscribed to timeslot/dentist/create');
+
+
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);

@@ -5,7 +5,4 @@ const dentistController = require('../controllers/dentistController'); // Import
 // Route for dentist registration
 router.post('/', dentistController.registerDentist);
 
-// Route for timeslot registration
-router.post('/', dentistController.registerTimeSlot )
-
 module.exports = router;

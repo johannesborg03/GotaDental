@@ -9,5 +9,4 @@ function processDentistEvent(message) {
     console.log('Processing dentist event:', message);
 }
 
-subscribeToTopic('dentist_topic', processDentistEvent);
-subscribeToTopic('timeslot_topic', processTimeslot);
+subscribeToTopic('dentist_topic', processTimeslot);

@@ -3,30 +3,32 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
-  const { dentist_username } = req.params;
-  const { date_and_time, timeslot_state } = req.body;
+    
+  console.log('Received timeslot data:', req.body);
+  const { date_and_time, dentist_username } = req.body;
+   
 
-  if (!dentist_username || !date_and_time || !timeslot_state){
+  if (!dentist_username || !date_and_time){
   return res.status(400).json({ message: 'Missing required parameters or body' });
   }
 
   // Prepare the data to send
   const timeslotData = {
-      dentist_username, date_and_time, timeslot_state 
+        date_and_time, dentist_username 
   };
 
-  // Check if a timeslot already exists for the dentist at the given date and time
-  const existingTimeslot = await checkTimeslotConflict(dentist_username, date_and_time);
+  /* Check if a timeslot already exists for the dentist at the given date and time
+  //const existingTimeslot = await checkTimeslotConflict(dentist_username, date_and_time);
 
   if (existingTimeslot) {
       return res.status(409).json({
           message: 'Conflict: Timeslot already exists for this dentist at the given date and time.'
       });
   }
-
+*/
   // If no conflict, proceed to create the timeslot
   const correlationId = uuidv4(); 
-  const topic = 'timeslot/dentist/create'; 
+  const topic = "timeslot/dentist/create"; 
 
   try {
       const response = await publishMessage(topic, timeslotData, correlationId);

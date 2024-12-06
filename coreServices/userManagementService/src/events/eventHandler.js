@@ -156,70 +156,6 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     }
 }
 
-
-async function handleTimeSlotRegistration(message, replyTo, correlationId, channel) {
-    console.log('Processing time slot registration:', message);
-
-    const { dentist_username, date_and_time } = message;
-
-    try {
-        // Validate input
-        if (!dentist_username || !date_and_time) {
-            console.error('Invalid message data:', message);
-            const response = { success: false, error: 'Invalid data. Dentist username and date_and_time are required.' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-            return;
-        }
-
-        // Parse and validate date_and_time
-        const dateTime = new Date(date_and_time);
-        if (isNaN(dateTime)) {
-            console.error('Invalid date_and_time:', date_and_time);
-            const response = { success: false, error: 'Invalid date_and_time format. Must be a valid ISO date string.' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-            return;
-        }
-
-        // Check if dentist exists
-        const dentist = await Dentist.findOne({ dentist_username });
-        if (!dentist) {
-            console.log(`Dentist with username ${dentist_username} not found.`);
-            const response = { success: false, error: `Dentist with username ${dentist_username} not found.` };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-            return;
-        }
-
-        // Check if the time slot already exists
-        const existingSlot = await TimeSlot.findOne({ dentist_username, date_and_time: dateTime });
-        if (existingSlot) {
-            console.log(`Time slot already exists for dentist ${dentist_username} on ${date_and_time}.`);
-            const response = { success: false, error: `Time slot already exists for dentist ${dentist_username} on ${date_and_time}.` };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-            return;
-        }
-
-        // Create and save the new time slot
-        const newTimeSlot = new TimeSlot({
-            dentist_username,
-            date_and_time: dateTime
-        });
-
-        await newTimeSlot.save();
-
-        console.log(`Time slot for dentist ${dentist_username} on ${date_and_time} registered successfully.`);
-
-        // Respond with success
-        const response = { success: true, timeSlot: newTimeSlot };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-    } catch (error) {
-        console.error('Error processing time slot registration:', error);
-        const response = { success: false, error: 'Internal server error while registering time slot.' };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-    }
-}
-
-
-
 // Initialize all subscriptions
 async function initializeSubscriptions() {
     try {
@@ -235,9 +171,6 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentists/register', handleDentistRegistration);
         console.log('Subscribed to dentists/register');
 
-        await subscribeToTopic('dentists/slot/post', handleTimeSlotRegistration);
-        console.log('Subscribed to "dentists/slot/post"');
-
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
 
@@ -251,4 +184,4 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin, handleTimeSlotRegistration };
+module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin};

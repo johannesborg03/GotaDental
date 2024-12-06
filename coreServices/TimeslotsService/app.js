@@ -45,7 +45,7 @@ app.use(cors()); // Enable CORS
 initializeSubscriptions();
 
 // Modular Routes
-app.use('/api/timeslots', timeslotsRoutes);
+app.use(timeslotsRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

@@ -6,7 +6,7 @@ const router = express.Router();
 const timeslotRoutes = require('../controllers/Timeslots');
 
 
-router.use('/api/dentists', timeslotRoutes); 
+router.use('/api', timeslotRoutes); 
     
 
 module.exports = router;
