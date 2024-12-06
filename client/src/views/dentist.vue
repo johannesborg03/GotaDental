@@ -45,12 +45,9 @@ export default {
   },
 
   mounted() {
-    const username = localStorage.getItem('userIdentifier');
-    console.log(username);
+     this.username = sessionStorage.getItem('userIdentifier');
+    console.log(this.username);
 
-    if (username) {
-      this.username = username;
-    }
   },
 
   methods: {
@@ -77,12 +74,12 @@ export default {
           dentist_username: this.username,
         };
 
-        console.log(dateTime)
+        console.log(dateTime);
 
-        // Make the POST request to create the time slot
+        console.log(this.username);
+        // Make the POST request to create the time slot 
         const response = await axios.post('http://localhost:4000/api/create', {
-          dentist_username: this.username, 
-          date_and_time: dateTime, 
+         slotDetails
         });
 
         if (response.status === 201) {
