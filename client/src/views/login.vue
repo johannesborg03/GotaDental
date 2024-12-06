@@ -46,7 +46,7 @@ export default {
 
                 console.log("Received response:", response.data);
                 
-                localStorage.setItem('userIdentifier', this.username_ssn);
+                sessionStorage.setItem('userIdentifier', this.username_ssn);
 
                 if (this.username_ssn.endsWith('DT')) {
                     // Redirect to dentist homepage if user is a dentist 
