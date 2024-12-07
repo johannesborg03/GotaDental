@@ -9,6 +9,18 @@
         <h2 class="card-title text-secondary">Register a Slot</h2>
         <form @submit.prevent="registerSlot" class="needs-validation" novalidate>
 
+          <!-- Selection of an office -->
+          <div class="mb-3">
+            <label for="officeSelect" class="form-label">Select Office:</label>
+            <select id="officeSelect" class="form-select" v-model="officeId" required>
+              <option value="" disabled>Select an office</option>
+              <option v-for="office in offices" :key="office.office_id" :value="office.office_id">
+                {{ office.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Please select an office.</div>
+          </div>
+
           <!-- Input for selecting the date -->
           <div class="mb-3">
             <label for="slotDate" class="form-label">Select Date:</label>
@@ -44,7 +56,7 @@ export default {
       slotDate: '',
       slotTime: '',
       username: '',
-      office: '',
+      officeId: '',
       offices: [],
     };
   },
