@@ -61,60 +61,66 @@ export default {
     };
   },
 
-  mounted() {
+  async mounted() {
     this.username = sessionStorage.getItem('userIdentifier');
     console.log(this.username);
+    // Fetching the offices
+    try {
+      const response = await axios.get('http://localhost:4000/api/offices');
+      this.offices = response.data;
+    } catch (error) {
+      console.error('Error fetching offices:', error);
+    }
+},
 
-  },
-
-  methods: {
+methods: {
 
     async registerSlot() {
-      if (!this.slotDate || !this.slotTime) {
-        alert('Please select a valid date and time!');
+    if (!this.slotDate || !this.slotTime) {
+      alert('Please select a valid date and time!');
+      return;
+    }
+
+    try {
+      // Combine date and time into a single Date object
+      const dateTimeString = `${this.slotDate}T${this.slotTime}:00`; // 'T' separates date and time
+      const dateTime = new Date(dateTimeString);
+
+      // Check if the dateTime is valid
+      if (isNaN(dateTime)) {
+        alert('Invalid date or time. Please check your input.');
         return;
       }
 
-      try {
-        // Combine date and time into a single Date object
-        const dateTimeString = `${this.slotDate}T${this.slotTime}:00`; // 'T' separates date and time
-        const dateTime = new Date(dateTimeString);
+      const slotDetails = {
+        date_and_time: dateTime,
+        dentist_username: this.username,
+      };
 
-        // Check if the dateTime is valid
-        if (isNaN(dateTime)) {
-          alert('Invalid date or time. Please check your input.');
-          return;
-        }
+      console.log(dateTime);
 
-        const slotDetails = {
-          date_and_time: dateTime,
-          dentist_username: this.username,
-        };
+      console.log(this.username);
+      // Make the POST request to create the time slot 
+      const response = await axios.post('http://localhost:4000/api/create', {
+        slotDetails
+      });
 
-        console.log(dateTime);
+      if (response.status === 201) {
+        console.log('Slot registered successfully:', response.data);
+        alert('Time slot registered successfully!');
 
-        console.log(this.username);
-        // Make the POST request to create the time slot 
-        const response = await axios.post('http://localhost:4000/api/create', {
-          slotDetails
-        });
-
-        if (response.status === 201) {
-          console.log('Slot registered successfully:', response.data);
-          alert('Time slot registered successfully!');
-
-          // Reset form fields
-          this.slotDate = '';
-          this.slotTime = '';
-        } else {
-          alert(`Failed to register slot: ${response.data.message}`);
-        }
-
-      } catch (error) {
-        console.error('Error registering slot:', error);
-        alert('An error occurred while registering the time slot. Please try again later.');
+        // Reset form fields
+        this.slotDate = '';
+        this.slotTime = '';
+      } else {
+        alert(`Failed to register slot: ${response.data.message}`);
       }
+
+    } catch (error) {
+      console.error('Error registering slot:', error);
+      alert('An error occurred while registering the time slot. Please try again later.');
     }
   }
+}
 };
 </script>
