@@ -61,7 +61,6 @@ methods: {
 
 
 <style>
-/* Add your styles here */
 
 /* Ensure the map container has a height, or the map will not be visible */
 .map-container {
