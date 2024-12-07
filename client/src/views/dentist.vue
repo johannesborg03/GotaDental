@@ -106,7 +106,7 @@ methods: {
         // Reset form fields
         this.slotDate = '';
         this.slotTime = '';
-        this.officeId = '';
+        this.selectedOffice = '';
       } else {
         alert(`Failed to register slot: ${response.data.message}`);
       }
