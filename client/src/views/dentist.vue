@@ -95,7 +95,7 @@ methods: {
       console.log(this.username);
 
       // Make the POST request to create the time slot 
-      const response = await axios.post('http://localhost:4000/api/create', {
+      const response = await axios.post('http://localhost:4000/api/timeslots', {
         slotDetails
       });
 
