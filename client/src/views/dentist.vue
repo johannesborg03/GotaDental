@@ -9,18 +9,21 @@
         <h2 class="card-title text-secondary">Register a Slot</h2>
         <form @submit.prevent="registerSlot" class="needs-validation" novalidate>
 
+          <!-- Input for selecting the date -->
           <div class="mb-3">
             <label for="slotDate" class="form-label">Select Date:</label>
             <input type="date" id="slotDate" class="form-control" v-model="slotDate" required />
             <div class="invalid-feedback">Please select a valid date.</div>
           </div>
 
+          <!-- Input for selecting the time -->
           <div class="mb-3">
             <label for="slotTime" class="form-label">Select Time:</label>
             <input type="time" id="slotTime" class="form-control" v-model="slotTime" required />
             <div class="invalid-feedback">Please select a valid time.</div>
           </div>
 
+          <!-- Submission Button -->
           <div>
             <button class="btn btn-primary w-100" type="submit">
               <i class="bi bi-calendar-check"></i> Register Slot
@@ -41,11 +44,13 @@ export default {
       slotDate: '',
       slotTime: '',
       username: '',
+      office: '',
+      offices: [],
     };
   },
 
   mounted() {
-     this.username = sessionStorage.getItem('userIdentifier');
+    this.username = sessionStorage.getItem('userIdentifier');
     console.log(this.username);
 
   },
@@ -79,7 +84,7 @@ export default {
         console.log(this.username);
         // Make the POST request to create the time slot 
         const response = await axios.post('http://localhost:4000/api/create', {
-         slotDetails
+          slotDetails
         });
 
         if (response.status === 201) {
