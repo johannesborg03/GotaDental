@@ -76,7 +76,7 @@ export default {
 methods: {
 
     async registerSlot() {
-    if (!this.slotDate || !this.slotTime) {
+    if (!this.slotDate || !this.slotTime || !this.officeId) {
       alert('Please select a valid date and time!');
       return;
     }
@@ -95,6 +95,7 @@ methods: {
       const slotDetails = {
         date_and_time: dateTime,
         dentist_username: this.username,
+        office_id: this.officeId,
       };
 
       console.log(dateTime);
@@ -112,6 +113,7 @@ methods: {
         // Reset form fields
         this.slotDate = '';
         this.slotTime = '';
+        this.officeId = '';
       } else {
         alert(`Failed to register slot: ${response.data.message}`);
       }
