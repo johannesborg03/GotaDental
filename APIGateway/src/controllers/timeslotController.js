@@ -5,16 +5,18 @@ const { v4: uuidv4 } = require('uuid');
 exports.createTimeslot = async (req, res) => {
     
   console.log('Received timeslot data:', req.body);
-  const { date_and_time, dentist_username } = req.body;
+  const { date_and_time, dentist_username, office_id} = req.body;
    
 
-  if (!dentist_username || !date_and_time){
+  if (!dentist_username || !date_and_time || !office_id){
   return res.status(400).json({ message: 'Missing required parameters or body' });
   }
 
   // Prepare the data to send
   const timeslotData = {
-        date_and_time, dentist_username 
+        date_and_time, 
+        dentist_username,
+        office_id,
   };
 
   /* Check if a timeslot already exists for the dentist at the given date and time
