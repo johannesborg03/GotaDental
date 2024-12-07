@@ -47,6 +47,28 @@ router.post('/api/timeslots/:dentist_username/timeslot', async function (req, re
     }
 });
 
+
+router.post('/api/timeslots', async function (req, res) {
+    try {
+        const { dentist_username, office_id, date_and_time } = req.body;
+
+        // Check for overlapping timeslots
+        const existingTimeslot = await Timeslot.findOne({
+            dentist_id: dentist_username,
+            office_id: office_id,
+            date_and_time: date_and_time
+        });
+
+        
+    } catch (error) {
+        console.error("Error while creating timeslot:", error);
+        res.status(500).json({
+            message: "Server error while creating timeslot",
+            error: error.message
+        });
+    }
+});
+
 // Get all timeslots for dentist in a specific office 
 router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
     try {
