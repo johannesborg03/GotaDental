@@ -52,13 +52,15 @@ router.post('/api/timeslots', async function (req, res) {
     try {
         const { dentist_username, office_id, date_and_time } = req.body;
 
-        // Check for overlapping timeslots
-        const existingTimeslot = await Timeslot.findOne({
-            dentist_id: dentist_username,
-            office_id: office_id,
-            date_and_time: date_and_time
-        });
+        if (!dentist_username || !office_id || !date_and_time) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
 
+        // Validation to see if dentist belongs to the office
+        const office = await Office.findOne({ _id: office_id, dentists: dentist_username });
+        if (!office) {
+            return res.status(400).json({ message: "Dentist is not associated with the office" });
+        }
         
     } catch (error) {
         console.error("Error while creating timeslot:", error);
