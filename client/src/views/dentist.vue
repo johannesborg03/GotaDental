@@ -56,7 +56,7 @@ export default {
       slotDate: '',
       slotTime: '',
       username: '',
-      selectedOffice: '',     
+      selectedOffice: null,     
       offices: [],
     };
   },
