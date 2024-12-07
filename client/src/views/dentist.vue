@@ -74,10 +74,9 @@ export default {
 },
 
 methods: {
-
     async registerSlot() {
     if (!this.slotDate || !this.slotTime || !this.officeId) {
-      alert('Please select a valid date and time!');
+      alert('Fill in the fields');
       return;
     }
 
@@ -99,10 +98,10 @@ methods: {
       };
 
       console.log(dateTime);
-
       console.log(this.username);
+
       // Make the POST request to create the time slot 
-      const response = await axios.post('http://localhost:4000/api/create', {
+      const response = await axios.post('http://localhost:4000/api/timeslots', {
         slotDetails
       });
 
@@ -117,7 +116,6 @@ methods: {
       } else {
         alert(`Failed to register slot: ${response.data.message}`);
       }
-
     } catch (error) {
       console.error('Error registering slot:', error);
       alert('An error occurred while registering the time slot. Please try again later.');
