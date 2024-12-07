@@ -1,7 +1,13 @@
 <template>
-  <div>
+  
+  <b-container>
+    <b-row>
+
+
   <div id="map" class="map-container"></div>
-</div>
+
+    </b-row>
+</b-container>
 
 
 </template>
@@ -28,7 +34,7 @@ methods: {
     initMap(){
         try{
         // Create a Leaflet map instance and attach it to the #map div
-        this.map = L.map("map").setView([51.505, -0.09], 13); // [lat, lng], zoom level
+        this.map = L.map("map").setView([57.707, 11.966], 13); // [lat, lng], zoom level
 
         // Add a tile layer to the map (e.g., OpenStreetMap tiles)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -37,7 +43,7 @@ methods: {
       }).addTo(this.map);
 
       // Add a marker to the map
-      L.marker([51.505, -0.09])
+      L.marker([57.707, 11.966])
         .addTo(this.map)
         .bindPopup("A sample marker.")
         .openPopup();
