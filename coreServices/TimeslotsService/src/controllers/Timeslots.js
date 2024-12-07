@@ -62,7 +62,7 @@ router.post('/api/timeslots', async function (req, res) {
             return res.status(400).json({ message: "Dentist is not associated with the office" });
         }
         
-        // Check for overlapping time slots
+        // Check to see if there is overlapping time slots
         const existingTimeslot = await Timeslot.findOne({
             dentist_id: dentist_username,
             office_id: office_id,
@@ -70,9 +70,24 @@ router.post('/api/timeslots', async function (req, res) {
         });
 
         if (existingTimeslot) {
-            return res.status(409).json({ message: "Overlapping timeslot exists for this dentist in the office" });
+            return res.status(409).json({ message: "Overlapping time slot exists for this dentist in the office" });
         }
 
+        // Creating a new time slot
+        const timeslot = new Timeslot({
+            timeslot_id: mongoose.Types.ObjectId(),
+            dentist_id: dentist_username,
+            office_id: office_id,
+            date_and_time: date_and_time,
+            timeslot_state: 0 
+        });
+
+        await timeslot.save();
+
+        res.status(201).json({
+            message: "Timeslot created successfully",
+            timeslot: timeslot
+        });
     } catch (error) {
         console.error("Error while creating timeslot:", error);
         res.status(500).json({
