@@ -1,6 +1,7 @@
 <template>
+  <div>
   <div id="map" class="map-container"></div>
-
+</div>
 
 
 </template>
@@ -58,11 +59,11 @@ methods: {
 
 /* Ensure the map container has a height, or the map will not be visible */
 .map-container {
-  width: 100%;
-  height: 100%;
+  width: 180px;
+  height: 180px;
 }
 #map {
-  width: 100%;
-  height: 100%;
+  width: 380px;
+  height: 340px;
 }
 </style>
