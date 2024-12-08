@@ -1,5 +1,6 @@
 const { subscribeToTopic } = require('./subscriber');  
 const Appointment = require('../models/Appointment');  
+const Timeslot = require('../models/Timeslot'); // Import Timeslot model
 
 
 // Handle creating a new appointment
@@ -31,6 +32,10 @@ async function handleCreateAppointment(message, replyTo, correlationId, channel)
 
         const newAppointment = new Appointment({ patient_ssn, dentist_username, office_id, date_and_time, notes: notes });
         await newAppointment.save();
+
+        // Update the timeslot status to "booked" by marking tht state with 1
+        timeslot.timeslot_state = 1; 
+        await timeslot.save();
 
         console.log('Appointment created:', newAppointment);
         const successResponse = { success: true, appointment: newAppointment };
