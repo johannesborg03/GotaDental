@@ -14,7 +14,9 @@
                         <span>
                             <i class="bi bi-calendar-event text-primary"></i>
                             {{ new Date(slot.date_and_time).toLocaleDateString() }} at
-                            {{ new Date(slot.date_and_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                            {{ new Date(slot.date_and_time).toLocaleTimeString([], {
+                                hour: '2-digit', minute: '2-digit'
+                            }) }}
                         </span>
                     </li>
                 </ul>
@@ -48,19 +50,19 @@ export default {
         };
     },
     async mounted() {
-    await this.fetchAvailableSlots();
+        await this.fetchAvailableSlots();
     },
     methods: {
         async fetchAvailableSlots() {
-            this.errorMessage = null; 
-            try{
+            this.errorMessage = null;
+            try {
                 const response = await fetch('http://localhost:4000/api/timeslots/available');
                 if (!response.ok) {
                     throw new Error(`Fetching failure: ${response.statusText}`);
                 }
                 const slots = await response.json();
                 this.availableSlots = slots;
-            } catch(error){
+            } catch (error) {
                 console.log('Error: Can not fetch any available slots', error);
                 this.errorMessage = 'Failed to load available slots. Please try again later.';
             }
