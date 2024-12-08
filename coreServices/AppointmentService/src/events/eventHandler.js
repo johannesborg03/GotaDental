@@ -222,6 +222,17 @@ async function handleUpdateAppointment(message, replyTo, correlationId, channel)
             return;
         }
 
+        const oldTimeslot = await Timeslot.findOne({
+            dentist_username: appointment.dentist_username,
+            date_and_time: appointment.date_and_time,
+            timeslot_state: 1, // Booked
+        });
+
+        if (oldTimeslot) {
+            oldTimeslot.timeslot_state = 0; // Free the old timeslot
+            await oldTimeslot.save();
+        }
+        
          appointment.dentist_username = new_dentist_username;
          appointment.date_and_time = new_date_and_time;
           await appointment.save();
