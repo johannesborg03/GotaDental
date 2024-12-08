@@ -1,10 +1,11 @@
 <template>
   
-  <b-container>
-    <b-row>
 
 
-  <div id="map" class="map-container"></div>
+  
+  <b-container class="map-container">
+    <b-row class="justify-content-center">
+  <div id="map"></div>
 
     </b-row>
 </b-container>
@@ -64,6 +65,7 @@ methods: {
 
 /* Ensure the map container has a height, or the map will not be visible */
 .map-container {
+  margin-top: 100px;
   width: 180px;
   height: 180px;
 }
