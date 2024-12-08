@@ -37,19 +37,22 @@ export default {
         };
     },
     methods:{
+        async fetchAvailableSlots() {
+            try {
+                const response = await axios.get('http://localhost:4000/api/timeslots/available');
+                this.availableSlots = response.data.timeslots; 
+            } catch (err) {
+                console.error('Error fetching slots:', err);
+                alert('Failed to fetch available slots. Please try again later.');
+            }
+        },
         formatSlot(dateTime) {
             const date = new Date(dateTime);
             return date.toLocaleString(); 
         },
     },
     async mounted() {
-        try {
-            const response = await fetch('http://localhost:3000/api/slots');
-            const slots = await response.json();
-            this.availableSlots = slots;
-        } catch (err) {
-            console.error('Error fetching slots:', err);
-        }
+        await this.fetchAvailableSlots();
     },
 };
 </script>
