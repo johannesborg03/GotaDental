@@ -10,7 +10,10 @@ exports.createAppointment = async (req, res) => {
     }
 
     const appointmentData = {
-        patient_ssn, dentist_username, office_id,date_and_time, 
+        patient_ssn, 
+        dentist_username, 
+        office_id,
+        date_and_time, 
         notes: "" // Default empty notes
     };
 
@@ -28,22 +31,25 @@ exports.createAppointment = async (req, res) => {
 
         if (conflictResponse && conflictResponse.conflict) {
             return res.status(409).json({
-                message: "Conflict: Dentist or patient already has an appointment at this time."
+                 message: "Conflict: Dentist or patient already has an appointment at this time."
             });
         }
         // Proceed to create the appointment if no conflicts
         const response = await publishMessage(topic, appointmentData, correlationId);
 
         if (response && response.success) {
-            return res.status(201).json({
+                 return res.status(201).json({
                 message: "Appointment created successfully",
                 appointment: response.appointment,
             });
         }
-    } catch (error) {
-        console.error("Error publishing to MQTT:", error);
-        res.status(500).json({
-            message: "Failed to create appointment",
+        return res.status(500).json({
+            message: "Failed to create the appointment",
+        });
+     } catch (error) {
+         console.error("Error publishing to MQTT:", error);
+         res.status(500).json({
+            message: "Internal server error while creating the appointment",
             error: error.message,
         });
     }
