@@ -120,8 +120,16 @@ router.get('/api/timeslots/available', async (req, res) => {
         if (!availableTimeslots || availableTimeslots.length === 0) {
             return res.status(404).json({ message: 'No available timeslots found' });
         }
+        res.status(200).json({
+            message: 'Available timeslots retrieved successfully',
+            timeslots: availableTimeslots,
+        });
     } catch (error) {
         console.error('Error fetching available timeslots:', error);
+        res.status(500).json({
+            message: 'Server error while retrieving available timeslots',
+            error: error.message,
+        });    
     }
 });
 
