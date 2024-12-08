@@ -110,6 +110,19 @@ exports.getTimeslotById = async (req, res) => {
   }
 };
 
+// Fetch available time slots
+exports.getAvailableTimeslots = async (req, res) => {
+    const correlationId = uuidv4();
+    const topic = 'timeslot/available/retrieve';
+
+    try {
+        
+    } catch (error) {
+        
+    }
+};
+
+
 exports.updateTimeslot = async (req, res) => {
 
 const {office_id, dentist_username, timeslot_id,  date_and_time } = req.params;
