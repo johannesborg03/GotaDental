@@ -272,7 +272,8 @@ async function initializeAppointmentSubscriptions() {
         await subscribeToTopic('appointments/patient/cancel', handleCancelAppointmentByPatient);
         await subscribeToTopic('appointments/dentist/cancel', handleCancelAppointmentByDentist);
         await subscribeToTopic('appointments/notes/add', handleAddNoteToAppointment);
-
+          await subscribeToTopic('appointments/update', handleUpdateAppointment);
+ 
         console.log('Appointment subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing appointment subscriptions:', error);
@@ -287,5 +288,6 @@ module.exports = {
     handleGetAppointmentById,
     handleCancelAppointmentByPatient,
     handleCancelAppointmentByDentist,
-    handleAddNoteToAppointment,
+     handleAddNoteToAppointment,
+     handleUpdateAppointment,
 };
