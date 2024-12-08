@@ -2,6 +2,9 @@
   
 
 <b-card class="map-card">
+  <b-row class="justify-content-center text-center title">
+  <b-col>MAP</b-col>
+</b-row>
   <b-container class="map-container">   
     <b-row class="justify-content-center">
   <div id="map"></div>
@@ -63,6 +66,8 @@ methods: {
 <style>
 
 .map-card{
+  background-color: #003C47 !important;
+  color: #003C47;
   padding: 0%;
   margin-top: 5%;
   margin-left: 20%;
@@ -82,6 +87,8 @@ methods: {
 
 .title {
   font-family: Tahoma;
+  margin-bottom: 1%;
+  color: #E0E0E0;
   
 }
 
