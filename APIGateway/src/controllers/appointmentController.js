@@ -10,10 +10,10 @@ exports.createAppointment = async (req, res) => {
     }
 
     const appointmentData = {
-        patient_ssn, 
-        dentist_username, 
+        patient_ssn,
+        dentist_username,
         office_id,
-        date_and_time, 
+        date_and_time,
         notes: "" // Default empty notes
     };
 
@@ -22,8 +22,8 @@ exports.createAppointment = async (req, res) => {
     const topic = "appointments/create";
 
     try {
-          // Check for conflicts
-          const conflictResponse = await publishMessage(
+        // Check for conflicts
+        const conflictResponse = await publishMessage(
             checkConflictTopic,
             { patient_ssn, dentist_username, date_and_time },
             correlationId
@@ -31,14 +31,14 @@ exports.createAppointment = async (req, res) => {
 
         if (conflictResponse && conflictResponse.conflict) {
             return res.status(409).json({
-                 message: "Conflict: Dentist or patient already has an appointment at this time."
+                message: "Conflict: Dentist or patient already has an appointment at this time."
             });
         }
         // Proceed to create the appointment if no conflicts
         const response = await publishMessage(topic, appointmentData, correlationId);
 
         if (response && response.success) {
-                 return res.status(201).json({
+            return res.status(201).json({
                 message: "Appointment created successfully",
                 appointment: response.appointment,
             });
@@ -46,9 +46,9 @@ exports.createAppointment = async (req, res) => {
         return res.status(500).json({
             message: "Failed to create the appointment",
         });
-     } catch (error) {
-         console.error("Error publishing to MQTT:", error);
-         res.status(500).json({
+    } catch (error) {
+        console.error("Error publishing to MQTT:", error);
+        res.status(500).json({
             message: "Internal server error while creating the appointment",
             error: error.message,
         });
@@ -58,8 +58,6 @@ exports.createAppointment = async (req, res) => {
 // Controller to retrieve all appointments for a patient
 exports.getAppointmentsForPatient = async (req, res) => {
     const { patient_ssn } = req.params;
-
-
     if (!patient_ssn) {
         return res.status(400).json({
             message: "Patient SSN is empty."
@@ -68,11 +66,8 @@ exports.getAppointmentsForPatient = async (req, res) => {
 
     const correlationId = uuidv4();
     const topic = `appointments/patient/${patient_ssn}/retrieve`;
-
     try {
         const response = await publishMessage(topic, { patient_ssn }, correlationId);
-
-        
         res.status(200).json({
             message: "Appointment retrieved successfully",
             appointments: response,
@@ -89,10 +84,9 @@ exports.getAppointmentsForPatient = async (req, res) => {
 // Controller to retrieve a specific appointment by ID
 exports.getAppointmentById = async (req, res) => {
     const { appointment_id } = req.params;
-
     if (!appointment_id) {
         return res.status(400).json({
-             message: "Appointment ID is empty."
+            message: "Appointment ID is empty."
         });
     }
 
@@ -118,10 +112,9 @@ exports.getAppointmentById = async (req, res) => {
 // Controller to cancel an appointment by patient
 exports.cancelAppointmentByPatient = async (req, res) => {
     const { patient_ssn, appointment_id } = req.params;
-
     if (!appointment_id || !patient_ssn) {
         return res.status(400).json({
-             message: "Appointment ID or Patient SSN is empty"
+            message: "Appointment ID or Patient SSN is empty"
         });
     }
 
@@ -130,7 +123,6 @@ exports.cancelAppointmentByPatient = async (req, res) => {
 
     try {
         const response = await publishMessage(topic, { patient_ssn, appointment_id }, correlationId);
-
         res.status(200).json({
             message: "Appointment canceled successfully by patient",
             appointment: response,
@@ -147,10 +139,9 @@ exports.cancelAppointmentByPatient = async (req, res) => {
 // Controller to cancel an appointment by dentist
 exports.cancelAppointmentByDentist = async (req, res) => {
     const { dentist_username, appointment_id } = req.params;
-
     if (!appointment_id || !patient_ssn) {
         return res.status(400).json({
-             message: "Appointment ID or dentist_username is empty"
+            message: "Appointment ID or dentist_username is empty"
         });
     }
 
@@ -177,13 +168,11 @@ exports.cancelAppointmentByDentist = async (req, res) => {
 exports.addNoteToAppointment = async (req, res) => {
     const { appointment_id, dentist_username } = req.params;
     const { content } = req.body;
-
     if (!appointment_id || !dentist_username) {
         return res.status(400).json({
-             message: "Appointment ID or dentist_username is empty"
+            message: "Appointment ID or dentist_username is empty"
         });
     }
-
     if (!content || content.trim() === "") {
         return res.status(400).json({
             message: "Content cannot be empty."
@@ -199,7 +188,6 @@ exports.addNoteToAppointment = async (req, res) => {
 
     try {
         const response = await publishMessage(topic, noteData, correlationId);
-
         res.status(201).json({
             message: "Note added successfully",
             appointment: response,
