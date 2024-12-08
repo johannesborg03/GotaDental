@@ -1,12 +1,11 @@
-const { subscribeToTopic } = require('./subscriber');  
-const Appointment = require('../models/Appointment');  
+const { subscribeToTopic } = require('./subscriber');
+const Appointment = require('../models/Appointment');
 const Timeslot = require('../models/Timeslot'); // Import Timeslot model
 
 
 // Handle creating a new appointment
 async function handleCreateAppointment(message, replyTo, correlationId, channel) {
     console.log('Received create appointment message:', message);
-
     const { patient_ssn, dentist_username, office_id, date_and_time, notes } = message;
 
     try {
@@ -17,24 +16,24 @@ async function handleCreateAppointment(message, replyTo, correlationId, channel)
             return;
         }
 
-         const timeslot = await Timeslot.findOne({
+        const timeslot = await Timeslot.findOne({
             dentist_username,
             date_and_time,
-            timeslot_state: 0, 
+            timeslot_state: 0,
         });
 
-                 // Check for available timeslot
-         if (!timeslot) {
-             const errorResponse = { success: false, error: 'No available timeslot' };
-             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-             return;
+        // Check for availability of the timeslot
+        if (!timeslot) {
+            const errorResponse = { success: false, error: 'No available timeslot' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
         }
 
         const newAppointment = new Appointment({ patient_ssn, dentist_username, office_id, date_and_time, notes: notes });
         await newAppointment.save();
 
         // Update the timeslot status to "booked" by marking tht state with 1
-        timeslot.timeslot_state = 1; 
+        timeslot.timeslot_state = 1;
         await timeslot.save();
 
         console.log('Appointment created:', newAppointment);
@@ -50,7 +49,6 @@ async function handleCreateAppointment(message, replyTo, correlationId, channel)
 // Handle retrieving all appointments for a patient
 async function handleGetAppointmentsForPatient(message, replyTo, correlationId, channel) {
     console.log('Received retrieve all appointments message:', message);
-
     const { patient_ssn } = message;
 
     try {
@@ -75,7 +73,6 @@ async function handleGetAppointmentsForPatient(message, replyTo, correlationId, 
 // Handle retrieving a specific appointment
 async function handleGetAppointmentById(message, replyTo, correlationId, channel) {
     console.log('Received retrieve appointment message:', message);
-
     const { appointment_id } = message;
 
     try {
@@ -104,7 +101,6 @@ async function handleGetAppointmentById(message, replyTo, correlationId, channel
 // Handle canceling an appointment by patient
 async function handleCancelAppointmentByPatient(message, replyTo, correlationId, channel) {
     console.log('Received cancel appointment by patient message:', message);
-
     const { patient_ssn, appointment_id } = message;
 
     try {
@@ -126,10 +122,10 @@ async function handleCancelAppointmentByPatient(message, replyTo, correlationId,
             date_and_time: deletedAppointment.date_and_time,
         });
 
-          if (timeslot) {
-               timeslot.timeslot_state = 0; // Mark timeslot as available
-             await timeslot.save();
-         }
+        if (timeslot) {
+            timeslot.timeslot_state = 0; 
+            await timeslot.save();
+        }
         const successResponse = { success: true, appointment: deletedAppointment };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
@@ -142,7 +138,6 @@ async function handleCancelAppointmentByPatient(message, replyTo, correlationId,
 // Handle canceling an appointment by dentist
 async function handleCancelAppointmentByDentist(message, replyTo, correlationId, channel) {
     console.log('Received cancel appointment by dentist message:', message);
-
     const { dentist_username, appointment_id } = message;
 
     try {
@@ -171,7 +166,6 @@ async function handleCancelAppointmentByDentist(message, replyTo, correlationId,
 // Handle adding a note to an appointment
 async function handleAddNoteToAppointment(message, replyTo, correlationId, channel) {
     console.log('Received add note to appointment message:', message);
-
     const { appointment_id, content, dentist_username } = message;
 
     try {
@@ -205,7 +199,6 @@ async function handleAddNoteToAppointment(message, replyTo, correlationId, chann
 // Handle updating an appointment
 async function handleUpdateAppointment(message, replyTo, correlationId, channel) {
     console.log('Received update appointment message:', message);
-
     const { appointment_id, new_date_and_time, new_dentist_username } = message;
 
     try {
@@ -225,37 +218,35 @@ async function handleUpdateAppointment(message, replyTo, correlationId, channel)
         const oldTimeslot = await Timeslot.findOne({
             dentist_username: appointment.dentist_username,
             date_and_time: appointment.date_and_time,
-            timeslot_state: 1, // Booked
+            timeslot_state: 1, 
         });
 
         if (oldTimeslot) {
-            oldTimeslot.timeslot_state = 0; // Free the old timeslot
+            oldTimeslot.timeslot_state = 0; // Free the old time slot
             await oldTimeslot.save();
         }
 
-         
         const newTimeslot = await Timeslot.findOne({
             dentist_username: new_dentist_username,
             date_and_time: new_date_and_time,
-            timeslot_state: 0, // Available
+            timeslot_state: 0, 
         });
- 
+
         if (!newTimeslot) {
             const errorResponse = { success: false, error: 'No available timeslot for the new date and dentist' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
-         
-         appointment.dentist_username = new_dentist_username;
-         appointment.date_and_time = new_date_and_time;
-          await appointment.save();
 
-           newTimeslot.timeslot_state = 1; // Mark the new timeslot as booked
-          await newTimeslot.save();
+        appointment.dentist_username = new_dentist_username;
+        appointment.date_and_time = new_date_and_time;
+        await appointment.save();
 
-          const successResponse = { success: true, appointment };
-       
-          channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+        newTimeslot.timeslot_state = 1; // Marked the new timeslot as booked
+        await newTimeslot.save();
+
+        const successResponse = { success: true, appointment };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error updating appointment:', error);
         const errorResponse = { success: false, error: 'Failed to update appointment' };
@@ -272,14 +263,13 @@ async function initializeAppointmentSubscriptions() {
         await subscribeToTopic('appointments/patient/cancel', handleCancelAppointmentByPatient);
         await subscribeToTopic('appointments/dentist/cancel', handleCancelAppointmentByDentist);
         await subscribeToTopic('appointments/notes/add', handleAddNoteToAppointment);
-          await subscribeToTopic('appointments/update', handleUpdateAppointment);
- 
+        await subscribeToTopic('appointments/update', handleUpdateAppointment);
+
         console.log('Appointment subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing appointment subscriptions:', error);
     }
 }
-
 
 module.exports = {
     initializeAppointmentSubscriptions,
@@ -288,6 +278,6 @@ module.exports = {
     handleGetAppointmentById,
     handleCancelAppointmentByPatient,
     handleCancelAppointmentByDentist,
-     handleAddNoteToAppointment,
-     handleUpdateAppointment,
+    handleAddNoteToAppointment,
+    handleUpdateAppointment,
 };
