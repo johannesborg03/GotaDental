@@ -54,7 +54,12 @@ export default {
         async fetchAvailableSlots() {
             this.errorMessage = null; 
             try{
-
+                const response = await fetch('http://localhost:4000/api/timeslots/available');
+                if (!response.ok) {
+                    throw new Error(`Fetching failure: ${response.statusText}`);
+                }
+                const slots = await response.json();
+                this.availableSlots = slots;
             } catch(error){
                 console.log('Error: Can not fetch any available slots', error);
                 this.errorMessage = 'Failed to load available slots. Please try again later.';
