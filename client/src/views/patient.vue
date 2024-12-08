@@ -28,6 +28,13 @@
         <div v-if="errorMessage" class="alert alert-danger text-center">
             {{ errorMessage }}
         </div>
+
+        <!-- Refresh Button -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary" @click="fetchAvailableSlots">
+                Refresh Slots
+            </button>
+        </div>
     </div>
 </template>
 
@@ -41,13 +48,11 @@ export default {
         };
     },
     async mounted() {
-        try {
-            const response = await fetch('http://localhost:3000/api/slots');
-            const slots = await response.json();
-            this.availableSlots = slots;
-        } catch (err) {
-            console.error('Error fetching slots:', err);
-        }
+    await this.fetchAvailableSlots();
+    },
+    methods: {
+        async fetchAvailableSlots() {
+        },
     },
 };
 </script>
