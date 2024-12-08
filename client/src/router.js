@@ -5,6 +5,7 @@ import dentist from './views/dentist.vue';
 import patient from './views/patient.vue';
 import registerDentist from './views/registerDentist.vue';
 import Home from './views/Home.vue';
+import Map from './views/Map.vue';
 
 const routes = [
 
@@ -19,6 +20,8 @@ const routes = [
     { path: '/patient', name: 'Patient', component: patient},
 
     { path: '/registerDentist', name: 'RegisterDentist',component: registerDentist, meta: { hideNavbar: true }},
+
+    { path: '/Map', name: 'Map',component: Map}
 ];
 
 const router = createRouter({
