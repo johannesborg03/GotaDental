@@ -26,7 +26,7 @@ exports.createAppointment = async (req, res) => {
             correlationId
         );
 
-        if (conflictResponse.conflict) {
+        if (conflictResponse && conflictResponse.conflict) {
             return res.status(409).json({
                 message: "Conflict: Dentist or patient already has an appointment at this time."
             });
@@ -34,10 +34,12 @@ exports.createAppointment = async (req, res) => {
         // Proceed to create the appointment if no conflicts
         const response = await publishMessage(topic, appointmentData, correlationId);
 
-        res.status(201).json({
-            message: "Appointment created successfully",
-            appointment: response,
-        });
+        if (response && response.success) {
+            return res.status(201).json({
+                message: "Appointment created successfully",
+                appointment: response.appointment,
+            });
+        }
     } catch (error) {
         console.error("Error publishing to MQTT:", error);
         res.status(500).json({
