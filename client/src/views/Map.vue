@@ -63,20 +63,21 @@ methods: {
 <style>
 
 .map-card{
+  padding: 0%;
   margin-top: 5%;
-  margin-left: 25%;
-  margin-right: 25%;
+  margin-left: 20%;
+  margin-right: 20%;
 }
 
 /* Ensure the map container has a height, or the map will not be visible */
 .map-container {
  /* margin-top: 100px; */
-  width: 380px;
-  height: 340px;
+  width: 500px;
+  height: 400px;
 }
 #map {
-  width: 380px;
-  height: 340px;
+  width: 750px;
+  height: 400px;
 }
 
 .title {
