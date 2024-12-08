@@ -201,6 +201,42 @@ async function handleAddNoteToAppointment(message, replyTo, correlationId, chann
     }
 }
 
+
+// Handle updating an appointment
+async function handleUpdateAppointment(message, replyTo, correlationId, channel) {
+    console.log('Received update appointment message:', message);
+
+    const { appointment_id, new_date_and_time, new_dentist_username } = message;
+
+    try {
+        if (!appointment_id || !new_date_and_time || !new_dentist_username) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const appointment = await Appointment.findById(appointment_id);
+        if (!appointment) {
+            const errorResponse = { success: false, error: 'Appointment not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+         appointment.dentist_username = new_dentist_username;
+         appointment.date_and_time = new_date_and_time;
+          await appointment.save();
+
+       
+          const successResponse = { success: true, appointment };
+       
+          channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating appointment:', error);
+        const errorResponse = { success: false, error: 'Failed to update appointment' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 // Initialize subscriptions
 async function initializeAppointmentSubscriptions() {
     try {
