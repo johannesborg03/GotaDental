@@ -13,11 +13,12 @@
                         class="list-group-item d-flex justify-content-between align-items-center">
                         <span>
                             <i class="bi bi-calendar-event text-primary"></i>
-                            {{ slot.date }} at {{ slot.time }}
+                            {{ new Date(slot.date_and_time).toLocaleDateString() }} at
+                            {{ new Date(slot.date_and_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                         </span>
                     </li>
                 </ul>
-                <div v-if="availableSlots.length === 0" class="text-center mt-3 text-muted">
+                <div v-if="availableSlots.length === 0 && !errorMessage" class="text-center mt-3 text-muted">
                     <i>No slots available</i>
                 </div>
             </div>
