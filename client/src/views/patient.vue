@@ -30,6 +30,8 @@
 
 
 <script>
+import axios from 'axios';
+
 export default {
     data() {
         return {
@@ -38,7 +40,7 @@ export default {
     },
     methods:{
         async fetchAvailableSlots() {
-            try {
+             try {
                 const response = await axios.get('http://localhost:4000/api/timeslots/available');
                 this.availableSlots = response.data.timeslots; 
             } catch (err) {
@@ -50,9 +52,19 @@ export default {
             const date = new Date(dateTime);
             return date.toLocaleString(); 
         },
+        async bookSlot(slot, index) {
+                try {
+                    const response = await axios.post('http://localhost:4000/api/appointments/book', {
+                    timeslot_id: slot._id, 
+                 });
+            } catch (error) {
+                console.error('Error booking slot:', err);
+
+            }
+         },
     },
     async mounted() {
-        await this.fetchAvailableSlots();
+            await this.fetchAvailableSlots();
     },
 };
 </script>
