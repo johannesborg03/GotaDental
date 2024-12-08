@@ -116,9 +116,19 @@ exports.getAvailableTimeslots = async (req, res) => {
     const topic = 'timeslot/available/retrieve';
 
     try {
-        
+        const response = await publishMessage(topic, {}, correlationId);
+
+        if (response && response.length > 0) {
+            res.status(200).json(response);
+        } else {
+            res.status(200).json([]);
+        }
     } catch (error) {
-        
+        console.error('Error retrieving available timeslots:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve available timeslots',
+            error: error.message,
+        });
     }
 };
 

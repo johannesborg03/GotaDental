@@ -18,4 +18,6 @@ const timeslotController = require('../controllers/timeslotController');
 //Delete a timeslot for a dentist 
 //router.delete('api/timeslot/:office_id/:dentist_username/:timeslot_id/delete', timeslotController.deleteTimeslot)
 
+router.get('/api/timeslots/available', timeslotController.getAvailableTimeslots);
+
 module.exports = router;
