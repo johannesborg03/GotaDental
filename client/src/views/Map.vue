@@ -1,14 +1,13 @@
 <template>
   
 
-
-  
-  <b-container class="map-container">
+<b-card class="map-card">
+  <b-container class="map-container">   
     <b-row class="justify-content-center">
   <div id="map"></div>
-
     </b-row>
 </b-container>
+</b-card>
 
 
 </template>
@@ -63,14 +62,32 @@ methods: {
 
 <style>
 
+.map-card{
+  margin-top: 5%;
+  margin-left: 25%;
+  margin-right: 25%;
+}
+
 /* Ensure the map container has a height, or the map will not be visible */
 .map-container {
-  margin-top: 100px;
-  width: 180px;
-  height: 180px;
+ /* margin-top: 100px; */
+  width: 380px;
+  height: 340px;
 }
 #map {
   width: 380px;
   height: 340px;
+}
+
+.title {
+  font-family: Tahoma;
+  
+}
+
+@media (max-width: 768px) {
+  .map-card {
+    margin-left: 0%;
+    margin-right: 0%;
+  }
 }
 </style>
