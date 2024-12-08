@@ -152,6 +152,24 @@ async function handleUpdateTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+// Handle retrieving available timeslots
+async function handleGetAvailableTimeslots(message, replyTo, correlationId, channel) {
+
+    try {
+        // Query the database for available timeslots
+        const availableTimeslots = await Timeslot.find({ timeslot_state: 0 });
+
+        if (!availableTimeslots || availableTimeslots.length === 0) {
+            const errorResponse = { success: false, error: 'No available timeslots found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+    } catch (error) {
+    }
+}
+
+
 // Handle deleting a timeslot
 async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
     console.log('Received delete timeslot message:', message);
