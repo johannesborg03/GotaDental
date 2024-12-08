@@ -232,12 +232,27 @@ async function handleUpdateAppointment(message, replyTo, correlationId, channel)
             oldTimeslot.timeslot_state = 0; // Free the old timeslot
             await oldTimeslot.save();
         }
-        
+
+         
+        const newTimeslot = await Timeslot.findOne({
+            dentist_username: new_dentist_username,
+            date_and_time: new_date_and_time,
+            timeslot_state: 0, // Available
+        });
+ 
+        if (!newTimeslot) {
+            const errorResponse = { success: false, error: 'No available timeslot for the new date and dentist' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+         
          appointment.dentist_username = new_dentist_username;
          appointment.date_and_time = new_date_and_time;
           await appointment.save();
 
-       
+           newTimeslot.timeslot_state = 1; // Mark the new timeslot as booked
+          await newTimeslot.save();
+
           const successResponse = { success: true, appointment };
        
           channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
