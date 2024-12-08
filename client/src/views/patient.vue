@@ -52,6 +52,13 @@ export default {
     },
     methods: {
         async fetchAvailableSlots() {
+            this.errorMessage = null; 
+            try{
+
+            } catch(error){
+                console.log('Error: Can not fetch any available slots', error);
+                this.errorMessage = 'Failed to load available slots. Please try again later.';
+            }
         },
     },
 };
