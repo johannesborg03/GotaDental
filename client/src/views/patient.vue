@@ -13,8 +13,11 @@
                         class="list-group-item d-flex justify-content-between align-items-center">
                         <span>
                             <i class="bi bi-calendar-event text-primary"></i>
-                            {{ slot.date }} at {{ slot.time }}
+                            {{ formatSlot(slot.date_and_time) }}
                         </span>
+                        <button class="btn btn-success btn-sm" @click="bookSlot(slot, index)">
+                            Book
+                        </button>
                     </li>
                 </ul>
                 <div v-if="availableSlots.length === 0" class="text-center mt-3 text-muted">
@@ -32,6 +35,12 @@ export default {
         return {
             availableSlots: [],
         };
+    },
+    methods:{
+        formatSlot(dateTime) {
+            const date = new Date(dateTime);
+            return date.toLocaleString(); 
+        },
     },
     async mounted() {
         try {
