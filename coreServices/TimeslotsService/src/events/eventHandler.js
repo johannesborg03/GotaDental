@@ -154,9 +154,9 @@ async function handleUpdateTimeslot(message, replyTo, correlationId, channel) {
 
 // Handle retrieving available timeslots
 async function handleGetAvailableTimeslots(message, replyTo, correlationId, channel) {
+    console.log('Received request to retrieve available timeslots:', message);
 
     try {
-        // Query the database for available timeslots
         const availableTimeslots = await Timeslot.find({ timeslot_state: 0 });
 
         if (!availableTimeslots || availableTimeslots.length === 0) {
@@ -164,8 +164,15 @@ async function handleGetAvailableTimeslots(message, replyTo, correlationId, chan
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+        const successResponse = { success: true, timeslots: availableTimeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+
+        console.log('Available timeslots sent successfully');
 
     } catch (error) {
+        console.error('Error retrieving available timeslots:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve available timeslots' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
 }
 
@@ -208,6 +215,7 @@ async function initializeTimeslotSubscriptions() {
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
+        await subscribeToTopic('timeslot/available/retrieve', handleGetAvailableTimeslots);
 
         console.log('Timeslot subscriptions initialized!');
     } catch (error) {
@@ -222,4 +230,5 @@ module.exports = {
     handleGetTimeslotById,
     handleUpdateTimeslot,
     handleDeleteTimeslot,
+    handleGetAvailableTimeslots,
 };
