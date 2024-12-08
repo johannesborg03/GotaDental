@@ -38,11 +38,11 @@ export default {
             availableSlots: [],
         };
     },
-    methods:{
+    methods: {
         async fetchAvailableSlots() {
-             try {
+            try {
                 const response = await axios.get('http://localhost:4000/api/timeslots/available');
-                this.availableSlots = response.data.timeslots; 
+                this.availableSlots = response.data.timeslots;
             } catch (error) {
                 console.error('Error fetching slots:', error);
                 alert('Failed to fetch slots. Please try again later.');
@@ -50,29 +50,29 @@ export default {
         },
         formatSlot(dateTime) {
             const date = new Date(dateTime);
-            return date.toLocaleString(); 
+            return date.toLocaleString();
         },
         async bookSlot(slot, index) {
-                try {
-                    const response = await axios.post('http://localhost:4000/api/appointments/book', {
-                    timeslot_id: slot._id, 
-                 });
-                 if (response.status === 201) {
-                alert('Time slot booked successfully!');
-                this.availableSlots.splice(index, 1);
-             }
+            try {
+                const response = await axios.post('http://localhost:4000/api/appointments/book', {
+                    timeslot_id: slot._id,
+                });
+                if (response.status === 201) {
+                    alert('Time slot booked successfully!');
+                    this.availableSlots.splice(index, 1);
+                }
             } catch (error) {
                 console.error('Error booking slot:', error);
                 if (error.response && error.response.status === 409) {
                     alert('Time slot no longer available!');
                 } else {
                     alert('Failed to book time slot. Please try again later.');
-                 }
+                }
             }
-         },
+        },
     },
     async mounted() {
-             await this.fetchAvailableSlots();
+        await this.fetchAvailableSlots();
     },
 };
 </script>
