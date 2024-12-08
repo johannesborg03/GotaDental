@@ -16,6 +16,19 @@ async function handleCreateAppointment(message, replyTo, correlationId, channel)
             return;
         }
 
+         const timeslot = await Timeslot.findOne({
+            dentist_username,
+            date_and_time,
+            timeslot_state: 0, 
+        });
+
+                 // Check for available timeslot
+         if (!timeslot) {
+             const errorResponse = { success: false, error: 'No available timeslot' };
+             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+             return;
+        }
+
         const newAppointment = new Appointment({ patient_ssn, dentist_username, office_id, date_and_time, notes: notes });
         await newAppointment.save();
 
