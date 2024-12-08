@@ -12,11 +12,15 @@ function processDentistEvent(message) {
 
 // Callback function to handle the retrieval of available timeslots
 async function processAvailableTimeslots(message) {
-    try {
+    console.log('Received request to retrieve available timeslots:', message);
 
+    try {
+        const availableTimeslots = await Timeslot.find({ timeslot_state: 0 });
+        console.log('Available timeslots:', availableTimeslots);
     } catch (error) {
-        
+        console.error('Error fetching available timeslots:', error);
     }
 }
 subscribeToTopic('dentist_topic', processDentistEvent);
 subscribeToTopic('timeslot_topic', processTimeslot);
+subscribeToTopic('timeslot/available/retrieve', processAvailableTimeslots);
