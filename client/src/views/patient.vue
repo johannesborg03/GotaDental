@@ -22,6 +22,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Error Message Section -->
+        <div v-if="errorMessage" class="alert alert-danger text-center">
+            {{ errorMessage }}
+        </div>
     </div>
 </template>
 
@@ -31,6 +36,7 @@ export default {
     data() {
         return {
             availableSlots: [],
+            errorMessage: null,
         };
     },
     async mounted() {
