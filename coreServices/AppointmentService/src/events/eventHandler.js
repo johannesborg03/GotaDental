@@ -121,6 +121,15 @@ async function handleCancelAppointmentByPatient(message, replyTo, correlationId,
             return;
         }
 
+        const timeslot = await Timeslot.findOne({
+            dentist_username: deletedAppointment.dentist_username,
+            date_and_time: deletedAppointment.date_and_time,
+        });
+
+          if (timeslot) {
+               timeslot.timeslot_state = 0; // Mark timeslot as available
+             await timeslot.save();
+         }
         const successResponse = { success: true, appointment: deletedAppointment };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
