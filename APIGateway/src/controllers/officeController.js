@@ -12,7 +12,7 @@ exports.getAllOffices = async (req, res) => {
         if (response.length === 0) {
             return res.status(404).json({
                 message: "No offices found",
-                offices: []
+                offices: [],
             });
         }
 

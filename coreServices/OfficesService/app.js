@@ -4,8 +4,9 @@ var cors = require('cors');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const OfficeModel = require('./src/models/Office'); // Model loader
-const officeRoutes = require('./routes/officeRoutes'); // Routes for Office-related REST API
-const { initializeOfficeSubscriptions } = require('./eventHandler'); // Import the event handler
+//const officeRoutes = require('./routes/officeRoutes'); // Routes for Office-related REST API
+const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
+const officeRoutes = require('./src/apiRoutes/officeRoutes'); // Correct relative path
 
 
 require('dotenv').config();
