@@ -8,6 +8,7 @@ const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
 const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
+//const timeslotRouter = require('./routes/timeslotRoutes');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
@@ -45,7 +46,9 @@ app.use(cors()); // Enable CORS
 initializeSubscriptions();
 
 // Modular Routes
-app.use(timeslotsRoutes);
+//app.use(timeslotsRoutes);
+app.use('/api', timeslotsRoutes);
+
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
