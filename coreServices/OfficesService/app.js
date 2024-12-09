@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 
-app.use(officesController);
+//app.use(officesController);
 
 app.use('/api', officeRoutes);
 

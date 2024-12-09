@@ -18,23 +18,20 @@ var timeslotSchema = new mongoose.Schema({
         default: 0
     },
     office_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'Office',
+        type: String,
+        //ref : 'Office',
         required: true
     },
 
-    dentist_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'Dentist',
-        required: true
+    dentist_username: { 
+        type: String, // Store username directly as String
+        required: true,
     },
 
     date_and_time: {
         type: Date, // Use Date type for date handling
         required: true
     }
-
-   
 });
 
 module.exports = bookingDbConnection.model('Timeslot', timeslotSchema);
