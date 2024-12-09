@@ -9,16 +9,26 @@
         <h2 class="card-title text-secondary">Register a Slot</h2>
         <form @submit.prevent="registerSlot" class="needs-validation" novalidate>
 
-          <!-- Selection of an office -->
+          <!-- List of offices -->
           <div class="mb-3">
-            <label for="officeSelect" class="form-label">Select Office:</label>
-            <select id="officeSelect" class="form-select" v-model="selectedOffice" required>
-              <option value="" disabled>Select an office</option>
-              <option v-for="office in offices" :key="office.office_id" :value="office.office_id">
-                {{ office.office_name }}
-              </option>
-            </select>
-            <div class="invalid-feedback">Please select an office.</div>
+            <label class="form-label">Select Office:</label>
+            <div v-if="offices.length > 0">
+              <div
+                v-for="office in offices"
+                :key="office.office_id"
+                class="card my-2 p-2"
+                :class="{ 'bg-primary text-white': selectedOffice === office.office_id }"
+                @click="selectOffice(office.office_id)"
+                style="cursor: pointer;"
+              >
+                <h5>{{ office.office_name }}</h5>
+                <p>Address: {{ office.office_address }}</p>
+                <p>Latitude: {{ office.latitude }}, Longitude: {{ office.longitude }}</p>
+              </div>
+            </div>
+            <div v-else>
+              <p class="text-danger">No offices available.</p>
+            </div>
           </div>
 
           <!-- Input for selecting the date -->
@@ -69,14 +79,26 @@ export default {
   methods: {
     async fetchOffices() {
     try {
+        console.log('Fetching offices from API...');
         const response = await axios.get('http://localhost:4000/api/offices');
-        console.log('Fetched offices:', response.data.offices);
-        this.offices = response.data.offices;
+        console.log('Response from API:', response.data);
+
+        if (response.data.offices && response.data.offices.length > 0) {
+            this.offices = response.data.offices;
+        } else {
+            this.offices = [];
+            alert('No offices available.');
+        }
     } catch (error) {
-        console.error('Error fetching offices:', error);
+        console.error('Error fetching offices:', error.response ? error.response.data : error.message);
         alert('Failed to load offices. Please try again.');
     }
 },
+
+    async selectOffice(officeId) {
+      this.selectedOffice = officeId;
+      console.log("Selected Office:", officeId);
+    },
 
     async registerSlot() {
       if (!this.slotDate || !this.slotTime || !this.selectedOffice) {
@@ -92,18 +114,20 @@ export default {
           office_id: this.selectedOffice,
         };
 
+        console.log("Registering slot with details:", slotDetails);
+
         const response = await axios.post('http://localhost:4000/api/timeslots/create', slotDetails);
 
         if (response.status === 201) {
           alert('Time slot registered successfully!');
           this.slotDate = '';
           this.slotTime = '';
-          this.selectedOffice = '';
+          this.selectedOffice = null;
         } else {
           alert(`Failed to register slot: ${response.data.message}`);
         }
       } catch (error) {
-        console.error('Error registering slot:', error);
+        console.error('Error registering slot:', error.response ? error.response.data : error.message);
         alert('An error occurred while registering the time slot. Please try again.');
       }
     },
