@@ -8,13 +8,17 @@ async function handleRetrieveAllOffices(message, replyTo, correlationId, channel
     try {
         const offices = await Office.find({}, 'office_id office_name latitude longitude');
 
+        console.log('Found offices:', offices);
+
         if (!offices || offices.length === 0) {
             const errorResponse = { success: false, error: 'No offices found' };
+            console.log('No offices found, sending error response');
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
         const successResponse = { success: true, offices };
+        console.log('Sending success response with offices:', successResponse);
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error retrieving offices:', error);
@@ -23,10 +27,12 @@ async function handleRetrieveAllOffices(message, replyTo, correlationId, channel
     }
 }
 
+
 // Initialize subscriptions for the Office service
 async function initializeOfficeSubscriptions() {
     try {
-        await subscribeToTopic('offices/retrieve', handleRetrieveAllOffices); // Subscribe to the topic for retrieving all offices
+        // Subscribe to the correct topic
+        await subscribeToTopic('offices/retrieveAll', handleRetrieveAllOffices);
         console.log('Office subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing office subscriptions:', error);

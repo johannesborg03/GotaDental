@@ -14,8 +14,8 @@
             <label for="officeSelect" class="form-label">Select Office:</label>
             <select id="officeSelect" class="form-select" v-model="selectedOffice" required>
               <option value="" disabled>Select an office</option>
-              <option v-for="office in offices" :key="office_id" :value="office_id">
-                {{ office.name }}
+              <option v-for="office in offices" :key="office.office_id" :value="office.office_id">
+                {{ office.office_name }}
               </option>
             </select>
             <div class="invalid-feedback">Please select an office.</div>
@@ -55,76 +55,58 @@ export default {
     return {
       slotDate: '',
       slotTime: '',
-      username: '',
-      selectedOffice: null,     
+      selectedOffice: null,
       offices: [],
+      username: '',
     };
   },
 
   async mounted() {
     this.username = sessionStorage.getItem('userIdentifier');
-    console.log(this.username);
-    this.fetchOffices();
+    await this.fetchOffices();
+  },
+
+  methods: {
+    async fetchOffices() {
+    try {
+        const response = await axios.get('http://localhost:4000/api/offices');
+        console.log('Fetched offices:', response.data.offices);
+        this.offices = response.data.offices;
+    } catch (error) {
+        console.error('Error fetching offices:', error);
+        alert('Failed to load offices. Please try again.');
+    }
 },
 
-methods: {
     async registerSlot() {
-    if (!this.slotDate || !this.slotTime || !this.officeId) {
-      alert('Fill in the fields');
-      return;
-    }
-
-    try {
-      // Combine date and time into a single Date object
-      const dateTimeString = `${this.slotDate}T${this.slotTime}:00`; // 'T' separates date and time
-      const dateTime = new Date(dateTimeString);
-
-      // Check if the dateTime is valid
-      if (isNaN(dateTime)) {
-        alert('Invalid date or time. Please check your input.');
+      if (!this.slotDate || !this.slotTime || !this.selectedOffice) {
+        alert('Fill in all the fields');
         return;
       }
 
-      const slotDetails = {
-        date_and_time: dateTime,
-        dentist_username: this.username,
-        office_id: this.officeId,
-      };
-
-      console.log(dateTime);
-      console.log(this.username);
-
-      // Make the POST request to create the time slot 
-      const response = await axios.post('http://localhost:4000/api/timeslots', {
-        slotDetails
-      });
-
-      if (response.status === 201) {
-        console.log('Slot registered successfully:', response.data);
-        alert('Time slot registered successfully!');
-
-        // Reset form fields
-        this.slotDate = '';
-        this.slotTime = '';
-        this.selectedOffice = '';
-      } else {
-        alert(`Failed to register slot: ${response.data.message}`);
-      }
-    } catch (error) {
-      console.error('Error registering slot:', error);
-      alert('An error occurred while registering the time slot. Please try again later.');
-    }
-  },
-  async fetchOffices() {
       try {
-        // Fetch the list of offices from the backend
-        const response = await axios.get("http://localhost:4000/api/offices");
-        this.offices = response.data.offices; // Update the offices array
+        const dateTimeString = `${this.slotDate}T${this.slotTime}:00`;
+        const slotDetails = {
+          date_and_time: dateTimeString,
+          dentist_username: this.username,
+          office_id: this.selectedOffice,
+        };
+
+        const response = await axios.post('http://localhost:4000/api/timeslots/create', slotDetails);
+
+        if (response.status === 201) {
+          alert('Time slot registered successfully!');
+          this.slotDate = '';
+          this.slotTime = '';
+          this.selectedOffice = '';
+        } else {
+          alert(`Failed to register slot: ${response.data.message}`);
+        }
       } catch (error) {
-        console.error("Error fetching offices:", error);
-        alert("Failed to load offices. Please try again.");
+        console.error('Error registering slot:', error);
+        alert('An error occurred while registering the time slot. Please try again.');
       }
     },
-}
+  },
 };
 </script>

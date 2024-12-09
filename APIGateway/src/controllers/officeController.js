@@ -1,27 +1,30 @@
 const { publishMessage } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
-// Controller to retrieve all offices with location data
 exports.getAllOffices = async (req, res) => {
     const correlationId = uuidv4();
-    const topic = 'offices/retrieveAll';
+    const topic = 'offices/retrieve';
+
+    console.log('Publishing to topic:', topic, 'with correlationId:', correlationId);
 
     try {
         const response = await publishMessage(topic, {}, correlationId);
 
-        if (response.length === 0) {
+        console.log('Received response from RabbitMQ:', response);
+
+        if (!response.success) {
             return res.status(404).json({
-                message: "No offices found",
+                message: response.error || 'No offices found',
                 offices: [],
             });
         }
 
         res.status(200).json({
             message: 'Offices retrieved successfully',
-            offices: response,
+            offices: response.offices,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error('Error retrieving offices through API Gateway:', error);
         res.status(500).json({
             message: 'Failed to retrieve offices',
             error: error.message,
@@ -29,26 +32,18 @@ exports.getAllOffices = async (req, res) => {
     }
 };
 
-// Controller to retrieve details of a specific office by office_id
+
 exports.getOfficeById = async (req, res) => {
     const { office_id } = req.params;
-    
-    const correlationId = uuidv4();
-    const topic = `offices/${office_id}/retrieve`;
 
     try {
-        const response = await publishMessage(topic, { office_id }, correlationId);
-
-        if (!response) {
-            return res.status(404).json({ message: 'Office not found' });
-        }
-
+        const response = await axios.get(`http://localhost:3002/api/offices/${office_id}`);
         res.status(200).json({
             message: 'Office details retrieved successfully',
-            office: response,
+            office: response.data.office,
         });
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
+        console.error('Error retrieving office details:', error.message);
         res.status(500).json({
             message: 'Failed to retrieve office details',
             error: error.message,
