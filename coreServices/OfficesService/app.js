@@ -4,6 +4,8 @@ var cors = require('cors');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const OfficeModel = require('./src/models/Office'); // Model loader
+const officeRoutes = require('./routes/officeRoutes'); // Routes for Office-related REST API
+const { initializeOfficeSubscriptions } = require('./eventHandler'); // Import the event handler
 
 
 require('dotenv').config();
@@ -34,6 +36,7 @@ app.use(cors()); // Enable CORS
 
 app.use(officesController);
 
+app.use('/api', officeRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
