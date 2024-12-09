@@ -17,6 +17,10 @@
           <router-link to="/Appointment">Appointments</router-link>
         </BNavItem>
         <BNavItem class="buttonsNav">
+          <router-link to="/Map">Map</router-link>
+        </BNavItem>
+
+        <BNavItem class="buttonsNav">
 
          
         </BNavItem>
@@ -24,7 +28,8 @@
 
       <!-- Username-->
       <BNavbarNav class="ms-auto mb-2 mb-lg-0">
-        <div class="d-none d-lg-flex align-items-center">
+        <div class="d-none d-lg-flex align-items-center username">
+          {{ userIdentifier }}
         </div>
 
         <!-- Dropdown -->
@@ -74,7 +79,7 @@ export default {
     },
     logout() {
       // Clear the sessionStorage on logout .
-      localStorage.removeItem("userIdentifier"); // Remove user data from session storage
+      sessionStorage.removeItem("userIdentifier"); // Remove user data from session storage
       this.$router.push("/"); // Redirect to home page
     }
   }
