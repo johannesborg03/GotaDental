@@ -1,26 +1,38 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+require('dotenv').config();
+
+const { initializeSubscriptions } = require('./src/events/eventHandler'); // RabbitMQ
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 
-const TimeslotModel = require('./src/models/Timeslot'); // Model loader
-
-//ENV port
-require('dotenv').config();
+const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
+const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
+//const timeslotRouter = require('./routes/timeslotRoutes');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
 
-// Load the Appointment model
+// Verify the database connection
+if (!process.env.BOOKING_DB_URI) {
+    console.error('Error: BOOKING_DB_URI is not defined in the environment variables.');
+    process.exit(1);
+}
+
+bookingDbConnection.on('connected', () => {
+    console.log('Connected to Booking Database');
+});
+
+bookingDbConnection.on('error', (err) => {
+    console.error('Failed to connect to Booking Database:', err.message);
+    process.exit(1);
+});
+
+// Load the Timeslot model
 const Timeslot = TimeslotModel(bookingDbConnection);
 
 // Variables
-
 var port = process.env.PORT || 3003;
-
-var timeslotsController = require('./src/controllers/Timeslots.js');
-
-
 
 // Create Express app
 var app = express();
@@ -30,8 +42,13 @@ app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+// Initialize RabbitMQ Subscriptions
+initializeSubscriptions();
 
-app.use(timeslotsController);
+// Modular Routes
+//app.use(timeslotsRoutes);
+app.use('/api', timeslotsRoutes);
+
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
@@ -41,7 +58,10 @@ app.use('/api/*', (req, res) => {
 // Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(err.status || 500).json({ message: err.message });
+    res.status(err.status || 500).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    });
 });
 
 // Start the server

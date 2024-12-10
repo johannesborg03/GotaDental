@@ -45,6 +45,56 @@ router.post('/api/timeslots/:dentist_username/timeslot', async function (req, re
     }
 });
 
+
+router.post('/api/timeslots', async function (req, res) {
+    try {
+        const { dentist_username, office_id, date_and_time } = req.body;
+
+        if (!dentist_username || !office_id || !date_and_time) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Validation to see if dentist belongs to the office
+        const office = await Office.findOne({ _id: office_id, dentists: dentist_username });
+        if (!office) {
+            return res.status(400).json({ message: "Dentist is not associated with the office" });
+        }
+        
+        // Check to see if there is overlapping time slots
+        const existingTimeslot = await Timeslot.findOne({
+            dentist_id: dentist_username,
+            office_id: office_id,
+            date_and_time: date_and_time
+        });
+
+        if (existingTimeslot) {
+            return res.status(409).json({ message: "Overlapping time slot exists for this dentist in the office" });
+        }
+
+        // Creating a new time slot
+        const timeslot = new Timeslot({
+            timeslot_id: mongoose.Types.ObjectId(),
+            dentist_id: dentist_username,
+            office_id: office_id,
+            date_and_time: date_and_time,
+            timeslot_state: 0 
+        });
+
+        await timeslot.save();
+
+        res.status(201).json({
+            message: "Timeslot created successfully",
+            timeslot: timeslot
+        });
+    } catch (error) {
+        console.error("Error while creating timeslot:", error);
+        res.status(500).json({
+            message: "Server error while creating timeslot",
+            error: error.message
+        });
+    }
+});
+
 // Get all timeslots for dentist in a specific office 
 router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
     try {

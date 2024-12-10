@@ -1,52 +1,40 @@
 const { publishMessage, setupReplyQueue } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
-// Controller to create a new timeslot
+// Controller to create a new time slot
 exports.createTimeslot = async (req, res) => {
-    const { dentist_username } = req.params;
-    const { date_and_time, timeslot_state } = req.body;
-
-    if (!dentist_username || !date_and_time || !timeslot_state) {
-        return res.status(400).json({ message: 'Missing required parameters or body' });
-    }
-
-    // Prepare the data to send
-    const timeslotData = {
-        dentist_username, date_and_time, timeslot_state
-    };
-
-    // Check if a timeslot already exists for the dentist at the given date and time
-    const existingTimeslot = await checkTimeslotConflict(dentist_username, date_and_time);
-
-    if (existingTimeslot) {
-        return res.status(409).json({
-            message: 'Conflict: Timeslot already exists for this dentist at the given date and time.'
-        });
-    }
-
-    // If no conflict, proceed to create the timeslot
-    const correlationId = uuidv4();
-    const topic = 'timeslot/dentist/create';
-
     try {
-        const response = await publishMessage(topic, timeslotData, correlationId);
-        res.status(201).json({
-            message: 'Timeslot created successfully',
-            timeslot: response,
-        });
+        const { date_and_time, dentist_username, office_id } = req.body;
+
+        if (!date_and_time || !dentist_username || !office_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Call the CoreService (via MQTT or HTTP)
+        const timeslotPayload = { date_and_time, dentist_username, office_id };
+
+        // Example of HTTP request to CoreService
+        const response = await axios.post(
+            'http://localhost:3003/api/timeslots/create',
+            timeslotPayload
+        );
+
+        if (response.status === 201) {
+            return res.status(201).json({ message: 'Timeslot created successfully', data: response.data });
+        } else {
+            return res.status(400).json({ message: 'Failed to create timeslot', data: response.data });
+        }
     } catch (error) {
-        console.error('Error publishing to MQTT:', error);
-        res.status(500).json({
-            message: 'Failed to create timeslot',
-            error: error.message,
-        });
+        console.error('Error creating timeslot:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
 
 
-// Controller to retrieve all timeslots for a specific office
+// Controller to retrieve all time slots for a specific office
 exports.getAllTimeslotsForOffice = async (req, res) => {
     const { office_id } = req.params;
+
     if (!office_id) {
         return res.status(400).json({ message: 'Missing office_id' });
     }
@@ -56,12 +44,14 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
 
     try {
         const response = await publishMessage(topic, { office_id }, correlationId);
+
         if (!response || response.length === 0) {
             return res.status(404).json({
                 message: 'No timeslots found for this office',
                 timeslots: [],
             });
         }
+
         res.status(200).json({
             message: 'Timeslots retrieved successfully',
             timeslots: response,
@@ -129,6 +119,7 @@ exports.getAvailableTimeslots = async (req, res) => {
 };
 
 exports.updateTimeslot = async (req, res) => {
+
     const { office_id, dentist_username, timeslot_id, date_and_time } = req.params;
 
     if (!office_id || !dentist_username || !timeslot_id || !date_and_time) {
@@ -143,21 +134,15 @@ exports.updateTimeslot = async (req, res) => {
         if (!response) {
             return res.status(404).json({ message: 'Timeslot not found' });
         }
-        res.status(200).json({
-            message: 'Timeslot updated successfully',
-            timeslot: response,
-        });
-
+        res.status(200).json({ message: 'Timeslot updated successfully', timeslot: response });
     } catch (error) {
         console.error('Error publishing to MQTT', error);
-        res.status(500).json({
-            message: 'Failed to update timeslot',
-            error: error.message,
-        });
+        res.status(500).json({ message: 'Failed to update timeslot', error: error.message });
     }
 }
 
 exports.deleteTimeslot = async (req, res) => {
+
     const { dentist_username, timeslot_id, office_id } = req.params;
     if (!dentist_username || !timeslot_id || !office_id) {
         return res.status(400).json({ message: 'Missing required parameters' })
@@ -172,21 +157,17 @@ exports.deleteTimeslot = async (req, res) => {
 
     const correlationId = uuidv4();
     const topic = `timeslot/${office_id}/${dentist_username}/${timeslot_id}`
+
     try {
         const response = await publishMessage(topic, { office_id, dentist_username, timeslot_id }, correlationId);
 
         if (!response) {
             return res.status(404).json('Timeslot not found')
         }
-        return res.status(200).json({
-            message: "Timeslot Deleted",
-            timeslot: response
-        });
+
+        return res.status(200).json({ message: "Timeslot Deleted", timeslot: response });
     } catch (error) {
         console.error('Error publishing to MQTT', error);
-        res.status(500).json({
-            message: 'Failed to delete timeslot',
-            error: error.message,
-        });
+        res.status(500).json({ message: 'Failed to delete timeslot', error: error.message });
     }
 };

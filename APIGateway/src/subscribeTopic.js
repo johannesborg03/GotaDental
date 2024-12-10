@@ -28,6 +28,14 @@ async function processAvailableTimeslots(message, replyTo, correlationId) {
     }
 }
 
-subscribeToTopic('dentist_topic', processDentistEvent);
-subscribeToTopic('timeslot_topic', processTimeslot);
-subscribeToTopic('timeslot/available/retrieve', processAvailableTimeslots);
+function processRetrieveAllOffices(message) {
+    console.log('Processing office retrieval event:', message);
+}
+
+function processCreateOffice(message) {
+    console.log('Processing office creation event:', message);
+}
+
+subscribeToTopic('dentist_topic', processTimeslot);
+subscribeToTopic('offices/retrieveAll', processRetrieveAllOffices);
+subscribeToTopic('offices/create', processCreateOffice);

@@ -156,8 +156,6 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     }
 }
 
-
-
 // Initialize all subscriptions
 async function initializeSubscriptions() {
     try {
@@ -172,7 +170,6 @@ async function initializeSubscriptions() {
 
         await subscribeToTopic('dentists/register', handleDentistRegistration);
         console.log('Subscribed to dentists/register');
-        //console.log('Subscribed to "patients/register"');
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
@@ -187,4 +184,4 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin };
+module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin};
