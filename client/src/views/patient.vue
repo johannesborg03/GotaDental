@@ -1,78 +1,87 @@
 <template>
     <div class="container py-4">
         <div class="mb-4 text-center">
-            <h1 class="text-primary">Available Slots</h1>
+            <h1 class="text-primary">Available Appointments</h1>
         </div>
 
-        <!-- Available Slots Section -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title text-secondary">Book a Slot</h2>
-                <ul class="list-group">
-                    <li v-for="(slot, index) in availableSlots" :key="index"
-                        class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>
-                            <i class="bi bi-calendar-event text-primary"></i>
-                            {{ formatSlot(slot.date_and_time) }}
-                        </span>
-                        <button class="btn btn-success btn-sm" @click="bookSlot(slot, index)">
-                            Book
-                        </button>
-                    </li>
-                </ul>
-                <div v-if="availableSlots.length === 0" class="text-center mt-3 text-muted">
-                    <i>No slots available</i>
-                </div>
+        <!-- Select Office -->
+        <div class="mb-3">
+            <label for="officeSelect" class="form-label">Select Office:</label>
+            <select id="officeSelect" class="form-select" v-model="selectedOffice" @change="fetchTimeslots" required>
+                <option value="" disabled>Select an office</option>
+                <option v-for="office in offices" :key="office.office_id" :value="office.office_id">
+                    {{ office.office_name }}
+                </option>
+            </select>
+        </div>
+
+        <!-- Available Timeslots -->
+        <div v-if="timeslots.length > 0">
+            <h2 class="mt-4">Available Timeslots</h2>
+            <div v-for="slot in timeslots" :key="slot.id" class="card my-2 p-2">
+                <p>
+                    <strong>Date:</strong> {{ new Date(slot.date_and_time).toLocaleDateString() }} <br>
+                    <strong>Time:</strong> {{ new Date(slot.date_and_time).toLocaleTimeString() }} <br>
+                    <strong>Dentist:</strong> {{ slot.dentist_username }}
+                </p>
+                <button class="btn btn-primary" @click="bookTimeslot(slot.id)" :disabled="slot.is_booked">
+                    {{ slot.is_booked ? "Booked" : "Book Slot" }}
+                </button>
             </div>
         </div>
+        <p v-else class="text-danger mt-4">No available timeslots for the selected office.</p>
     </div>
 </template>
 
-
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
     data() {
         return {
-            availableSlots: [],
+            offices: [],
+            timeslots: [],
+            selectedOffice: null,
         };
     },
-    methods: {
-        async fetchAvailableSlots() {
-            try {
-                const response = await axios.get('http://localhost:4000/api/timeslots/available');
-                this.availableSlots = response.data.timeslots;
-            } catch (error) {
-                console.error('Error fetching slots:', error);
-                alert('Failed to fetch slots. Please try again later.');
-            }
-        },
-        formatSlot(dateTime) {
-            const date = new Date(dateTime);
-            return date.toLocaleString();
-        },
-        async bookSlot(slot, index) {
-            try {
-                const response = await axios.post('http://localhost:4000/api/appointments/book', {
-                    timeslot_id: slot._id,
-                });
-                if (response.status === 201) {
-                    alert('Time slot booked successfully!');
-                    this.availableSlots.splice(index, 1);
-                }
-            } catch (error) {
-                console.error('Error booking slot:', error);
-                if (error.response && error.response.status === 409) {
-                    alert('Time slot no longer available!');
-                } else {
-                    alert('Failed to book time slot. Please try again later.');
-                }
-            }
-        },
-    },
     async mounted() {
-        await this.fetchAvailableSlots();
+        await this.fetchOffices();
+    },
+    methods: {
+        async fetchOffices() {
+            try {
+                const response = await axios.get("http://localhost:4000/api/offices");
+                this.offices = response.data.offices || [];
+            } catch (error) {
+                console.error("Error fetching offices:", error.response?.data || error.message);
+                alert("Failed to load offices. Please try again.");
+            }
+        },
+        async fetchTimeslots() {
+            if (!this.selectedOffice) return;
+
+            try {
+                const response = await axios.get(`http://localhost:4000/api/timeslots/${this.selectedOffice}`);
+                this.timeslots = response.data.timeslots || [];
+            } catch (error) {
+                console.error("Error fetching timeslots:", error.response?.data || error.message);
+                alert("Failed to load timeslots. Please try again.");
+            }
+        },
+        async bookTimeslot(timeslotId) {
+            try {
+                const response = await axios.post(`http://localhost:4000/api/timeslots/book`, {
+                    timeslot_id: timeslotId,
+                });
+                if (response.status === 200) {
+                    alert("Timeslot booked successfully!");
+                    this.fetchTimeslots(); // Refresh timeslots after booking
+                }
+            } catch (error) {
+                console.error("Error booking timeslot:", error.response?.data || error.message);
+                alert("Failed to book timeslot. Please try again.");
+            }
+        },
     },
 };
 </script>

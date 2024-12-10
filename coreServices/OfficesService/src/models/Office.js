@@ -7,45 +7,35 @@ const bookingDbConnection = connectToBookingDB();
 var Schema = mongoose.Schema;
 
 var officeSchema = new mongoose.Schema({
-    office_id : {
-        type : String,
-        required : true,
-        unique : true,
+    office_id: {
+        type: String,
+        required: true,
+        unique: true
     },
-    office_name : {
-        type : String,
-        required : true,
-    },
-
-    office_address : {
-        type : String,
-        required : true,
-    },
-
-    dentist_username: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'Dentist',
+    office_name: {
+        type: String,
         required: true
     },
-
     latitude: {
-        type : Number,
-        required : true,
-        min: -90,  // Ensuring latitude is within valid range
-        max: 90    // Ensuring latitude is within valid range
+        type: Number,
+        required: true
     },
-
     longitude: {
-        type : Number,
-        required : true,
-        min: -180, // Ensuring longitude is within valid range
-        max: 180   // Ensuring longitude is within valid range
+        type: Number,
+        required: true
+    },
+    dentists: {
+        type: [String], // Array of dentist usernames
+        required: true
+    },
+    office_address: { // Check if this exists in your schema
+        type: String,
+        required: true
+    },
+    dentist_username: { // Check if this exists in your schema
+        type: String,
+        required: true
     }
-
-    
-
-
-   
 });
 
 module.exports = bookingDbConnection.model('Office', officeSchema);
