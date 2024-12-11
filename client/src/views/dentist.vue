@@ -80,7 +80,7 @@ export default {
     async fetchOffices() {
     try {
         console.log('Fetching offices from API...');
-        const response = await fetch('http://localhost:4000/api/offices');
+        const response = await axios.get('http://localhost:4000/api/offices');
         console.log('Response from API:', response.data);
 
         if (response.data.offices && response.data.offices.length > 0) {

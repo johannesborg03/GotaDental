@@ -6,7 +6,7 @@ async function handleRetrieveAllOffices(message, replyTo, correlationId, channel
     const { identifier} = message;
 
     try {
-        const offices = await Office.find({office_id : identifier});
+        const offices = await Office.find();
         if(!offices){
             const errorResponse = { success: false, error: 'Invalid office' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });

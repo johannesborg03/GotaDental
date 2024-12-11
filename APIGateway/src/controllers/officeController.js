@@ -3,23 +3,23 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.getAllOffices = async (req, res) => {
     console.log('Received login request:', req.body);
-    const { office_id, office_name } = req.body;
+    //const { office_id, office_name } = req.body;
 
     // Validate the input data
-    if (!office_id || !office_name) {
-        return res.status(400).json({ message: 'Missing required fields' });
-    }
+    //if (!office_id || !office_name) {
+      //  return res.status(400).json({ message: 'Missing required fields' });
+    //}
 
     const topic =  'retrieveAll/offices';
 
-    const officeData = { identifier: office_id, office_name };
+    //const officeData = { identifier: office_id, office_name };
     const correlationId = uuidv4(); // Unique ID for this request
 
     console.log('Publishing to topic:', topic);
     console.log('office data:', officeData);
 
     try{
-        const response = await publishMessage(topic, officeData, correlationId);
+        const response = await publishMessage(topic, {}, correlationId);
 
         if (response.error) {
             return res.status(401).json({ message: response.error });

@@ -13,7 +13,7 @@ const patientRoutes = require('./src/routes/patientRoutes');
 const dentistRoutes = require('./src/routes/dentistRoutes');
 const loginRoutes = require('./src/routes/loginRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
-const officeRoutes = require('./src/routes/officeRoutes'); // Path to officeRoutes.js
+const officeRoutes = require('./src/routes/officeRoutes'); 
 
 
 
