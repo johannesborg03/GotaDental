@@ -2,14 +2,33 @@ const { publishMessage } = require('../mqttService'); // Adjust the path if nece
 const { v4: uuidv4 } = require('uuid');
 
 exports.getAllOffices = async (req, res) => {
-    console.log("GET /api/offices called");
-    res.status(200).json({ message: "Test response" });
-    try {
-        const offices = await Office.find({});
-        console.log('[Office Service] Offices retrieved:', offices);
+    console.log('Received login request:', req.body);
+    const { office_id, office_name } = req.body;
 
-        res.status(200).json({ offices });
-    } catch (error) {
+    // Validate the input data
+    if (!office_id || !office_name) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const topic =  'offices';
+
+    const officeData = { identifier: office_id, office_name };
+    const correlationId = uuidv4(); // Unique ID for this request
+
+    console.log('Publishing to topic:', topic);
+    console.log('Login data:', officeData);
+
+    try{
+        const response = await publishMessage(topic, officeData, correlationId);
+
+        if (response.error) {
+            return res.status(401).json({ message: response.error });
+        }
+        res.status(200).json({
+            message: 'Offices fetched',
+            token: response.token,
+        });
+    }catch (error) {
         console.error('[Office Service] Error fetching offices:', error);
         res.status(500).json({ message: 'Error fetching offices' });
     }
