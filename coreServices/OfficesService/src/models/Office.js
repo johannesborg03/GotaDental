@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const { connectToBookingDB } = require('../utils/dbConnect');
+const { connectToBookingDB } = require('../utils/officeDBConnect');
 
 // Initialize the connection
 const bookingDbConnection = connectToBookingDB();
