@@ -2,21 +2,25 @@ const { subscribeToTopic } = require('./subscriber');
 const Office = require('../models/Office');
 
 async function handleRetrieveAllOffices(message, replyTo, correlationId, channel) {
-    console.log('[Office Service] Received message to retrieve all offices:', message);
+    console.log('Received retrieve all offices message:', message);
+    const { identifier} = message;
 
     try {
-        const offices = await Office.find({});
-        console.log('[Office Service] Offices fetched:', offices);
+        const offices = await Office.find({office_id : identifier});
+        if(!offices){
+            const errorResponse = { success: false, error: 'Invalid office' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
 
-        const response = { success: true, offices };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+        const successResponse = { success: true, token: 'jwt-token-for-offices', offices};
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
-        console.error('[Office Service] Error retrieving offices:', error);
-        const errorResponse = { success: false, error: error.message };
+        console.error('Error retrieving offices:', error);
+        const errorResponse = { success: false, error: 'Internal server error while fetching offices'};
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
 }
-
 
 async function handleCreateOffice(message, replyTo, correlationId, channel) {
     console.log('Received message from topic "offices/create":', message);
@@ -38,7 +42,9 @@ async function handleCreateOffice(message, replyTo, correlationId, channel) {
 
 async function initializeOfficeSubscriptions() {
     try {
-        await subscribeToTopic('offices/retrieveAll', handleRetrieveAllOffices);
+        await subscribeToTopic('retrieveAll/offices', handleRetrieveAllOffices);
+        console.log('Subscribed to retrieveAll/offices');
+
         await subscribeToTopic('offices/create', handleCreateOffice);
 
         console.log('Office subscriptions initialized!');
@@ -47,7 +53,9 @@ async function initializeOfficeSubscriptions() {
     }
 }
 
+
 module.exports = {
     initializeOfficeSubscriptions,
+    handleRetrieveAllOffices,
     handleCreateOffice,
 };

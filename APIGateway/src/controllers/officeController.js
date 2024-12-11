@@ -10,13 +10,13 @@ exports.getAllOffices = async (req, res) => {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const topic =  'offices';
+    const topic =  'retrieveAll/offices';
 
     const officeData = { identifier: office_id, office_name };
     const correlationId = uuidv4(); // Unique ID for this request
 
     console.log('Publishing to topic:', topic);
-    console.log('Login data:', officeData);
+    console.log('office data:', officeData);
 
     try{
         const response = await publishMessage(topic, officeData, correlationId);
