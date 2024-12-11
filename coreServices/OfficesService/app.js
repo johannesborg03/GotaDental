@@ -2,7 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
 const officeRoutes = require('./src/apiRoutes/officeRoutes'); 
-const { initializeSubscriptions } = require('./src/events/eventHandler');
+const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
 const { connectToOfficeDB } = require('./src/utils/officeDBConnect');
 const OfficeModel = require('./src/models/Office'); 
 
@@ -14,7 +14,7 @@ const Office = OfficeModel(officeDbConnection);
 require('dotenv').config();
 
 // Variables
-var port = process.env.PORT || 3004; // Use the port defined in .env
+var port = process.env.PORT || 3005; // Use the port defined in .env
 
 // Controllers:
 var officesController = require('./src/controllers/Offices');
@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
 // Initialize RabbitMQ Subscriptions
-initializeSubscriptions();
+initializeOfficeSubscriptions();
 
 app.use(officeRoutes);
 
