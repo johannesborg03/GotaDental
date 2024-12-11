@@ -1,16 +1,16 @@
-const Office = require('../models/Office');
+var express = require ('express');
+var router = express.Router();
+var { subscribeToTopic } = require('../events/subscriber');
+//const Office = require('../models/Office');
 
-exports.getAllOffices = async (req, res) => {
+router.get('/api/offices', async function (req, res) {
     try {
-        const offices = await Office.find({}, 'office_id office_name latitude longitude dentists');
-        if (!offices.length) {
-            return res.status(404).json({ message: 'No offices found', offices: [] });
-        }
-        res.status(200).json({ message: 'Offices retrieved successfully', offices });
+        const offices = await Office.find();
+        res.status(200).json(offices);
     } catch (error) {
-        res.status(500).json({ message: 'Server error while retrieving offices', error: error.message });
+        res.status(500).json({ message: 'Error fetching offices', error: error.message });
     }
-};
+});
 
 exports.getOfficeById = async (req, res) => {
     try {
@@ -26,3 +26,5 @@ exports.getOfficeById = async (req, res) => {
         res.status(500).json({ message: 'Server error while retrieving office details', error: error.message });
     }
 };
+
+module.exports = router;
