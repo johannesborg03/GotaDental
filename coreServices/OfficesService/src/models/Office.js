@@ -28,11 +28,11 @@ var officeSchema = new mongoose.Schema({
         type: [String], // Array of dentist usernames
         required: true
     },
-    office_address: { // Check if this exists in your schema
+    office_address: { 
         type: String,
         required: true
     },
-    dentist_username: { // Check if this exists in your schema
+    dentist_username: { 
         type: String,
         required: true
     }
