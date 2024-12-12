@@ -3,27 +3,30 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
-    const { dentist_username, office_id, date_and_time, timeslot_state } = req.body;
+        //const { date_and_time, dentist_username, office_id } = req.body;
+        const { dentist_username } = req.parms;
+        const { date_and_time, timeslot_state } = req.body;
 
-    if (!dentist_username || !office_id || !date_and_time || !timeslot_state) {
-        return res.status(400).json({ message: 'Missing required fields' });
-    }
 
-    const correlationId = uuidv4();
-    const topic = 'timeslot/dentist/create';
 
-    try {
-        const response = await publishMessage(topic, { dentist_username, office_id, date_and_time, timeslot_state }, correlationId);
-
-        if (!response.success) {
-            return res.status(409).json({ message: response.error || 'Conflict: Timeslot creation failed' });
+        if (!date_and_time || !dentist_username || !timeslot_state) {
+            return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        res.status(201).json({ message: 'Timeslot created successfully', timeslot: response.timeslot });
-    } catch (error) {
-        console.error('Error creating timeslot:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
+        // Call the CoreService (via MQTT or HTTP)
+        const timeslotData= { date_and_time, dentist_username, timeslot_state };
+
+        // If no conflict, proceed to create the timeslot
+        const correlationId = uuidv4(); 
+        const topic = 'timeslot/dentist/create'; 
+
+        try {
+            const response = await publishMessage(topic, timeslotData, correlationId);
+            res.status(201).json({message: 'Timeslot created successfully', timeslot: response,});
+        } catch (error) {
+            console.error('Error publishing to MQTT:', error);
+            res.status(500).json({message: 'Failed to create timeslot', error: error.message,});
+        }
 };
 
 // Controller to retrieve all timeslots for a specific office

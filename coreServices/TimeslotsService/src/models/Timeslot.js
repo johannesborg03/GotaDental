@@ -6,11 +6,7 @@ const bookingDbConnection = connectToBookingDB();
 var Schema = mongoose.Schema;
 
 var timeslotSchema = new mongoose.Schema({
-    timeslot_id : {
-        type : String,
-        required : true,
-        unique : true,
-    },
+
     timeslot_state : {
         type : Number,
         required : true,
@@ -19,8 +15,8 @@ var timeslotSchema = new mongoose.Schema({
     },
     office_id: {
         type: String,
-        //ref : 'Office',
-        required: true
+        ref : 'Office',
+        required: false
     },
 
     dentist_username: { 
