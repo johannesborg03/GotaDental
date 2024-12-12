@@ -4,16 +4,11 @@
             <h1 class="text-primary">Available Appointments</h1>
         </div>
 
-        <!-- Select Office -->
-        <div class="mb-3">
-            <label for="officeSelect" class="form-label">Select Office:</label>
-            <select id="officeSelect" class="form-select" v-model="selectedOffice" @change="fetchTimeslots" required>
-                <option value="" disabled>Select an office</option>
-                <option v-for="office in offices" :key="office.office_id" :value="office.office_id">
-                    {{ office.office_name }}
-                </option>
-            </select>
-        </div>
+        <button class="btn btn-primary">
+      <router-link to="/patientTimeslot" class="text-white text-decoration-none">
+        Available Timeslots</router-link>
+    </button>
+        
 
         <!-- Available Timeslots -->
         <div v-if="timeslots.length > 0">
