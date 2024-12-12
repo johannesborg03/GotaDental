@@ -32,10 +32,10 @@ data() {
     },
     methods: {
         async fetchTimeslots() {
-            if (!this.selectedOffice) return;
+            //if (!this.selectedOffice) return;
 
             try {
-                const response = await axios.get(`http://localhost:4000/api/timeslots/${this.selectedOffice}`);
+                const response = await axios.get(`http://localhost:4000/api/timeslots/`);
                 this.timeslots = response.data.timeslots || [];
             } catch (error) {
                 console.error("Error fetching timeslots:", error.response?.data || error.message);
