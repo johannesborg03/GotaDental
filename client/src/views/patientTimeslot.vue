@@ -23,4 +23,39 @@
 </template>
 
 <script>
+export default {
+
+data() {
+        return {
+            timeslots: [],
+        };
+    },
+    methods: {
+        async fetchTimeslots() {
+            if (!this.selectedOffice) return;
+
+            try {
+                const response = await axios.get(`http://localhost:4000/api/timeslots/${this.selectedOffice}`);
+                this.timeslots = response.data.timeslots || [];
+            } catch (error) {
+                console.error("Error fetching timeslots:", error.response?.data || error.message);
+                alert("Failed to load timeslots. Please try again.");
+            }
+        },
+        async bookTimeslot(timeslotId) {
+            try {
+                const response = await axios.post(`http://localhost:4000/api/timeslots/book`, {
+                    timeslot_id: timeslotId,
+                });
+                if (response.status === 200) {
+                    alert("Timeslot booked successfully!");
+                    this.fetchTimeslots(); // Refresh timeslots after booking
+                }
+            } catch (error) {
+                console.error("Error booking timeslot:", error.response?.data || error.message);
+                alert("Failed to book timeslot. Please try again.");
+            }
+        },
+    },
+}
 </script>
