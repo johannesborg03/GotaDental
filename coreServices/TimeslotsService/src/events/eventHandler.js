@@ -6,17 +6,18 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
     console.log('Processing create timeslot request:', message);
 
     // Extract data from the received message
-    const { dentist_username, date_and_time } = message;
+    const { dentist_username, date_and_time, timeslot_state } = message;
 
     try {
         // Validate the input data
-        if (!dentist_username || !date_and_time) {
+        if (!dentist_username || !date_and_time || !timeslot_state) {
             console.error('Invalid message data:', message);
             const response = { success: false, error: 'Missing required fields' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
 
+        /*
         // Check if the timeslot already exists
         const existingTimeslot = await Timeslot.findOne({ dentist_username, date_and_time });
         if (existingTimeslot) {
@@ -25,15 +26,10 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
             return;
         }
+        */
 
         // Create a new timeslot
-        const newTimeslot = new Timeslot({
-            dentist_username,
-            date_and_time,
-            timeslot_state: 1, // Default state (1 for active)
-        });
-
-        // Save the new timeslot to the database
+        const newTimeslot = new Timeslot({dentist_username, date_and_time, timeslot_state: 1,});
         await newTimeslot.save();
 
         console.log('Timeslot created successfully:', newTimeslot);
@@ -203,10 +199,7 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
 // Initialize subscriptions
 async function initializeSubscriptions() {
     try {
-        await subscribeToTopic('/create', handleCreateTimeslot);
-        console.log('Subscribed to timeslot/dentist/create');
-
-
+        await subscribeToTopic('timeslot/dentist/create', handleCreateTimeslot);
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);

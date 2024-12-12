@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Timeslot = require('../models/Timeslot'); // Ensure this path is correct
 const axios = require('axios');
-
+/*
 // Create a new timeslot
 router.post('/timeslots/create', async (req, res) => {
     const { dentist_username, office_id, date_and_time } = req.body;
@@ -53,5 +53,5 @@ router.post('/timeslots/create', async (req, res) => {
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
-
+*/ 
 module.exports = router;
