@@ -38,7 +38,7 @@ app.use('/api/dentists', dentistRoutes); // Prefix all patient routes with '/api
 app.use('/api', loginRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api', officeRoutes);
-app.use('/api', timeslotRoutes);
+app.use('/api/timeslot', timeslotRoutes);
 
 
 //const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);

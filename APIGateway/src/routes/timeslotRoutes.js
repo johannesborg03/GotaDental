@@ -3,6 +3,7 @@ const router = express.Router();
 const { publishMessage } = require('../mqttService'); // Ensure this is correct
 const { v4: uuidv4 } = require('uuid');
 
+//router.post('/:dentist_username', timeslotController.createTimeslot);
 // Create a new timeslot
 router.post('/timeslots', async (req, res) => {
     const correlationId = uuidv4();
