@@ -17,10 +17,33 @@ import axios from "axios";
 export default {
     data() {
         return {
-
+            username: '', // should be change to ssn 
         };
     },
+
     async mounted() {
+        this.username = sessionStorage.getItem('userIdentifier');
+        await this.fetchOffices();
+    },
+    mounted() {
+        this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
+        this.fetchUserData();
+    },
+
+    methods: {
+        async fetchUserData() {
+            try {
+                const response = await fetch(`http://localhost:3005/api/patient/${this.username}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user data: ${response.status}`);
+                }
+
+                const userData = await response.json();
+                console.log('Fetched user data:', userData);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        },
     },
 };
 </script>
