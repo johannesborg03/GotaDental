@@ -3,31 +3,30 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new time slot
 exports.createTimeslot = async (req, res) => {
-    try {
-        const { date_and_time, dentist_username, office_id } = req.body;
+        //const { date_and_time, dentist_username, office_id } = req.body;
+        const { dentist_username } = req.parms;
+        const { date_and_time, timeslot_state } = req.body;
 
-        if (!date_and_time || !dentist_username || !office_id) {
+
+
+        if (!date_and_time || !dentist_username || !timeslot_state) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
         // Call the CoreService (via MQTT or HTTP)
-        const timeslotPayload = { date_and_time, dentist_username, office_id };
+        const timeslotData= { date_and_time, dentist_username, timeslot_state };
 
-        // Example of HTTP request to CoreService
-        const response = await axios.post(
-            'http://localhost:3003/api/timeslots/create',
-            timeslotPayload
-        );
+        // If no conflict, proceed to create the timeslot
+        const correlationId = uuidv4(); 
+        const topic = 'timeslot/dentist/create'; 
 
-        if (response.status === 201) {
-            return res.status(201).json({ message: 'Timeslot created successfully', data: response.data });
-        } else {
-            return res.status(400).json({ message: 'Failed to create timeslot', data: response.data });
+        try {
+            const response = await publishMessage(topic, timeslotData, correlationId);
+            res.status(201).json({message: 'Timeslot created successfully', timeslot: response,});
+        } catch (error) {
+            console.error('Error publishing to MQTT:', error);
+            res.status(500).json({message: 'Failed to create timeslot', error: error.message,});
         }
-    } catch (error) {
-        console.error('Error creating timeslot:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
 };
 
 

@@ -3,23 +3,8 @@ const router = express.Router();
 const { publishMessage } = require('../mqttService'); // Ensure this is correct
 const { v4: uuidv4 } = require('uuid');
 
-//router.post('/:dentist_username', timeslotController.createTimeslot);
-// Create a new timeslot
-router.post('/timeslots', async (req, res) => {
-    const correlationId = uuidv4();
-    const topic = 'timeslots/create';
-
-    try {
-        const response = await publishMessage(topic, req.body, correlationId);
-        if (!response.success) {
-            return res.status(400).json({ message: response.message });
-        }
-        res.status(201).json({ message: 'Timeslot created successfully', timeslot: response.timeslot });
-    } catch (error) {
-        console.error('Error creating timeslot:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
+// Create a new timeslot for a specific dentist
+router.post('/:dentist_username', timeslotController.createTimeslot);
 
 // Retrieve a timeslot by ID
 router.get('/timeslots/:office_id/:dentist_username/:timeslot_id', async (req, res) => {

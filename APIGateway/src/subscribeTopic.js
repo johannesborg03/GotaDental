@@ -18,5 +18,6 @@ function processCreateOffice(message) {
 }
 
 subscribeToTopic('dentist_topic', processTimeslot);
+subscribeToTopic('timeslot_topic', processTimeslot);
 subscribeToTopic('offices/retrieveAll', processRetrieveAllOffices);
 subscribeToTopic('offices/create', processCreateOffice);
