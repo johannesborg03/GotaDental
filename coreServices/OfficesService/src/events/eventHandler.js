@@ -3,8 +3,6 @@ const Office = require('../models/Office');
 
 async function handleRetrieveAllOffices(message, replyTo, correlationId, channel) {
     console.log('Received retrieve all offices message:', message);
-    const { identifier} = message;
-
     try {
         const offices = await Office.find();
         if(!offices){
@@ -22,6 +20,27 @@ async function handleRetrieveAllOffices(message, replyTo, correlationId, channel
     }
 }
 
+async function handleRetrieveOfficesByID(message, replyTo, correlationId, channel) {
+    console.log('Received retrieve all offices message:', message);
+    const { office_id, office_name} = message;
+
+    try {
+        if(!office_id || !office_name){
+            const errorResponse = { success: false, error: 'Invalid office' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const office = await Office.findOne({_id: office_id});
+
+        const successResponse = { success: true, office, office};
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving offices:', error);
+        const errorResponse = { success: false, error: 'Internal server error while fetching offices'};
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
 async function handleCreateOffice(message, replyTo, correlationId, channel) {
     console.log('Received message from topic "offices/create":', message);
 
@@ -45,14 +64,17 @@ async function initializeOfficeSubscriptions() {
         await subscribeToTopic('retrieveAll/offices', handleRetrieveAllOffices);
         console.log('Subscribed to retrieveAll/offices');
 
+        await subscribeToTopic('offices/retrieve', handleRetrieveOfficesByID);
+        console.log('Subscribed to offices/retrieve');
+
         await subscribeToTopic('offices/create', handleCreateOffice);
+        console.log('Subscribed to offices/create');
 
         console.log('Office subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing office subscriptions:', error);
     }
 }
-
 
 module.exports = {
     initializeOfficeSubscriptions,

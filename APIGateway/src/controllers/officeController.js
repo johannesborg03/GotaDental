@@ -2,7 +2,7 @@ const { publishMessage } = require('../mqttService'); // Adjust the path if nece
 const { v4: uuidv4 } = require('uuid');
 
 exports.getAllOffices = async (req, res) => {
-    console.log('Received login request:', req.body);
+    console.log('Received office request:', req.body);
     //const { office_id, office_name } = req.body;
 
     // Validate the input data
@@ -38,7 +38,7 @@ exports.getAllOffices = async (req, res) => {
 exports.getOfficeById = async (req, res) => {
     const { office_id } = req.params;
     const correlationId = uuidv4();
-    const topic = `offices/${office_id}/retrieve`;
+    const topic = `offices/retrieve`;
 
     try {
         const response = await publishMessage(topic, { office_id }, correlationId);
@@ -49,7 +49,7 @@ exports.getOfficeById = async (req, res) => {
 
         res.status(200).json({
             message: 'Office details retrieved successfully',
-            office: response.office,
+            token: response.token,
         });
     } catch (error) {
         console.error('Error retrieving office details:', error);
@@ -71,20 +71,11 @@ exports.createOffice = async (req, res) => {
 
     try {
         // Publish the message to RabbitMQ
-        const response = await publishMessage(
-            topic,
-            { office_id, office_name, latitude, longitude, dentists },
-            correlationId
-        );
-
-        if (!response || !response.success) {
-            return res.status(409).json({ message: response?.error || 'Failed to create office' });
+        const response = await publishMessage(topic, { office_id, office_name, latitude, longitude, dentists }, correlationId);
+        if (!response.success) {
+            return res.status(404).json({ message: response?.error || 'Failed to create office' });
         }
-
-        res.status(201).json({
-            message: 'Office created successfully',
-            office: response.office,
-        });
+        res.status(201).json({message: 'Office created successfully', office: response.office,});
     } catch (error) {
         console.error('Error creating office:', error);
         res.status(500).json({ message: 'Server error during office creation' });
