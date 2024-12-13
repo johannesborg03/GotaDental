@@ -36,5 +36,22 @@ describe('Login Handlers', () => {
         );
     });
 
-    
+    test('should fail patient login with invalid credentials', async () => {
+        Patient.findOne = vi.fn().mockResolvedValue(null);
+
+        const message = { identifier: 'invalidSSN', password: 'wrongPassword' };
+        const replyTo = 'responseQueue';
+        const correlationId = 'testCorrelationId';
+
+        await handlePatientLogin(message, replyTo, correlationId, channel);
+
+        expect(Patient.findOne).toHaveBeenCalledWith({ patient_ssn: 'invalidSSN' });
+        expect(channel.sendToQueue).toHaveBeenCalledWith(
+            replyTo,
+            Buffer.from(JSON.stringify({ success: false, error: 'Invalid SSN or password' })),
+            { correlationId }
+        );
+    });
+
+   
 });
