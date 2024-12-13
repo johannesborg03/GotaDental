@@ -3,13 +3,13 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 const officeRoutes = require('./src/apiRoutes/officeRoutes'); 
 const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
-const { connectToOfficeDB } = require('./src/utils/officeDBConnect');
+const { connectToBookingDB } = require('./src/utils/dbConnect');
 const OfficeModel = require('./src/models/Office'); 
 
 // Initialize the database connection
-const officeDbConnection = connectToOfficeDB();
+const bookingDbConnection = connectToBookingDB();
 // Load the office model
-const Office = OfficeModel(officeDbConnection);
+const Office = OfficeModel(bookingDbConnection);
 
 require('dotenv').config();
 
