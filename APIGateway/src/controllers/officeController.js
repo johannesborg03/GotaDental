@@ -9,10 +9,11 @@ exports.getAllOffices = async (req, res) => {
     const correlationId = uuidv4();
     const topic = 'retrieveAll/offices';
 
-    console.log('Publishing to topic:', topic);
-    console.log('office data:', officeData);
+    
+
 
     try{
+        console.log('Publishing to topic:', topic);
         const response = await publishMessage(topic, {}, correlationId);
 
         if (response.error) {
@@ -21,6 +22,7 @@ exports.getAllOffices = async (req, res) => {
         res.status(200).json({
             message: 'Offices fetched',
             token: response.token,
+            offices: response.offices,
         });
     }catch (error) {
         console.error('[Office Service] Error fetching offices:', error);
