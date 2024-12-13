@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.registerDentist = async (req, res) => {
     console.log('Received dentist data:', req.body);
-    const { name, username, email} = req.body;
+    const { name, username, email, password } = req.body;
 
     // Validate the input data
     if (!name || !username || !email || !password)  {
