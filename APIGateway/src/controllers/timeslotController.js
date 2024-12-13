@@ -4,24 +4,22 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new time slot
 exports.createTimeslot = async (req, res) => {
         //const { date_and_time, dentist_username, office_id } = req.body;
-        const { dentist_username } = req.params;
-        const { date_and_time, timeslot_state } = req.body;
+        const { title, start, end, dentist, office } = req.body;
 
 
 
-        if (!date_and_time || !dentist_username || !timeslot_state) {
+        if (!title || !start || !end || !dentist || !office) {
             return res.status(400).json({ message: 'Missing required fields' });
-        }
-
-        // Call the CoreService (via MQTT or HTTP)
-        const timeslotData= { date_and_time, dentist_username, timeslot_state };
-
+          }
+       
         // If no conflict, proceed to create the timeslot
         const correlationId = uuidv4(); 
-        const topic = 'timeslot/dentist/create'; 
+        const topic = 'timeslot/create'; 
 
         try {
+            const message = { title, start, end, dentist, office };
             const response = await publishMessage(topic, timeslotData, correlationId);
+            
             res.status(201).json({message: 'Timeslot created successfully', timeslot: response,});
         } catch (error) {
             console.error('Error publishing to MQTT:', error);

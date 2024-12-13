@@ -21,23 +21,36 @@ async function handleRetrieveAllOffices(message, replyTo, correlationId, channel
 }
 
 async function handleRetrieveOfficesByID(message, replyTo, correlationId, channel) {
-    console.log('Received retrieve all offices message:', message);
-    const { office_id, office_name} = message;
+  
+    console.log('Received request to retrieve office:', message);
+    const { office_id } = message;
 
     try {
-        if(!office_id || !office_name){
-            const errorResponse = { success: false, error: 'Invalid office' };
+        if (!office_id) {
+            const errorResponse = { success: false, error: 'Missing office_id in request.' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        const office = await Office.findOne({_id: office_id});
+        // Fetch the office details from the database
+        const office = await Office.findById(office_id);
+        if (!office) {
+            const errorResponse = { success: false, error: 'Office not found.' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
 
-        const successResponse = { success: true, office, office};
+        console.log(`Office details fetched: ${office.office_name}`);
+
+        console.log(`Replying to: ${replyTo}, Correlation ID: ${correlationId}`);
+
+
+
+        const successResponse = { success: true, office_name: office.office_name };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
-        console.error('Error retrieving offices:', error);
-        const errorResponse = { success: false, error: 'Internal server error while fetching offices'};
+        console.error('Error retrieving office:', error);
+        const errorResponse = { success: false, error: 'Internal server error while retrieving office.' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
 }

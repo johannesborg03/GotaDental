@@ -3,13 +3,20 @@
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
+     <div v-if="selectedTimeslot" class="mt-3">
+      <p>Selected Timeslot:</p>
+      <p>Title: {{ selectedTimeslot.title }}</p>
+      <p>Start: {{ selectedTimeslot.start }}</p>
+      <p>End: {{ selectedTimeslot.end }}</p>
+      <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
+    </div>
   </div>
   </template>
   
   <script setup>
   import { ref } from "vue";
   import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
-  
+  import  axios from "axios";
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -20,7 +27,8 @@ function getCurrentWeekStart() {
   return now.toISOString().split("T")[0]; // Return in "YYYY-MM-DD" format
 }
 
-
+// State for selected timeslot
+const selectedTimeslot = ref(null);
 
   // Reactive configuration
   const calendarConfig = ref({
@@ -31,17 +39,43 @@ function getCurrentWeekStart() {
     onTimeRangeSelected: (args) => {
     // Callback triggered when a time range is selected
     const title = prompt("Enter the appointment title:", "New Appointment");
-    if (title) {
-      const newEvent = {
-        id: String(calendarConfig.value.events.length + 1), // Generate unique ID
-        text: title,
-        start: args.start, // Selected start time
-        end: args.end, // Selected end time
+      if (title) {
+      selectedTimeslot.value = {
+        title,
+        start: args.start,
+        end: args.end,
       };
-      calendarConfig.value.events.push(newEvent); // Add new appointment to events
     }
   },
-  });
+});
+
+async function saveTimeslot() {
+  if (!selectedTimeslot.value) {
+    alert("No timeslot selected.");
+    return;
+  }
+
+  try {
+    const payload = {
+      title: selectedTimeslot.value.title,
+      start: selectedTimeslot.value.start,
+      end: selectedTimeslot.value.end,
+      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', // Replace with actual dentist ID
+      office: "your-office-id", // Replace with actual office ID
+    };
+
+    const response = await axios.post("http://localhost:4000/api/timeslots", payload);
+    alert("Timeslot saved successfully!");
+    console.log("Saved timeslot:", response.data);
+
+    // Clear selected timeslot
+    selectedTimeslot.value = null;
+  } catch (error) {
+    console.error("Error saving timeslot:", error);
+    alert("Failed to save timeslot. Please try again.");
+  }
+}
+
   
   // Navigation methods
   function prevWeek() {
@@ -55,4 +89,7 @@ function getCurrentWeekStart() {
     currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
     calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
   }
+
+
+
   </script>

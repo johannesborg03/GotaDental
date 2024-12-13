@@ -1,6 +1,7 @@
 const { subscribeToTopic } = require('./subscriber');
-const { publishMessage } = require('./publisher'); 
+const { publishMessage } = require('./publisher');
 const mqtt = require('mqtt');
+const { v4: uuidv4 } = require('uuid');
 
 const Patient = require('../models/Patient');
 const Dentist = require('../models/Dentist');
@@ -32,6 +33,7 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
     console.log('Received dentist login message:', message);
     const { identifier, password } = message;
 
+    const officeCorrelationId = uuidv4(); // Unique ID for this request
     try {
         const dentist = await Dentist.findOne({ dentist_username: identifier });
         if (!dentist || dentist.password !== password) {
@@ -40,7 +42,32 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             return;
         }
 
-        const successResponse = { success: true, token: 'jwt-token-for-dentist', userType: 'dentist' };
+        // Publish a request to OfficeService to fetch office details
+        const officeTopic = 'offices/retrieve'; // Topic to fetch office data
+        console.log(`Sending request to OfficeService for office ID: ${dentist.office}`);
+
+        console.log(`Waiting for response with Correlation ID: ${correlationId}`);
+
+        const officeResponse = await publishMessage(officeTopic, { office_id: dentist.office }, officeCorrelationId);
+
+        // Check the response from OfficeService
+        if (!officeResponse || officeResponse.success === false) {
+            const errorResponse = { success: false, error: 'Failed to retrieve office details.' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        console.log(`Office details retrieved successfully: ${officeResponse.office_name}`);
+
+
+
+
+        const successResponse = {
+            success: true,
+            token: 'jwt-token-for-dentist',
+            userType: 'dentist',
+            office: dentist.office?.office_name || "No office assigned",
+        };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error during dentist login:', error);
@@ -90,7 +117,7 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
         });
 
         await newPatient.save();
-        
+
         console.log(`Patient with SSN ${ssn} registered successfully.`);
         // Respond with success
         const response = { success: true, patient: newPatient };
@@ -111,7 +138,7 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 
     try {
         // Validate the input data
-        if (!name || !username || !email || !date_of_birth || !password)  {
+        if (!name || !username || !email || !date_of_birth || !password) {
             console.error('Invalid message data:', message);
             const response = { success: false, error: 'Invalid data' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
@@ -143,16 +170,16 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 
         await newDentist.save();
 
-          // Publish a message to the Office Service to update the office
-          const updateOfficeTopic = 'offices/update';
-          const updateOfficeMessage = {
-              officeId: office,
-              dentistId: newDentist._id,
-          };
-  
-          await publishMessage(updateOfficeTopic, updateOfficeMessage, correlationId);
-          console.log(`Published message to update office:`, updateOfficeMessage);
-  
+        // Publish a message to the Office Service to update the office
+        const updateOfficeTopic = 'offices/update';
+        const updateOfficeMessage = {
+            officeId: office,
+            dentistId: newDentist._id,
+        };
+
+        await publishMessage(updateOfficeTopic, updateOfficeMessage, correlationId);
+        console.log(`Published message to update office:`, updateOfficeMessage);
+
 
 
         console.log(`Dentist with username ${username} registered successfully.`);
@@ -162,6 +189,38 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     } catch (error) {
         console.error('Error processing dentist registration:', error);
         const response = { success: false, error: 'Internal server error while registering dentist.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    }
+}
+
+async function handleUpdateDentistTimeslot(message, replyTo, correlationId, channel) {
+    const { dentistId, timeslotId } = message;
+
+    try {
+        if (!dentistId || !timeslotId) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Find the dentist and update their timeslots array
+        const dentist = await Dentist.findById(dentistId);
+        if (!dentist) {
+            const errorResponse = { success: false, error: 'Dentist not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        dentist.timeslots.push(timeslotId);
+        await dentist.save();
+
+        console.log('Dentist timeslot array updated successfully:', dentist);
+
+        const successResponse = { success: true, dentist };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating dentist timeslot array:', error);
+        const response = { success: false, error: 'Internal server error while updating dentist timeslot array.' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
     }
 }
@@ -181,6 +240,9 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentists/register', handleDentistRegistration);
         console.log('Subscribed to dentists/register');
 
+        await subscribeToTopic('dentists/updateTimeslot', handleUpdateDentistTimeslot);
+        console.log('Subscribed to dentists/updateTimeslot');
+
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
 
@@ -194,4 +256,4 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin};
+module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin, handleUpdateDentistTimeslot };

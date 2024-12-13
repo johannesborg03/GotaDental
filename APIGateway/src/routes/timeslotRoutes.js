@@ -5,7 +5,10 @@ const { v4: uuidv4 } = require('uuid');
 const timeslotController = require('../controllers/timeslotController');
 
 // Create a new timeslot for a specific dentist
-router.post('/:dentist_username', timeslotController.createTimeslot);
+//router.post('/:dentist_username', timeslotController.createTimeslot);
+
+
+router.post('/timeslots', timeslotController.createTimeslot);
 
 // Retrieve a timeslot by ID
 router.get('/timeslots/:office_id/:dentist_username/:timeslot_id', async (req, res) => {
