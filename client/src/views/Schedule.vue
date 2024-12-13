@@ -50,6 +50,7 @@ const selectedTimeslot = ref(null);
 });
 
 async function saveTimeslot() {
+
   if (!selectedTimeslot.value) {
     alert("No timeslot selected.");
     return;
@@ -61,9 +62,10 @@ async function saveTimeslot() {
       start: selectedTimeslot.value.start,
       end: selectedTimeslot.value.end,
       dentist: sessionStorage.getItem('userIdentifier') || 'Guest', // Replace with actual dentist ID
-      office: "your-office-id", // Replace with actual office ID
+      office: sessionStorage.getItem('Office'), // Replace with actual office ID
     };
 
+    console.log("Sending payload", payload);
     const response = await axios.post("http://localhost:4000/api/timeslots", payload);
     alert("Timeslot saved successfully!");
     console.log("Saved timeslot:", response.data);

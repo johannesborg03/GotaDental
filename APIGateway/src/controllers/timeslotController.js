@@ -1,30 +1,42 @@
-const { publishMessage, setupReplyQueue } = require('../mqttService');
+const { publishMessage } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new time slot
 exports.createTimeslot = async (req, res) => {
-        //const { date_and_time, dentist_username, office_id } = req.body;
-        const { title, start, end, dentist, office } = req.body;
+    console.log("hey");
+    const { title, start, end, dentist, office } = req.body;
+
+    // Validate required fields
+    if (!title || !start || !end || !dentist || !office) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
 
 
+    // Generate a unique correlation ID
+    const correlationId = uuidv4();
+    const topic = 'timeslot/create';
 
-        if (!title || !start || !end || !dentist || !office) {
-            return res.status(400).json({ message: 'Missing required fields' });
-          }
-       
-        // If no conflict, proceed to create the timeslot
-        const correlationId = uuidv4(); 
-        const topic = 'timeslot/create'; 
+    
+    try {
+        const timeslotData = { title, start, end, dentist, office }; // Fixed variable name
+        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
-        try {
-            const message = { title, start, end, dentist, office };
-            const response = await publishMessage(topic, timeslotData, correlationId);
-            
-            res.status(201).json({message: 'Timeslot created successfully', timeslot: response,});
-        } catch (error) {
-            console.error('Error publishing to MQTT:', error);
-            res.status(500).json({message: 'Failed to create timeslot', error: error.message,});
-        }
+        // Publish the message to RabbitMQ
+        await publishMessage(topic, timeslotData, correlationId);
+
+        // Respond with success
+        res.status(201).json({
+            message: 'Timeslot sent to Timeslot Service',
+            timeslot: timeslotData,
+            correlationId,
+        });
+    } catch (error) {
+        console.error('Error publishing timeslot to Timeslot Service:', error);
+        res.status(500).json({
+            message: 'Failed to create timeslot',
+            error: error.message,
+        });
+    }
 };
 
 

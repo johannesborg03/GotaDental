@@ -15,9 +15,6 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
-
-
-
         // Create the timeslot
         const newTimeslot = new Timeslot({ title, start, end, dentist, office });
         await newTimeslot.save();
