@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new time slot
 exports.createTimeslot = async (req, res) => {
         //const { date_and_time, dentist_username, office_id } = req.body;
-        const { dentist_username } = req.parms;
+        const { dentist_username } = req.params;
         const { date_and_time, timeslot_state } = req.body;
 
 
