@@ -4,20 +4,23 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.registerDentist = async (req, res) => {
     console.log('Received dentist data:', req.body);
-    const { name, username, email, date_of_birth, password } = req.body;
+    const { name, username, email, date_of_birth, password, officeId } = req.body;
 
-    // Validate the input data
-    if (!name || !username || !email || !date_of_birth || !password)  {
+    
+      // Validate the input data
+      if (!name || !username || !email || !date_of_birth || !password || !officeId) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
+
 
     const correlationId = uuidv4(); // Unique ID for this request
     const topic = 'dentists/register';
 
-    // Prepare the message for the RabbitMQ broker
-    const dentistData = { name, username, email, date_of_birth, password };
+    // Prepare the message for RabbitMQ
+    const dentistData = { name, username, email, date_of_birth, password, office: officeId };
 
     try {
+        console.log(dentistData);
         // Publish the message to the topic (exchange)
         const response = await publishMessage(topic, dentistData, correlationId);
 

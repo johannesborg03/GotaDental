@@ -108,7 +108,7 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     console.log('Processing dentist registration:', message);
 
     // Extract data from the received message
-    const { name, username, email, date_of_birth, password } = message;
+    const { name, username, email, date_of_birth, password, office } = message;
 
     try {
         // Validate the input data
@@ -138,7 +138,8 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             email,
             date_of_birth,
             appointments: [], // Empty array initially
-            timeslots: []
+            timeslots: [],
+            office,
         });
 
         await newDentist.save();
