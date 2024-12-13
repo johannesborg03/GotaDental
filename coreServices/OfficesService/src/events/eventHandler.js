@@ -81,6 +81,44 @@ async function handleCreateOffice(message, replyTo, correlationId, channel) {
 }
 
 
+async function handleUpdateOffice(message, replyTo, correlationId, channel) {
+    console.log('Processing office update:', message);
+
+    const { officeId, dentistId } = message;
+
+    try {
+        // Validate the input data
+        if (!officeId || !dentistId) {
+            console.error('Invalid message data:', message);
+            const response = { success: false, error: 'Invalid data. Both officeId and dentistId are required.' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Find and update the office
+        const office = await Office.findById(officeId);
+        if (!office) {
+            console.error('Office not found:', officeId);
+            const response = { success: false, error: 'Office not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
+
+        // Add the dentist to the office's dentists array
+        office.dentists.push(dentistId);
+        await office.save();
+
+        console.log(`Office ${officeId} updated successfully with dentist ${dentistId}.`);
+        const response = { success: true, office };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    } catch (error) {
+        console.error('Error updating office:', error);
+        const response = { success: false, error: 'Internal server error while updating office.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+    }
+}
+
+
 async function initializeOfficeSubscriptions() {
     try {
         await subscribeToTopic('retrieveAll/offices', handleRetrieveAllOffices);
@@ -92,6 +130,9 @@ async function initializeOfficeSubscriptions() {
         await subscribeToTopic('offices/create', handleCreateOffice);
         console.log('Subscribed to offices/create');
 
+        await subscribeToTopic('offices/update', handleUpdateOffice);
+        console.log('Subscribed to offices/update');
+
         console.log('Office subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing office subscriptions:', error);
@@ -102,4 +143,5 @@ module.exports = {
     initializeOfficeSubscriptions,
     handleRetrieveAllOffices,
     handleCreateOffice,
+    handleUpdateOffice
 };

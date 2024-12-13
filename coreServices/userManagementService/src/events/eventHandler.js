@@ -1,4 +1,5 @@
 const { subscribeToTopic } = require('./subscriber');
+const { publishMessage } = require('./publisher'); 
 const mqtt = require('mqtt');
 
 const Patient = require('../models/Patient');
@@ -89,9 +90,7 @@ async function handlePatientRegistration(message, replyTo, correlationId, channe
         });
 
         await newPatient.save();
-
-
-
+        
         console.log(`Patient with SSN ${ssn} registered successfully.`);
         // Respond with success
         const response = { success: true, patient: newPatient };
@@ -144,6 +143,16 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
 
         await newDentist.save();
 
+          // Publish a message to the Office Service to update the office
+          const updateOfficeTopic = 'offices/update';
+          const updateOfficeMessage = {
+              officeId: office,
+              dentistId: newDentist._id,
+          };
+  
+          await publishMessage(updateOfficeTopic, updateOfficeMessage, correlationId);
+          console.log(`Published message to update office:`, updateOfficeMessage);
+  
 
 
         console.log(`Dentist with username ${username} registered successfully.`);
