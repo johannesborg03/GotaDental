@@ -12,7 +12,6 @@ router.post('/api/dentists', async function (req, res) {
             password: req.body.password,
             name : req.body.name,
             email: req.body.email,
-            date_of_birth : req.body.date_of_birth,
             appointments : req.body.appointments,
             timeslots : req.body.timeslots,
         });
@@ -89,7 +88,6 @@ router.put('/api/dentists/:dentist_username', async (req, res) => {
                 password: req.body.password,
                 name: req.body.name,
                 email: req.body.email,
-                date_of_birth: req.body.date_of_birth,
                 appointments : req.body.appointments, //optional
                 timeslots: req.body.timeslots,    // Optional
             },

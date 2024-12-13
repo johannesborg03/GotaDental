@@ -7,5 +7,4 @@ vi.mock('../../src/models/Dentist');
 describe ('Patient Model Tests', () => {
 
 
-
 });
