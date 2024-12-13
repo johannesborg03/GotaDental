@@ -7,11 +7,6 @@ const bookingDbConnection = connectToBookingDB();
 var Schema = mongoose.Schema;
 
 var officeSchema = new mongoose.Schema({
-    office_id: {
-        type: String,
-        required: true,
-        unique: true
-    },
     office_name: {
         type: String,
         required: true
@@ -24,18 +19,17 @@ var officeSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    dentists: {
-        type: [String], // Array of dentist usernames
-        required: true
-    },
+    dentists: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Dentist", // Reference to the Dentist model
+        },
+      ],
     office_address: { 
         type: String,
         required: true
     },
-    dentist_username: { 
-        type: String,
-        required: true
-    }
+   
 });
 
 module.exports = bookingDbConnection.model('Office', officeSchema);
