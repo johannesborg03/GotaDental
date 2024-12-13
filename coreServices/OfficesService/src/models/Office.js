@@ -29,6 +29,12 @@ var officeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    timeslots: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Timeslot", // Reference to Timeslot model
+        },
+    ],
    
 });
 
