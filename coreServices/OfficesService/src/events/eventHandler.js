@@ -44,9 +44,31 @@ async function handleRetrieveOfficesByID(message, replyTo, correlationId, channe
 async function handleCreateOffice(message, replyTo, correlationId, channel) {
     console.log('Received message from topic "offices/create":', message);
 
+
+
+
+       // Destructure and validate the incoming message
+       const { office_name, latitude, longitude, dentists, office_address } = message;
+
+       if (!office_name || !latitude || !longitude || !office_address) {
+           console.error('Invalid data for creating office:', message);
+           const errorResponse = { success: false, error: 'Missing or invalid required fields' };
+           channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+           return;
+       }
+
+
     try {
         // Create the new office in the database
-        const newOffice = await Office.create(message);
+         //
+         const newOffice = await Office.create({
+            office_name,
+            latitude,
+            longitude,
+            office_address,
+         //   dentists: validatedDentists, // Use only validated dentist IDs
+        });
+
         console.log('Office created successfully:', newOffice);
 
         const successResponse = { success: true, office: newOffice };
