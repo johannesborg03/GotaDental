@@ -38,8 +38,9 @@ describe('Patient Model Tests', () => {
     // Assert the returned patient data 
     expect(savedPatient.patient_ssn).toBe('123456789101');
     expect(savedPatient.name).toBe('John');
+    expect(savedPatient.password).toBe('123');
     expect(savedPatient.email).toBe('john.doe@example.com');
-    expect(mockSave).toHaveBeenCalled(); 
+    expect(mockSave).toHaveBeenCalled();
   });
 
   test('should return error if patient_ssn already exists', async () => {
@@ -48,12 +49,12 @@ describe('Patient Model Tests', () => {
       code: 11000, // Simulating a MongoDB duplicate key error
       keyValue: { patient_ssn: '123456789101' } // Simulated duplicate field
     });
-  
+
     // Mock the Patient constructor 
     Patient.mockImplementation(() => ({
       save: mockSave
     }));
-  
+
     // Create a new patient with a duplicate SSN
     const newPatient = new Patient({
       patient_ssn: '123456789101',
@@ -63,21 +64,21 @@ describe('Patient Model Tests', () => {
       notified: false,
       appointments: []
     });
-  
+
     // Simulate the controller's error handling for duplicate
     try {
       await newPatient.save();
     } catch (err) {
       // Assert that the error code is 11000 (duplicate error)
       expect(err.code).toBe(11000);
-  
+
       // Assert the correct field is being checked for duplication
       expect(Object.keys(err.keyValue)[0]).toBe('patient_ssn');
     }
-  
+
     // Assert that the save method was called
     expect(mockSave).toHaveBeenCalled();
   });
-  
+
 
 });
