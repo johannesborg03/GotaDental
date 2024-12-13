@@ -2,18 +2,12 @@ const { publishMessage } = require('../mqttService'); // Adjust the path if nece
 const { v4: uuidv4 } = require('uuid');
 
 exports.getAllOffices = async (req, res) => {
+    
     console.log('Received office request:', req.body);
-    //const { office_id, office_name } = req.body;
+    
 
-    // Validate the input data
-    //if (!office_id || !office_name) {
-      //  return res.status(400).json({ message: 'Missing required fields' });
-    //}
-
-    const topic =  'retrieveAll/offices';
-
-    //const officeData = { identifier: office_id, office_name };
-    const correlationId = uuidv4(); // Unique ID for this request
+    const correlationId = uuidv4();
+    const topic = 'retrieveAll/offices';
 
     console.log('Publishing to topic:', topic);
     console.log('office data:', officeData);
@@ -37,6 +31,13 @@ exports.getAllOffices = async (req, res) => {
 // Controller to retrieve details of a specific office by office_id
 exports.getOfficeById = async (req, res) => {
     const { office_id } = req.params;
+
+
+      // Validate the input
+      if (!office_id) {
+        return res.status(400).json({ message: 'Missing required field: office_id' });
+    }
+
     const correlationId = uuidv4();
     const topic = `offices/retrieve`;
 
@@ -59,19 +60,24 @@ exports.getOfficeById = async (req, res) => {
 
 // Controller to create a new office
 exports.createOffice = async (req, res) => {
-    const { office_id, office_name, latitude, longitude, dentists } = req.body;
+    const { office_name, latitude, longitude, dentists, office_address } = req.body;
 
     // Validate the input
-    if (!office_id || !office_name || !latitude || !longitude || !dentists) {
-        return res.status(400).json({ message: 'Missing required fields' });
+    if (!office_name || !latitude || !longitude || !office_address) {
+        return res.status(400).json({ message: 'Missing or invalid required fields' });
     }
-
     const correlationId = uuidv4();
     const topic = 'offices/create';
 
     try {
+
+           // Prepare office data
+           const officeData = { office_name, latitude, longitude, dentists, office_address };
+
+
         // Publish the message to RabbitMQ
-        const response = await publishMessage(topic, { office_id, office_name, latitude, longitude, dentists }, correlationId);
+        const response = await publishMessage(topic, officeData, correlationId);
+
         if (!response.success) {
             return res.status(404).json({ message: response?.error || 'Failed to create office' });
         }
