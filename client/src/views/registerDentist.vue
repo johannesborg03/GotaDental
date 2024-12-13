@@ -38,7 +38,7 @@
                     <select id="office" v-model="input.officeId" class="form-control" required>
                         <option value="" disabled>Select your office</option>
                         <option v-for="office in offices" :key="office._id" :value="office._id">
-                            {{ office.name }}
+                            {{ office.office_name }}
                         </option>
                     </select>
                 </div>
@@ -74,6 +74,7 @@ export default {
                 confirmPassword: '',
                 officeId: '',
             },
+            offices: [],
             errorMessage: "",
             successMessage: "",
         };
@@ -83,7 +84,13 @@ export default {
         async fetchOffices() {
             try {
                 const response = await axios.get("http://localhost:4000/api/offices");
-                this.offices = response.data;
+                // Extract and assign offices from the response
+                if (response.data && response.data.offices) {
+                    this.offices = response.data.offices;
+                } else {
+                    console.error("No offices found in the response");
+                    this.errorMessage = "No offices available. Please try again later.";
+                }
             } catch (error) {
                 console.error("Error fetching offices:", error);
             }
@@ -155,8 +162,8 @@ export default {
         },
     },
     mounted() {
-    this.fetchOffices(); // Fetch offices when the component is mounted
-  },
+        this.fetchOffices(); // Fetch offices when the component is mounted
+    },
 };
 </script>
 
