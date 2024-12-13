@@ -15,5 +15,26 @@ describe('Login Handlers', () => {
         };
     });
 
-   
+    test('should handle patient login successfully', async () => {
+        // Mock data
+        const mockPatient = { patient_ssn: '12345', password: 'password123' };
+        Patient.findOne = vi.fn().mockResolvedValue(mockPatient);
+
+        // Input message
+        const message = { identifier: '12345', password: 'password123' };
+        const replyTo = 'responseQueue';
+        const correlationId = 'testCorrelationId';
+
+        await handlePatientLogin(message, replyTo, correlationId, channel);
+
+        // Assertions
+        expect(Patient.findOne).toHaveBeenCalledWith({ patient_ssn: '12345' });
+        expect(channel.sendToQueue).toHaveBeenCalledWith(
+            replyTo,
+            Buffer.from(JSON.stringify({ success: true, token: 'jwt-token-for-patient', userType: 'patient' })),
+            { correlationId }
+        );
+    });
+
+    
 });
