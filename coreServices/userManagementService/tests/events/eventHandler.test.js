@@ -71,4 +71,21 @@ describe('Login Handlers', () => {
         );
     });
 
+    test('should fail dentist login with incorrect password', async () => {
+        const mockDentist = { dentist_username: 'dentist1', password: 'securepass' };
+        Dentist.findOne = vi.fn().mockResolvedValue(mockDentist);
+
+        const message = { identifier: 'dentist1', password: 'wrongpass' };
+        const replyTo = 'responseQueue';
+        const correlationId = 'testCorrelationId';
+
+        await handleDentistLogin(message, replyTo, correlationId, channel);
+
+        expect(Dentist.findOne).toHaveBeenCalledWith({ dentist_username: 'dentist1' });
+        expect(channel.sendToQueue).toHaveBeenCalledWith(
+            replyTo,
+            Buffer.from(JSON.stringify({ success: false, error: 'Invalid username or password' })),
+            { correlationId }
+        );
+    });
 });
