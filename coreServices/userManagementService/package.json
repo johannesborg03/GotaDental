@@ -4,7 +4,8 @@
     "main": "app.js",
     "scripts": {
         "dev": "node app.js",
-        "start": "node app.js"
+        "start": "node app.js",
+        "test": "vitest"
     },
     "dependencies": {
         "amqplib": "^0.10.5",
@@ -13,5 +14,8 @@
         "express": "^4.21.1",
         "mongoose": "^8.8.2",
         "mqtt": "^5.10.2"
+    },
+    "devDependencies": {
+        "vitest": "^2.1.8"
     }
 }

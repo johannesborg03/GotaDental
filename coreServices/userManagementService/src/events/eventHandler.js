@@ -108,11 +108,11 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
     console.log('Processing dentist registration:', message);
 
     // Extract data from the received message
-    const { name, username, email, date_of_birth, password } = message;
+    const { name, username, email, password } = message;
 
     try {
         // Validate the input data
-        if (!name || !username || !email || !date_of_birth || !password)  {
+        if (!name || !username || !email || !password)  {
             console.error('Invalid message data:', message);
             const response = { success: false, error: 'Invalid data' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
@@ -136,7 +136,6 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             password,
             name,
             email,
-            date_of_birth,
             appointments: [], // Empty array initially
             timeslots: []
         });
