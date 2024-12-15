@@ -20,19 +20,27 @@
                     <input type="email" id="email" v-model="input.email" class="form-control"
                         placeholder="Enter your email" required />
                 </div>
+                <div class="form-group mb-3">
+
+                    <input type="text" id="date_of_birth" v-model="input.date_of_birth" class="form-control"
+                        placeholder="Enter your date of birth (YYYY-MM-DD)" required />
+                </div>
 
                 <div class="form-group mb-3">
                     <input type="password" id="password" v-model="input.password" class="form-control"
                         placeholder="Enter a password" required />
                 </div>
                 <div class="form-group mb-3">
-                    <input type="password" id="confirmPassword" v-model="input.confirmPassword" class="form-control" 
-                    placeholder="Confirm password"
-                     required />
+                    <input type="password" id="confirmPassword" v-model="input.confirmPassword" class="form-control"
+                        placeholder="Confirm password" required />
                 </div>
-                <div class="form-check mb-3">
-                    <input type="checkbox" id="terms" class="checkbox-input" v-model="terms" required />
-                    <label class="checkbox-label" for="terms">Accept terms and conditions</label>
+                <div class="form-group mb-3">
+                    <select id="office" v-model="input.officeId" class="form-control" required>
+                        <option value="" disabled>Select your office</option>
+                        <option v-for="office in offices" :key="office._id" :value="office._id">
+                            {{ office.office_name }}
+                        </option>
+                    </select>
                 </div>
 
                 <div class="d-grid gap-2">
@@ -58,19 +66,56 @@ export default {
     data() {
         return {
             input: {
-            name: '',
-            username: '', // Added username
-            email: '',
-            password: '',
-            confirmPassword: '',
+                name: '',
+                username: '', // Added username
+                email: '',
+                date_of_birth: '',
+                password: '',
+                confirmPassword: '',
+                officeId: '',
             },
+            offices: [],
             errorMessage: "",
             successMessage: "",
         };
     },
     methods: {
 
+        async fetchOffices() {
+            try {
+                const response = await axios.get("http://localhost:4000/api/offices");
+                // Extract and assign offices from the response
+                if (response.data && response.data.offices) {
+                    this.offices = response.data.offices;
+                } else {
+                    console.error("No offices found in the response");
+                    this.errorMessage = "No offices available. Please try again later.";
+                }
+            } catch (error) {
+                console.error("Error fetching offices:", error);
+            }
+        },
+
+
+
+
+
         async registerDentist() {
+
+
+            // Validate date_of_birth format (YYYY-MM-DD)
+            const dateOfBirthRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+            if (!dateOfBirthRegex.test(this.input.date_of_birth)) {
+                this.errorMessage = 'Date of Birth must be in the format YYYY-MM-DD.';
+                return;
+            }
+
+            // Check if the date is valid
+            const date = new Date(this.input.date_of_birth);
+            if (isNaN(date.getTime())) {
+                this.errorMessage = 'Invalid Date of Birth. Please enter a valid date.';
+                return;
+            }
 
             // Validate username format
             if (/^\d{12}$/.test(this.input.username)) {
@@ -95,24 +140,29 @@ export default {
                 const response = await axios.post('http://localhost:4000/api/dentists', {
                     name: this.input.name,
                     username: this.input.username,
-                    email: this.input.email, 
+                    email: this.input.email,
+                    date_of_birth: this.input.date_of_birth,
                     password: this.input.password,
+                    officeId: this.input.officeId,
                 });
-              
+
 
                 alert(response.data.message);
                 this.$router.push('/login');
                 this.successMessage = response.data.message || 'Registration successful!';
-            
+
             } catch (err) {
-             //   console.error('Error registering patient:', err);
-             if (err.response && err.response.data) {
+                //   console.error('Error registering patient:', err);
+                if (err.response && err.response.data) {
                     alert(err.response.data.message || 'Failed to register');
                 } else {
                     alert('An error has occurred. Please try again.');
                 }
             }
         },
+    },
+    mounted() {
+        this.fetchOffices(); // Fetch offices when the component is mounted
     },
 };
 </script>

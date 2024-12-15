@@ -14,6 +14,8 @@ router.post('/api/dentists', async function (req, res) {
             email: req.body.email,
             appointments : req.body.appointments,
             timeslots : req.body.timeslots,
+            office : req.body.office,
+
         });
 
         const savedDentist = await dentist.save();

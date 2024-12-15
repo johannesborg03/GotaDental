@@ -1,27 +1,23 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var cors = require('cors');
+const officeRoutes = require('./src/apiRoutes/officeRoutes'); 
+const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
-
-const OfficeModel = require('./src/models/Office'); // Model loader
-
-
-require('dotenv').config();
+const OfficeModel = require('./src/models/Office'); 
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
-
-// Load the Appointment model
+// Load the office model
 const Office = OfficeModel(bookingDbConnection);
 
+require('dotenv').config();
 
 // Variables
-var port = process.env.PORT || 3002;
+var port = process.env.PORT || 3005; // Use the port defined in .env
 
+// Controllers:
 var officesController = require('./src/controllers/Offices');
-
-
-
 
 // Create Express app
 var app = express();
@@ -31,9 +27,10 @@ app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+// Initialize RabbitMQ Subscriptions
+initializeOfficeSubscriptions();
 
-app.use(officesController);
-
+app.use(officeRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

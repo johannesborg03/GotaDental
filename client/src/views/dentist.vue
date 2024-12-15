@@ -3,54 +3,51 @@
     <div class="mb-4 text-center">
       <h1 class="text-primary">Dentist Interface</h1>
     </div>
+    <button class="btn btn-primary">
+      <router-link to="/dentistTimeslot" class="text-white text-decoration-none">
+        Timeslots</router-link>
+    </button>
 
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="card-title text-secondary">Register a Slot</h2>
-        <form @submit.prevent="registerSlot" class="needs-validation" novalidate>
+    <button class="btn btn-primary">
+      <router-link to="/schedule" class="text-white text-decoration-none">
+        Schedule</router-link>
+    </button>
 
-          <div class="mb-3">
-            <label for="slotDate" class="form-label">Select Date:</label>
-            <input type="date" id="slotDate" class="form-control" v-model="slotDate" required />
-            <div class="invalid-feedback">Please select a valid date.</div>
-          </div>
 
-          <div class="mb-3">
-            <label for="slotTime" class="form-label">Select Time:</label>
-            <input type="time" id="slotTime" class="form-control" v-model="slotTime" required />
-            <div class="invalid-feedback">Please select a valid time.</div>
-          </div>
-
-          <div>
-            <button class="btn btn-primary w-100" type="submit">
-              <i class="bi bi-calendar-check"></i> Register Slot
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+  
   </div>
 </template>
 
+
 <script>
+//import axios from 'axios';
+
+
+
+
+
 export default {
+  
   data() {
     return {
-      slotDate: '',
-      slotTime: '',
+      
       username: '', // should be change to ssn 
-    };
+    }
+    
   },
 
+  async mounted() {
+    this.username = sessionStorage.getItem('userIdentifier');
+    await this.fetchOffices();
+  },
   mounted() {
   this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
   this.fetchUserData(); 
 },
 
-  methods: {
+methods: {
     async fetchUserData() {
       try {
-  
         const response = await fetch(`http://localhost:3005/api/dentist/${this.username}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch user data: ${response.status}`);
@@ -58,52 +55,17 @@ export default {
 
         const userData = await response.json();
         console.log('Fetched user data:', userData);
-
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     },
-
-     // Register a time slot for the specified username
-     async registerSlot() {
-      // Validate required fields
-      if (!this.slotDate || !this.slotTime) {
-        alert('Please select a valid date and time!');
-        return;
-      }
-
-      try {
-      // Construct the slot details
-        const slotDetails = {
-          date: this.slotDate,
-          time: this.slotTime,
-        };
-
-         // Make the POST request to register the time slot
-         const response = await fetch(`http://localhost:3005/api/timeslot/${this.username}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(slotDetails),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Slot registered successfully:', data);
-          alert('Time slot registered successfully!');
-
-          // Reset form fields
-          this.slotDate = '';
-          this.slotTime = '';
-        } else {
-          const errorData = await response.json();
-          alert(`Failed to register slot: ${errorData.message}`);
-        }
-
-      } catch (error) {
-        console.error('Error registering slot:', error);
-        alert('An error occurred while registering the time slot. Please try again later.');
-      }
-  }
-}
+  },
 };
 </script>
+
+
+
+<style>
+
+
+</style>

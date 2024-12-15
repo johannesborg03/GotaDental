@@ -11,11 +11,11 @@ const connectToBookingDB = () => {
         });
 
         bookingDbConnection.on('connected', () => {
-            console.log('OfficeService Connected to Booking Database');
+            console.log('Office Service Connected to Booking Database');
         });
 
         bookingDbConnection.on('error', (err) => {
-            console.error(`OfficeService Failed to connect to Booking Database: ${err.message}`);
+            console.error(`Office Service Failed to connect to Booking Database: ${err.message}`);
             process.exit(1);
         });
     }

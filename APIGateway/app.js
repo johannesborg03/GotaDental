@@ -8,11 +8,14 @@ const { connectRabbitMQ } = require('./src/mqttService'); // Adjust path to your
 
 
 const bodyParser = require('body-parser');
-//const timeslotRoutes = require('./src/routes/timeslot'); 
+const timeslotRoutes = require('./src/routes/timeslotRoutes');
 const patientRoutes = require('./src/routes/patientRoutes'); 
 const dentistRoutes = require('./src/routes/dentistRoutes');
 const loginRoutes = require('./src/routes/loginRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const officeRoutes = require('./src/routes/officeRoutes'); 
+
+
 
 const app = express();
 require('dotenv').config();
@@ -29,16 +32,15 @@ app.use(cors({
 // Middleware to parse JSON bodies of incoming requests
 app.use(bodyParser.json());
 
-
-
-
-//app.use('/api/timeslot', timeslotRoutes);
-
 // Use the routes
 app.use('/api/patients', patientRoutes); // Prefix all patient routes with '/api'
 app.use('/api/dentists', dentistRoutes); // Prefix all patient routes with '/api'
 app.use('/api', loginRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api', officeRoutes);
+app.use('/api', timeslotRoutes);
+app.use('/api/office', officeRoutes);
+
 
 //const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);
 //mqttClient = mqtt.connect('mqtt://localhost:1883')
@@ -60,7 +62,7 @@ connectRabbitMQ().then(() => {
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
-    res.status(404).json({ message: 'Not Found' });
+    res.status(409).json({ message: 'Resource not found' });
 });
 
 // Error Handler
