@@ -85,7 +85,7 @@ async function saveTimeslot() {
     events.value.push(newTimeslot); // Add the new timeslot to the events array
     calendarConfig.value.events = [...events.value]; // Update the calendar configuration
 
-    
+
     // Clear selected timeslot
     selectedTimeslot.value = null;
   } catch (error) {
@@ -142,3 +142,20 @@ onMounted(() => {
   fetchTimeslots();
 });
 </script>
+
+<style>
+
+/* Default styling for the full date */
+.calendar_default_colheader_inner {
+  display: block;
+}
+
+/* Shortened date styling for screens smaller than 768px */
+@media (max-width: 768px) {
+  .calendar_default_colheader_inner {
+    display: inline-block;
+    text-align: center;
+  }
+
+}
+</style>
