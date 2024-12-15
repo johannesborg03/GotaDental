@@ -9,13 +9,15 @@
       </option>
     </select>
 
+    <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
+      Please select an office to view available timeslots.
+    </div>
+
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
 
-    <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
-      Please select an office to view available timeslots.
-    </div>
+   
 
 
 
