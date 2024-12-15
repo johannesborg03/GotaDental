@@ -66,7 +66,7 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             success: true,
             token: 'jwt-token-for-dentist',
             userType: 'dentist',
-            office: dentist.office?.office_name || "No office assigned",
+            office: officeResponse.office_name || "No office assigned",
         };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
@@ -146,6 +146,15 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             return;
         }
 
+         // Convert `date_of_birth` to a Date object
+         const dateOfBirth = new Date(date_of_birth);
+         if (isNaN(dateOfBirth)) {
+             console.error('Invalid date_of_birth format:', date_of_birth);
+             const response = { success: false, error: 'Invalid date_of_birth format' };
+             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+             return;
+         }
+
 
         // Check if the patient already exists
         const existingDentist = await Dentist.findOne({ dentist_username: username });
@@ -162,6 +171,7 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             password,
             name,
             email,
+            date_of_birth: dateOfBirth,
             appointments: [], // Empty array initially
             timeslots: [],
             office,
