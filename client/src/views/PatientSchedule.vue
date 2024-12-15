@@ -17,13 +17,7 @@
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
 
-    <div v-if="selectedTimeslot" class="mt-3">
-      <p>Selected Timeslot:</p>
-      <p>Title: {{ selectedTimeslot.title }}</p>
-      <p>Start: {{ selectedTimeslot.start }}</p>
-      <p>End: {{ selectedTimeslot.end }}</p>
-      <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
-    </div>
+   
   </div>
 </template>
 
@@ -55,17 +49,8 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(), // Initial week
   weekStarts: 1,
   events: [],
-  onTimeRangeSelected: (args) => {
-    // Callback triggered when a time range is selected
-    const title = prompt("Enter the appointment title:", "New Appointment");
-    if (title) {
-      selectedTimeslot.value = {
-        title,
-        start: args.start,
-        end: args.end,
-      };
-    }
-  },
+  timeRangeSelectedHandling: "Disabled", // Disable time range selection
+  eventClickHandling: "Disabled", // Disable event clicking
 });
 
 // Fetch all offices for the dropdown
@@ -131,10 +116,8 @@ function nextWeek() {
   calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
 }
 
-
 // Fetch timeslots when the component is mounted
 onMounted(() => {
- // fetchTimeslots();
   fetchOffices();
 });
 </script>
