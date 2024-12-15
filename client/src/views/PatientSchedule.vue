@@ -1,15 +1,24 @@
 <template>
   <div>
-    
+
     <h3>Select an Office:</h3>
     <select v-model="selectedOfficeId" @change="fetchTimeslots" class="form-select mb-3">
       <option disabled value="">Select an office</option>
-      <option v-for="office in offices" :key="office.id" :value="office.id">{{ office.name }}</option>
+      <option v-for="office in offices" :key="office._id" :value="office._id">
+        {{ office.office_name }}
+      </option>
     </select>
 
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
+
+    <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
+      Please select an office to view available timeslots.
+    </div>
+
+
+
     <div v-if="selectedTimeslot" class="mt-3">
       <p>Selected Timeslot:</p>
       <p>Title: {{ selectedTimeslot.title }}</p>
@@ -38,6 +47,8 @@ function getCurrentWeekStart() {
 const selectedTimeslot = ref(null);
 
 // State for events fetched from the backend
+const selectedOfficeId = ref("");
+const offices = ref([]);
 const events = ref([]);
 
 // Reactive configuration
@@ -59,7 +70,17 @@ const calendarConfig = ref({
   },
 });
 
-
+// Fetch all offices for the dropdown
+async function fetchOffices() {
+  try {
+    const response = await axios.get("http://localhost:4000/api/offices");
+    offices.value = response.data.offices; // Replace with actual API response
+    console.log("OFFICES:", response.data.offices);
+  } catch (error) {
+    console.error("Error fetching offices:", error);
+    alert("Failed to fetch offices. Please try again.");
+  }
+}
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
@@ -107,11 +128,11 @@ function nextWeek() {
 // Fetch timeslots when the component is mounted
 onMounted(() => {
   fetchTimeslots();
+  fetchOffices();
 });
 </script>
 
 <style>
-
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;
