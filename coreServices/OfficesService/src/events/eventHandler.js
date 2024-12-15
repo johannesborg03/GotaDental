@@ -131,6 +131,34 @@ async function handleUpdateOffice(message, replyTo, correlationId, channel) {
     }
 }
 
+async function handleUpdateOfficeTimeslot(message, replyTo, correlationId, channel) {
+    console.log('Received request to update Office timeslots:', message);
+
+    const { officeId, timeslotId } = message;
+
+    try {
+        const office = await Office.findById(officeId);
+        if (!office) {
+            const errorResponse = { success: false, error: 'Office not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Add the timeslot ID to the office's timeslots array
+        office.timeslots.push(timeslotId);
+        await office.save();
+
+        console.log('Updated Office timeslots successfully:', office);
+
+        const successResponse = { success: true };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating Office timeslots:', error);
+        const errorResponse = { success: false, error: 'Internal server error while updating Office timeslots.' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 
 async function initializeOfficeSubscriptions() {
     try {
@@ -146,6 +174,10 @@ async function initializeOfficeSubscriptions() {
         await subscribeToTopic('offices/update', handleUpdateOffice);
         console.log('Subscribed to offices/update');
 
+        await subscribeToTopic('offices/updateTimeslot', handleUpdateOfficeTimeslot);
+        console.log('Subscribed to offices/updateTimeslot');
+
+
         console.log('Office subscriptions initialized!');
     } catch (error) {
         console.error('Error initializing office subscriptions:', error);
@@ -156,5 +188,6 @@ module.exports = {
     initializeOfficeSubscriptions,
     handleRetrieveAllOffices,
     handleCreateOffice,
-    handleUpdateOffice
+    handleUpdateOffice,
+    handleUpdateOfficeTimeslot
 };

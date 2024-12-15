@@ -9,7 +9,8 @@ var Schema = mongoose.Schema;
 var officeSchema = new mongoose.Schema({
     office_name: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     latitude: {
         type: Number,

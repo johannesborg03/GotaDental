@@ -146,14 +146,14 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             return;
         }
 
-         // Convert `date_of_birth` to a Date object
-         const dateOfBirth = new Date(date_of_birth);
-         if (isNaN(dateOfBirth)) {
-             console.error('Invalid date_of_birth format:', date_of_birth);
-             const response = { success: false, error: 'Invalid date_of_birth format' };
-             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
-             return;
-         }
+        // Convert `date_of_birth` to a Date object
+        const dateOfBirth = new Date(date_of_birth);
+        if (isNaN(dateOfBirth)) {
+            console.error('Invalid date_of_birth format:', date_of_birth);
+            const response = { success: false, error: 'Invalid date_of_birth format' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+            return;
+        }
 
 
         // Check if the patient already exists
@@ -234,6 +234,42 @@ async function handleUpdateDentistTimeslot(message, replyTo, correlationId, chan
     }
 }
 
+async function handleGetDentistByUsername(message, replyTo, correlationId, channel) {
+    console.log('Received request to fetch Dentist ID:', message);
+
+    const { username } = message;
+
+    try {
+        // Find the dentist document and only retrieve `_id` and `office` fields
+        const dentist = await Dentist.findOne(
+            { dentist_username: username },
+            '_id office' // Limit the fields retrieved
+        );
+
+
+        if (!dentist) {
+            const errorResponse = { success: false, error: 'Dentist not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = {
+            success: true,
+            dentistId: dentist._id,
+            officeId: dentist.office,
+        };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+        console.log("Published Dentist id:", successResponse.dentistId);
+        console.log("Published Dentist Office id:", successResponse.officeId);
+    } catch (error) {
+        console.error('Error fetching Dentist ID:', error);
+        const errorResponse = { success: false, error: 'Internal server error' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
+
 // Initialize all subscriptions
 async function initializeSubscriptions() {
     try {
@@ -252,6 +288,9 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentists/updateTimeslot', handleUpdateDentistTimeslot);
         console.log('Subscribed to dentists/updateTimeslot');
 
+        await subscribeToTopic('dentist/getByUsername', handleGetDentistByUsername);
+        console.log('Subscribed to dentist/getByUsername');
+
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
 
@@ -265,4 +304,10 @@ async function initializeSubscriptions() {
     }
 }
 
-module.exports = { initializeSubscriptions, handleDentistLogin, handlePatientLogin, handleUpdateDentistTimeslot };
+module.exports = {
+    initializeSubscriptions,
+    handleDentistLogin,
+    handlePatientLogin,
+    handleUpdateDentistTimeslot,
+    handleGetDentistByUsername
+};
