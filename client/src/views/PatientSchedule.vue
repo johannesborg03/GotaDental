@@ -84,10 +84,7 @@ async function fetchOffices() {
 
 function handleOfficeChange() {
   if (selectedOfficeId.value) {
-    // Save the selected office ID to sessionStorage
-    sessionStorage.setItem("OfficeId", selectedOfficeId.value);
-    console.log("Office ID saved to sessionStorage:", selectedOfficeId.value);
-
+    console.log("Office ID selected:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
     fetchTimeslots();
   }
@@ -95,14 +92,13 @@ function handleOfficeChange() {
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
-  const officeId = sessionStorage.getItem("OfficeId");
-  if (!officeId) {
-    alert("No office found in session storage.");
+  if (!selectedOfficeId.value) {
+    alert("No office selected.");
     return;
   }
 
   try {
-    const response = await axios.get(`http://localhost:4000/api/offices/${officeId}/timeslots`);
+    const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
     console.log("Fetched timeslots:", response.data);
 
     // Map the response data to the format expected by DayPilotCalendar
@@ -138,7 +134,7 @@ function nextWeek() {
 
 // Fetch timeslots when the component is mounted
 onMounted(() => {
-  fetchTimeslots();
+ // fetchTimeslots();
   fetchOffices();
 });
 </script>
