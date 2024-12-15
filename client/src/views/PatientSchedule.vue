@@ -2,7 +2,7 @@
   <div>
 
     <h3>Select an Office:</h3>
-    <select v-model="selectedOfficeId" @change="fetchTimeslots" class="form-select mb-3">
+    <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
       <option disabled value="">Select an office</option>
       <option v-for="office in offices" :key="office._id" :value="office._id">
         {{ office.office_name }}
@@ -16,10 +16,6 @@
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
-
-   
-
-
 
     <div v-if="selectedTimeslot" class="mt-3">
       <p>Selected Timeslot:</p>
@@ -78,9 +74,22 @@ async function fetchOffices() {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // Replace with actual API response
     console.log("OFFICES:", response.data.offices);
+    console.log('OfficeId in response:', response.data.offices.officeId);
+
   } catch (error) {
     console.error("Error fetching offices:", error);
     alert("Failed to fetch offices. Please try again.");
+  }
+}
+
+function handleOfficeChange() {
+  if (selectedOfficeId.value) {
+    // Save the selected office ID to sessionStorage
+    sessionStorage.setItem("OfficeId", selectedOfficeId.value);
+    console.log("Office ID saved to sessionStorage:", selectedOfficeId.value);
+
+    // Fetch timeslots for the selected office
+    fetchTimeslots();
   }
 }
 
