@@ -11,5 +11,9 @@ router.get('/offices/:office_id', officeController.getOfficeById);
 // Route to create a new office
 router.post('/offices', officeController.createOffice);
 
+// Route to retrieve all timeslots for a specific office
+router.get('/offices/:office_id/timeslots', officeController.getOfficeTimeslots);
+
+
 module.exports = router;
 

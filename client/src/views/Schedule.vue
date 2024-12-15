@@ -1,9 +1,9 @@
 <template>
-   <div>
+  <div>
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
-     <div v-if="selectedTimeslot" class="mt-3">
+    <div v-if="selectedTimeslot" class="mt-3">
       <p>Selected Timeslot:</p>
       <p>Title: {{ selectedTimeslot.title }}</p>
       <p>Start: {{ selectedTimeslot.start }}</p>
@@ -11,12 +11,12 @@
       <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
     </div>
   </div>
-  </template>
-  
-  <script setup>
-  import { ref } from "vue";
-  import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
-  import  axios from "axios";
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
+import axios from "axios";
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -30,16 +30,19 @@ function getCurrentWeekStart() {
 // State for selected timeslot
 const selectedTimeslot = ref(null);
 
-  // Reactive configuration
-  const calendarConfig = ref({
-    viewType: "Week",
-    startDate: getCurrentWeekStart(), // Initial week
-    weekStarts: 1,
-    events: [ ],
-    onTimeRangeSelected: (args) => {
+// State for events fetched from the backend
+const events = ref([]);
+
+// Reactive configuration
+const calendarConfig = ref({
+  viewType: "Week",
+  startDate: getCurrentWeekStart(), // Initial week
+  weekStarts: 1,
+  events: [],
+  onTimeRangeSelected: (args) => {
     // Callback triggered when a time range is selected
     const title = prompt("Enter the appointment title:", "New Appointment");
-      if (title) {
+    if (title) {
       selectedTimeslot.value = {
         title,
         start: args.start,
@@ -78,20 +81,51 @@ async function saveTimeslot() {
   }
 }
 
-  
-  // Navigation methods
-  function prevWeek() {
-    const currentDate = new Date(calendarConfig.value.startDate);
-    currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
-    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-  }
-  
-  function nextWeek() {
-    const currentDate = new Date(calendarConfig.value.startDate);
-    currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
-    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+// Fetch all timeslots for the office
+async function fetchTimeslots() {
+  const officeId = sessionStorage.getItem("Office");
+  if (!officeId) {
+    alert("No office found in session storage.");
+    return;
   }
 
+  try {
+    const response = await axios.get(`http://localhost:4000/api/timeslots/office/${officeId}`);
+    console.log("Fetched timeslots:", response.data);
+
+    // Map the response data to the format expected by DayPilotCalendar
+    events.value = response.data.timeslots.map((timeslot) => ({
+      id: timeslot._id,
+      text: timeslot.title,
+      start: timeslot.start,
+      end: timeslot.end,
+    }));
+
+    // Update the calendar configuration
+    calendarConfig.value.events = events.value;
+  } catch (error) {
+    console.error("Error fetching timeslots:", error);
+    alert("Failed to fetch timeslots. Please try again.");
+  }
+}
 
 
-  </script>
+// Navigation methods
+function prevWeek() {
+  const currentDate = new Date(calendarConfig.value.startDate);
+  currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
+  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+}
+
+function nextWeek() {
+  const currentDate = new Date(calendarConfig.value.startDate);
+  currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
+  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+}
+
+
+// Fetch timeslots when the component is mounted
+onMounted(() => {
+  fetchTimeslots();
+});
+</script>
