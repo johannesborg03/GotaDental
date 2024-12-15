@@ -9,6 +9,7 @@ import Map from './views/Map.vue';
 import DentistTimeslot from './views/dentistTimeslot.vue';
 import schedule from './views/Schedule.vue';
 import PatientTimeslot from './views/patientTimeslot.vue';
+import PatientSchedule from './views/PatientSchedule.vue';
 
 const routes = [
 
@@ -31,6 +32,8 @@ const routes = [
     { path: '/schedule', name: 'schedule',component: schedule},
 
     { path: '/patientTimeslot', name: 'PatientTimeslot',component: PatientTimeslot},
+
+    { path: '/PatientSchedule', name: 'PatientSchedule',component: PatientSchedule},
 
 
 ];
