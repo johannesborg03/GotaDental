@@ -39,7 +39,7 @@ app.use('/api', loginRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api', officeRoutes);
 app.use('/api', timeslotRoutes);
-app.use('/api/office', officeRoutes)
+app.use('/api/office', officeRoutes);
 
 
 //const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);

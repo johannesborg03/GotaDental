@@ -73,6 +73,19 @@ async function saveTimeslot() {
     alert("Timeslot saved successfully!");
     console.log("Saved timeslot:", response.data);
 
+
+     // Add the new timeslot directly to the events array
+     const newTimeslot = {
+      id: response.data.timeslot._id,
+      text: response.data.timeslot.title,
+      start: response.data.timeslot.start,
+      end: response.data.timeslot.end,
+    };
+
+    events.value.push(newTimeslot); // Add the new timeslot to the events array
+    calendarConfig.value.events = [...events.value]; // Update the calendar configuration
+
+    
     // Clear selected timeslot
     selectedTimeslot.value = null;
   } catch (error) {
@@ -83,14 +96,14 @@ async function saveTimeslot() {
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
-  const officeId = sessionStorage.getItem("Office");
+  const officeId = sessionStorage.getItem("OfficeId");
   if (!officeId) {
     alert("No office found in session storage.");
     return;
   }
 
   try {
-    const response = await axios.get(`http://localhost:4000/api/timeslots/office/${officeId}`);
+    const response = await axios.get(`http://localhost:4000/api/offices/${officeId}/timeslots`);
     console.log("Fetched timeslots:", response.data);
 
     // Map the response data to the format expected by DayPilotCalendar

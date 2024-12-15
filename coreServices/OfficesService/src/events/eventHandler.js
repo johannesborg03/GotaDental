@@ -1,5 +1,8 @@
 const { subscribeToTopic } = require('./subscriber');
 const Office = require('../models/Office');
+const { publishMessage } = require('./publisher');
+const { v4: uuidv4 } = require('uuid');
+
 
 async function handleRetrieveAllOffices(message, replyTo, correlationId, channel) {
     console.log('Received retrieve all offices message:', message);
@@ -157,7 +160,57 @@ async function handleUpdateOfficeTimeslot(message, replyTo, correlationId, chann
         const errorResponse = { success: false, error: 'Internal server error while updating Office timeslots.' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
+};
+
+async function handleGetOfficeTimeslots(message, replyTo, correlationId, channel) {
+    console.log('Received request to fetch timeslots for office:', message);
+
+    const { office_id } = message;
+
+    try {
+        // Step 1: Fetch the timeslots array from the Office model
+        const office = await Office.findById(office_id, 'timeslots');
+        if (!office) {
+            const errorResponse = { success: false, error: 'Office not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const timeslotIds = office.timeslots; // Array of ObjectIds for timeslots
+        console.log('Fetched timeslot IDs from office:', timeslotIds);
+
+        if (!timeslotIds || timeslotIds.length === 0) {
+            const successResponse = { success: true, timeslots: [] };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+            return;
+        }
+
+        // Step 2: Send a topic request to the Timeslot Service
+        const timeslotTopic = 'timeslot/retrieveByIds';
+        const timeslotCorrelationId = uuidv4(); // Unique ID for this request
+        const timeslotMessage = { timeslot_ids: timeslotIds };
+
+        console.log('Publishing message to fetch timeslot details:', timeslotMessage);
+        const timeslotResponse = await publishMessage(timeslotTopic, timeslotMessage, timeslotCorrelationId);
+
+        if (!timeslotResponse || !timeslotResponse.success) {
+            console.error('Failed to fetch timeslot details:', timeslotResponse);
+            const errorResponse = { success: false, error: 'Failed to fetch timeslot details' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Step 3: Respond with the retrieved timeslot details
+        const successResponse = { success: true, timeslots: timeslotResponse.timeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+        console.log('Successfully fetched timeslot details:', successResponse.timeslots);
+    } catch (error) {
+        console.error('Error fetching timeslots for office:', error);
+        const errorResponse = { success: false, error: 'Internal server error' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
 }
+
 
 
 async function initializeOfficeSubscriptions() {
@@ -177,6 +230,9 @@ async function initializeOfficeSubscriptions() {
         await subscribeToTopic('offices/updateTimeslot', handleUpdateOfficeTimeslot);
         console.log('Subscribed to offices/updateTimeslot');
 
+        await subscribeToTopic('offices/timeslots/retrieve', handleGetOfficeTimeslots);
+        console.log('Subscribed to offices/timeslots/retrieve');
+
 
         console.log('Office subscriptions initialized!');
     } catch (error) {
@@ -189,5 +245,6 @@ module.exports = {
     handleRetrieveAllOffices,
     handleCreateOffice,
     handleUpdateOffice,
-    handleUpdateOfficeTimeslot
+    handleUpdateOfficeTimeslot,
+    handleGetOfficeTimeslots
 };

@@ -249,6 +249,25 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, channel) {
+    console.log('Received request to fetch timeslots by IDs:', message);
+
+    const { timeslot_ids } = message;
+
+    try {
+        const timeslots = await Timeslot.find({ _id: { $in: timeslot_ids } });
+        console.log('Fetched timeslots:', timeslots);
+
+        const successResponse = { success: true, timeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error fetching timeslots by IDs:', error);
+        const errorResponse = { success: false, error: 'Failed to fetch timeslots' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
 // Initialize subscriptions
 async function initializeSubscriptions() {
     try {
@@ -257,6 +276,7 @@ async function initializeSubscriptions() {
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
+        await subscribeToTopic('timeslot/retrieveByIds', handleRetrieveTimeslotsByIds);
 
         console.log('Timeslot subscriptions initialized!');
     } catch (error) {
@@ -271,4 +291,5 @@ module.exports = {
     handleGetTimeslotById,
     handleUpdateTimeslot,
     handleDeleteTimeslot,
+    handleRetrieveTimeslotsByIds
 };

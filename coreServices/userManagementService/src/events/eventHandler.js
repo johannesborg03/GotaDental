@@ -67,6 +67,7 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             token: 'jwt-token-for-dentist',
             userType: 'dentist',
             office: officeResponse.office_name || "No office assigned",
+            officeId: dentist.office
         };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {

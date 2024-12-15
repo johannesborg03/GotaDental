@@ -34,8 +34,8 @@ exports.login = async (req, res) => {
             token: response.token,
             userType: isSSN ? 'patient' : 'dentist',
             office: response.office,
+            officeId: response.officeId
         });
-        console.log(response.office);
     } catch (error) {
         console.error('Error handling login request:', error);
         res.status(500).json({ message: 'Server error during login' });
