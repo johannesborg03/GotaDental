@@ -162,7 +162,6 @@ async function handleDentistRegistration(message, replyTo, correlationId, channe
             password,
             name,
             email,
-            date_of_birth,
             appointments: [], // Empty array initially
             timeslots: [],
             office,
