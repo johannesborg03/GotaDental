@@ -8,6 +8,7 @@ import Home from './views/Home.vue';
 import Map from './views/Map.vue';
 import DentistTimeslot from './views/dentistTimeslot.vue';
 import schedule from './views/Schedule.vue';
+import PatientTimeslot from './views/patientTimeslot.vue';
 
 const routes = [
 
