@@ -10,22 +10,10 @@ const timeslotController = require('../controllers/timeslotController');
 
 router.post('/timeslots', timeslotController.createTimeslot);
 
-// Retrieve a timeslot by ID
-router.get('/timeslots/:office_id/:dentist_username/:timeslot_id', async (req, res) => {
-    const { office_id, dentist_username, timeslot_id } = req.params;
-    const correlationId = uuidv4();
-    const topic = 'timeslots/retrieve';
+// Retrieve all timeslots for an office
+router.get('/api/timeslots/:office_id', timeslotController.getAllTimeslotsForOffice);
 
-    try {
-        const response = await publishMessage(topic, { office_id, dentist_username, timeslot_id }, correlationId);
-        if (!response.success) {
-            return res.status(404).json({ message: 'Timeslot not found' });
-        }
-        res.status(200).json({ message: 'Timeslot retrieved successfully', timeslot: response.timeslot });
-    } catch (error) {
-        console.error('Error retrieving timeslot:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
+// Retrieve available timeslots
+router.get('/api/timeslots/available', timeslotController.getAvailableTimeslots);
 
 module.exports = router;

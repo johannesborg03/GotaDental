@@ -1,46 +1,54 @@
 <template>
     <div class="container py-4">
         <div class="mb-4 text-center">
-            <h1 class="text-primary">Available Slots</h1>
+            <h1 class="text-primary">Available Appointments</h1>
         </div>
 
-        <!-- Available Slots Section -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title text-secondary">Book a Slot</h2>
-                <ul class="list-group">
-                    <li v-for="(slot, index) in availableSlots" :key="index"
-                        class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>
-                            <i class="bi bi-calendar-event text-primary"></i>
-                            {{ slot.date }} at {{ slot.time }}
-                        </span>
-                    </li>
-                </ul>
-                <div v-if="availableSlots.length === 0" class="text-center mt-3 text-muted">
-                    <i>No slots available</i>
-                </div>
-            </div>
-        </div>
+        <button class="btn btn-primary">
+            <router-link to="/patientTimeslot" class="text-white text-decoration-none">
+                Available Timeslots</router-link>
+        </button>
+
+        <button class="btn btn-primary">
+            <router-link to="/PatientSchedule" class="text-white text-decoration-none">
+                Patient Schedule</router-link>
+        </button>
     </div>
 </template>
 
-
 <script>
+import axios from "axios";
+
 export default {
     data() {
         return {
-            availableSlots: [],
+            username: '', // should be change to ssn 
         };
     },
+
     async mounted() {
-        try {
-            const response = await fetch('http://localhost:3000/api/slots');
-            const slots = await response.json();
-            this.availableSlots = slots;
-        } catch (err) {
-            console.error('Error fetching slots:', err);
-        }
+        this.username = sessionStorage.getItem('userIdentifier');
+        await this.fetchOffices();
+    },
+    mounted() {
+        this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
+        this.fetchUserData();
+    },
+
+    methods: {
+        async fetchUserData() {
+            try {
+                const response = await fetch(`http://localhost:3005/api/patient/${this.username}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user data: ${response.status}`);
+                }
+
+                const userData = await response.json();
+                console.log('Fetched user data:', userData);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        },
     },
 };
 </script>

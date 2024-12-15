@@ -38,12 +38,9 @@ export default {
 
   async mounted() {
     this.username = sessionStorage.getItem('userIdentifier');
-    await this.fetchOffices();
+   // await this.fetchOffices();
   },
-  mounted() {
-  this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
-  this.fetchUserData(); 
-},
+ 
 
 methods: {
     async fetchUserData() {

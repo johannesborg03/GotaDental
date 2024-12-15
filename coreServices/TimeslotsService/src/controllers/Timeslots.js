@@ -1,9 +1,7 @@
 var express = require('express');
 const router = express.Router();
-
 const mongoose = require('mongoose');
-
-var Timeslot = require('../models/Timeslot.js'); 
+var Timeslot = require('../models/Timeslot.js');
 //var Dentist = require('../../../userManagementService/src/models/Dentist.js');
 //var Office = require('../../../OfficesService/src/models/Office.js')
 
@@ -40,7 +38,7 @@ router.post('/api/timeslots/:dentist_username/timeslot', async function (req, re
             timeslot: timeslot
         });
     } catch (error) {
-        console.error("Error while creating timeslot:", err);  
+        console.error("Error while creating timeslot:", err);
         res.status(500).json({
             message: "Server error while creating timeslot",
             error: error.message
@@ -67,7 +65,7 @@ router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
         if (timeslots.length === 0) {
             return res.status(404).json({ message: "No timeslots found for the dentists" });
         }
-        
+
         res.status(200).json({
             message: "Timeslots retrieved successfully",
             timeslots: timeslots
@@ -116,6 +114,26 @@ router.get('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async fun
     }
 });
 
+router.get('/api/timeslots/available', async (req, res) => {
+    try {
+        const availableTimeslots = await Timeslot.find({ timeslot_state: 0 });
+
+        if (!availableTimeslots || availableTimeslots.length === 0) {
+            return res.status(404).json({ message: 'No available timeslots found' });
+        }
+        res.status(200).json({
+            message: 'Available timeslots retrieved successfully',
+            timeslots: availableTimeslots,
+        });
+    } catch (error) {
+        console.error('Error fetching available timeslots:', error);
+        res.status(500).json({
+            message: 'Server error while retrieving available timeslots',
+            error: error.message,
+        });    
+    }
+});
+
 // Update a timeslot for a dentist in a specific office 
 router.put('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async function (req, res) {
     try {
@@ -130,7 +148,7 @@ router.put('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async fun
         }
 
         const updatedTimeslot = await Timeslot.findOneAndUpdate(
-            { timeslot_id: req.params.timeslot_id, dentist_id: req.params.dentist_username },req.body,{ new: true, runValidators: true }
+            { timeslot_id: req.params.timeslot_id, dentist_id: req.params.dentist_username }, req.body, { new: true, runValidators: true }
         );
 
         if (!updatedTimeslot) {
@@ -163,7 +181,7 @@ router.delete('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async 
             return res.status(404).json({ message: "Dentist not found in this office" });
         }
 
-        const deletedTimeslot = await Timeslot.findOneAndDelete({timeslot_id: req.params.timeslot_id,dentist_username: req.params.dentist_username});
+        const deletedTimeslot = await Timeslot.findOneAndDelete({ timeslot_id: req.params.timeslot_id, dentist_username: req.params.dentist_username });
 
         if (!deletedTimeslot) {
             return res.status(404).json({ message: "Timeslot not found" });

@@ -1,20 +1,23 @@
 <template>
-  <div class="mb-4 text-center">
-      <h1 class="text-primary">
-        {{ officeName || "OFFICE NAME" }}
-      </h1>
-    </div>
   <div>
+
+    <h3>Select an Office:</h3>
+    <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
+      <option disabled value="">Select an office</option>
+      <option v-for="office in offices" :key="office._id" :value="office._id">
+        {{ office.office_name }}
+      </option>
+    </select>
+
+    <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
+      Please select an office to view available timeslots.
+    </div>
+
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
-    <div v-if="selectedTimeslot" class="mt-3">
-      <p>Selected Timeslot:</p>
-      <p>Title: {{ selectedTimeslot.title }}</p>
-      <p>Start: {{ selectedTimeslot.start }}</p>
-      <p>End: {{ selectedTimeslot.end }}</p>
-      <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
-    </div>
+
+   
   </div>
 </template>
 
@@ -22,21 +25,6 @@
 import { ref, onMounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
-
-
-const officeName = ref("");
-
-
-// Function to fetch the office name from session storage
-function loadOfficeName() {
-  const storedOfficeName = sessionStorage.getItem("Office");
-  if (storedOfficeName) {
-    officeName.value = storedOfficeName;
-  } else {
-    officeName.value = "OFFICE NAME"; // Default fallback
-  }
-}
-
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -51,6 +39,8 @@ function getCurrentWeekStart() {
 const selectedTimeslot = ref(null);
 
 // State for events fetched from the backend
+const selectedOfficeId = ref("");
+const offices = ref([]);
 const events = ref([]);
 
 // Reactive configuration
@@ -59,71 +49,41 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(), // Initial week
   weekStarts: 1,
   events: [],
-  onTimeRangeSelected: (args) => {
-    // Callback triggered when a time range is selected
-    const title = prompt("Enter the appointment title:", "New Appointment");
-    if (title) {
-      selectedTimeslot.value = {
-        title,
-        start: args.start,
-        end: args.end,
-      };
-    }
-  },
+  timeRangeSelectedHandling: "Disabled", // Disable time range selection
+  eventClickHandling: "Disabled", // Disable event clicking
 });
 
-async function saveTimeslot() {
-
-  if (!selectedTimeslot.value) {
-    alert("No timeslot selected.");
-    return;
-  }
-
+// Fetch all offices for the dropdown
+async function fetchOffices() {
   try {
-    const payload = {
-      title: selectedTimeslot.value.title,
-      start: selectedTimeslot.value.start,
-      end: selectedTimeslot.value.end,
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', 
-      office: sessionStorage.getItem('Office'),
-    };
+    const response = await axios.get("http://localhost:4000/api/offices");
+    offices.value = response.data.offices; // Replace with actual API response
+    console.log("OFFICES:", response.data.offices);
+    console.log('OfficeId in response:', response.data.offices.officeId);
 
-    console.log("Sending payload", payload);
-    const response = await axios.post("http://localhost:4000/api/timeslots", payload);
-    alert("Timeslot saved successfully!");
-    console.log("Saved timeslot:", response.data);
-
-
-     // Add the new timeslot directly to the events array
-     const newTimeslot = {
-      id: response.data.timeslot._id,
-      text: response.data.timeslot.title,
-      start: response.data.timeslot.start,
-      end: response.data.timeslot.end,
-    };
-
-    events.value.push(newTimeslot); // Add the new timeslot to the events array
-    calendarConfig.value.events = [...events.value]; // Update the calendar configuration
-
-
-    // Clear selected timeslot
-    selectedTimeslot.value = null;
   } catch (error) {
-    console.error("Error saving timeslot:", error);
-    alert("Failed to save timeslot. Please try again.");
+    console.error("Error fetching offices:", error);
+    alert("Failed to fetch offices. Please try again.");
+  }
+}
+
+function handleOfficeChange() {
+  if (selectedOfficeId.value) {
+    console.log("Office ID selected:", selectedOfficeId.value);
+    // Fetch timeslots for the selected office
+    fetchTimeslots();
   }
 }
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
-  const officeId = sessionStorage.getItem("OfficeId");
-  if (!officeId) {
-    alert("No office found in session storage.");
+  if (!selectedOfficeId.value) {
+    alert("No office selected.");
     return;
   }
 
   try {
-    const response = await axios.get(`http://localhost:4000/api/offices/${officeId}/timeslots`);
+    const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
     console.log("Fetched timeslots:", response.data);
 
     // Map the response data to the format expected by DayPilotCalendar
@@ -156,16 +116,13 @@ function nextWeek() {
   calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
 }
 
-
 // Fetch timeslots when the component is mounted
 onMounted(() => {
-  fetchTimeslots();
-  loadOfficeName();
+  fetchOffices();
 });
 </script>
 
 <style>
-
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;

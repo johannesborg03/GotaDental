@@ -24,10 +24,7 @@
                 <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="Confirm password"
                     class="form-control" required />
             </div>
-            <div class="form-check mb-3">
-                <input type="checkbox" id="terms" class="checkbox-input" v-model="terms" required />
-                <label class="checkbox-label" for="terms">Accept terms and conditions</label>
-            </div>
+           
             <button type="submit" class="btn btn-primary w-100">Create account</button>
         </form>
     </div>
@@ -46,7 +43,6 @@ export default {
             email: '',
             name: '',
             password: '',
-            terms: false,
         },
         message: "",  // To store any error message
         showToast: false,  // Toast visibility flag
