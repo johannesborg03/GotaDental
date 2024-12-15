@@ -4,11 +4,21 @@ const amqp = require('amqplib');
 
 let channel;
 
-//Connecting to RabbitMQ 
+
+
+// Connect to RabbitMQ and create the channel
 async function connectRabbitMQ() {
-    const connection = await amqp.connect('amqp://localhost');
-    channel = await connection.createChannel();
-    console.log('RabbitMQ Publisher connected');
+    try {
+        connection = await amqp.connect('amqp://localhost');
+        channel = await connection.createChannel();
+        console.log('RabbitMQ Publisher connected');
+
+        // Assert the exchange only once
+        await channel.assertExchange('default_exchange', 'fanout', { durable: false });
+    } catch (error) {
+        console.error('Failed to connect to RabbitMQ:', error);
+        process.exit(1); // Exit if connection fails
+    }
 }
 
 //Publish messages 

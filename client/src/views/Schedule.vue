@@ -1,4 +1,9 @@
 <template>
+  <div class="mb-4 text-center">
+      <h1 class="text-primary">
+        {{ officeName || "OFFICE NAME" }}
+      </h1>
+    </div>
   <div>
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
@@ -17,6 +22,21 @@
 import { ref, onMounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+
+
+const officeName = ref("");
+
+
+// Function to fetch the office name from session storage
+function loadOfficeName() {
+  const storedOfficeName = sessionStorage.getItem("Office");
+  if (storedOfficeName) {
+    officeName.value = storedOfficeName;
+  } else {
+    officeName.value = "OFFICE NAME"; // Default fallback
+  }
+}
+
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -64,8 +84,8 @@ async function saveTimeslot() {
       title: selectedTimeslot.value.title,
       start: selectedTimeslot.value.start,
       end: selectedTimeslot.value.end,
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', // Replace with actual dentist ID
-      office: sessionStorage.getItem('Office'), // Replace with actual office ID
+      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', 
+      office: sessionStorage.getItem('Office'),
     };
 
     console.log("Sending payload", payload);
@@ -140,6 +160,7 @@ function nextWeek() {
 // Fetch timeslots when the component is mounted
 onMounted(() => {
   fetchTimeslots();
+  loadOfficeName();
 });
 </script>
 
