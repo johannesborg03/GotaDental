@@ -11,8 +11,6 @@ const connectToBookingDB = () => {
 
     if (!bookingDbConnection) {
         bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
-            useNewUrlParser: true, // Ensure compatibility with MongoDB
-            useUnifiedTopology: true, // Recommended option for MongoDB driver
         });
 
         // Event handlers for the connection
