@@ -12,9 +12,10 @@ router.post('/api/dentists', async function (req, res) {
             password: req.body.password,
             name : req.body.name,
             email: req.body.email,
-            date_of_birth : req.body.date_of_birth,
             appointments : req.body.appointments,
             timeslots : req.body.timeslots,
+            office : req.body.office,
+
         });
 
         const savedDentist = await dentist.save();

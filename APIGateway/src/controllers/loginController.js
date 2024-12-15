@@ -33,6 +33,8 @@ exports.login = async (req, res) => {
             message: 'Login successful',
             token: response.token,
             userType: isSSN ? 'patient' : 'dentist',
+            office: response.office,
+            officeId: response.officeId
         });
     } catch (error) {
         console.error('Error handling login request:', error);

@@ -7,6 +7,7 @@ import router from './router'
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
+import 'devextreme/dist/css/dx.light.css'; // You can change 'dx.light.css' to a theme of your choice
 
 
 

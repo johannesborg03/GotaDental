@@ -1,36 +1,89 @@
 const { subscribeToTopic } = require('./subscriber');
 const Timeslot = require('../models/Timeslot');
-
+const { publishMessage } = require('./publisher'); 
+const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose'); // Import mongoose
 
 async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
-    console.log('Processing create timeslot request:', message);
 
     // Extract data from the received message
-    const { dentist_username, date_and_time, timeslot_state } = message;
+    const { title, start, end, dentist, office } = message;
 
+    console.log("Message:", message);
     try {
         // Validate the input data
-        if (!dentist_username || !date_and_time || !timeslot_state) {
-            console.error('Invalid message data:', message);
-            const response = { success: false, error: 'Missing required fields' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+        if (!title || !start || !end || !dentist || !office) {
+            const errorResponse = { success: false, error: 'Missing required fields' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        /*
-        // Check if the timeslot already exists
-        const existingTimeslot = await Timeslot.findOne({ dentist_username, date_and_time });
-        if (existingTimeslot) {
-            console.log(`Timeslot for dentist ${dentist_username} on ${date_and_time} already exists.`);
-            const response = { success: false, error: `Timeslot for dentist ${dentist_username} on ${date_and_time} already exists.` };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(response)), { correlationId });
+
+        // Fetch Dentist ID from User Management Service using RabbitMQ
+        const dentistCorrelationId  = uuidv4(); // Unique ID for this request
+        const dentistTopic = 'dentist/getByUsername';
+        const dentistMessage = { username: dentist };
+
+        console.log(`Publishing message to fetch Dentist ID and Office Id:  ${JSON.stringify(dentistMessage)}`);
+
+        const dentistResponse = await publishMessage(dentistTopic, dentistMessage, dentistCorrelationId);
+        
+        if (!dentistResponse || !dentistResponse.success) {
+            console.error('Failed to fetch Dentist or Office ID:', dentistResponse);
+            const errorResponse = { success: false, error: 'Dentist or Office not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
-        */
 
-        // Create a new timeslot
-        const newTimeslot = new Timeslot({dentist_username, date_and_time, timeslot_state: 1,});
+        const { dentistId, officeId } = dentistResponse;
+        console.log(`Resolved Dentist ID: ${dentistId}`);
+        console.log(`Resolved Office ID: ${officeId}`);
+
+
+          // Validate the resolved Office ID
+          if (!mongoose.Types.ObjectId.isValid(officeId)) {
+            const errorResponse = { success: false, error: 'Invalid Office ID' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+     
+       // Create the timeslot
+        const newTimeslot = new Timeslot({
+            title,
+            start,
+            end,
+            dentist: dentistId, // Use the resolved Dentist ID
+            office: officeId,   // Use the resolved Office ID
+            isBooked: true,
+        });
+
         await newTimeslot.save();
+
+        console.log('Timeslot created successfully:', newTimeslot);
+
+         // Publish a message to update the dentist's timeslot array
+         const updateDentistTopic = 'dentists/updateTimeslot';
+         const updateDentistMessage = {
+             dentistId,
+             timeslotId: newTimeslot._id,
+         };
+ 
+         await publishMessage(updateDentistTopic, updateDentistMessage, correlationId);
+         console.log(`Published message to update dentist timeslot array:`, updateDentistMessage);
+ 
+
+          // Publish a message to update the office's timeslot array
+          const updateOfficeTopic = 'offices/updateTimeslot';
+          const updateOfficeMessage = {
+              officeId,
+              timeslotId: newTimeslot._id,
+          };
+  
+          await publishMessage(updateOfficeTopic, updateOfficeMessage, correlationId);
+          console.log('Published message to update office timeslot array:', updateOfficeMessage);
+  
+
 
         console.log('Timeslot created successfully:', newTimeslot);
         const successResponse = { success: true, timeslot: newTimeslot };
@@ -221,15 +274,34 @@ async function handleDeleteTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
+async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, channel) {
+    console.log('Received request to fetch timeslots by IDs:', message);
+
+    const { timeslot_ids } = message;
+
+    try {
+        const timeslots = await Timeslot.find({ _id: { $in: timeslot_ids } });
+        console.log('Fetched timeslots:', timeslots);
+
+        const successResponse = { success: true, timeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error fetching timeslots by IDs:', error);
+        const errorResponse = { success: false, error: 'Failed to fetch timeslots' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
 // Initialize subscriptions
 async function initializeSubscriptions() {
     try {
-        await subscribeToTopic('timeslot/dentist/create', handleCreateTimeslot);
+        await subscribeToTopic('timeslot/create', handleCreateTimeslot);
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
-        await subscribeToTopic('timeslot/available/retrieve', handleGetAvailableTimeslots);
+        await subscribeToTopic('timeslot/retrieveByIds', handleRetrieveTimeslotsByIds);
 
         console.log('Timeslot subscriptions initialized!');
     } catch (error) {
@@ -244,5 +316,5 @@ module.exports = {
     handleGetTimeslotById,
     handleUpdateTimeslot,
     handleDeleteTimeslot,
-    handleGetAvailableTimeslots,
+    handleRetrieveTimeslotsByIds
 };

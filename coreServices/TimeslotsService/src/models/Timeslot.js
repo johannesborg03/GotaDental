@@ -7,27 +7,41 @@ var Schema = mongoose.Schema;
 
 var timeslotSchema = new mongoose.Schema({
 
-    timeslot_state : {
-        type : Number,
-        required : true,
-        enum: [0, 1], // Only allows values 0 or 1
-        default: 0
-    },
-    office_id: {
+    title: {
         type: String,
-        ref : 'Office',
-        required: false
-    },
-
-    dentist_username: { 
-        type: String, // Store username directly as String
-        required: true,
-    },
-
-    date_and_time: {
-        type: Date, // Use Date type for date handling
-        required: true
-    }
-});
+        required: true, // Appointment title is required
+      },
+      start: {
+        type: Date,
+        required: true, // Start date and time
+      },
+      end: {
+        type: Date,
+        required: true, // End date and time
+      },
+      dentist: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Dentist", // Reference to Dentist model
+        required: true, // Each time slot must belong to a dentist
+      },
+      office: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Office", // Reference to Office model
+        required: true, // Each time slot must belong to an office
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now, // Automatically store creation timestamp
+      },
+      isBooked: {
+        type: Boolean,
+        default: false,
+      },
+      patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Patient", // Reference to the Patient who booked the slot
+      },
+      
+    });
 
 module.exports = bookingDbConnection.model('Timeslot', timeslotSchema);
