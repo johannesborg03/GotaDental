@@ -1,6 +1,6 @@
 var express = require ('express');
 var router = express.Router();
-//const Dentist = require('../models/Dentist');
+const Dentist = require('../models/Dentist');
 
 var { publishMessage } = require('../events/publisher');
 

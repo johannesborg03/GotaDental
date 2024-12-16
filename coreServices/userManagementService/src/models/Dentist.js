@@ -31,7 +31,6 @@ var dentistSchema = new mongoose.Schema({
     },
     date_of_birth: {
         type: Date,
-        required: true,
     },
     appointments: [{
         type: mongoose.Schema.Types.ObjectId, 

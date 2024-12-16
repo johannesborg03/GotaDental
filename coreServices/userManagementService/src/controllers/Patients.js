@@ -1,5 +1,6 @@
 var express = require ('express');
 var router = express.Router();
+const Patient = require('../models/Patient');
 
 var { subscribeToTopic } = require('../events/subscriber');
 
@@ -30,7 +31,7 @@ router.post('/api/patients', async function (req, res) {
             });
         }
         res.status(500).json({
-            message : "Server error while creating dentist",
+            message : "Server error while creating patient",
             error : err.message
         });
     }
@@ -95,7 +96,7 @@ router.put('/api/patients/:patient_ssn', async (req, res) => {
     }
 });
 
-// PATCH to update a dentist by dentist_id
+// PATCH to update a patient by patient_id
 router.patch('/api/patients/:patient_ssn', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
