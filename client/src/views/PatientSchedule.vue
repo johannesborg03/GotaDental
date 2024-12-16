@@ -17,14 +17,17 @@
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
 
-   
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+import { io } from "socket.io-client";
+
+
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -37,6 +40,10 @@ function getCurrentWeekStart() {
 
 // State for selected timeslot
 const selectedTimeslot = ref(null);
+
+// Initialize WebSocket connection
+const socket = io("http://localhost:3003"); // Replace with your backend URL
+
 
 // State for events fetched from the backend
 const selectedOfficeId = ref("");
@@ -72,54 +79,76 @@ function handleOfficeChange() {
     console.log("Office ID selected:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
     fetchTimeslots();
+    socket.emit("joinOffice", selectedOfficeId.value); // Join WebSocket room
   }
 }
 
-// Fetch all timeslots for the office
-async function fetchTimeslots() {
-  if (!selectedOfficeId.value) {
-    alert("No office selected.");
-    return;
-  }
+// Listen for real-time updates
+socket.on("timeslotCreated", (newTimeslot) => {
+  console.log("New timeslot received:", newTimeslot);
 
-  try {
-    const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
-    console.log("Fetched timeslots:", response.data);
+  // Add the new timeslot to the events array
+  events.value.push({
+    id: newTimeslot._id,
+    text: newTimeslot.title,
+    start: newTimeslot.start,
+    end: newTimeslot.end,
+  });
 
-    // Map the response data to the format expected by DayPilotCalendar
-    events.value = response.data.timeslots.map((timeslot) => ({
-      id: timeslot._id,
-      text: timeslot.title,
-      start: timeslot.start,
-      end: timeslot.end,
-    }));
-
-    // Update the calendar configuration
-    calendarConfig.value.events = events.value;
-  } catch (error) {
-    console.error("Error fetching timeslots:", error);
-    alert("Failed to fetch timeslots. Please try again.");
-  }
-}
-
-
-// Navigation methods
-function prevWeek() {
-  const currentDate = new Date(calendarConfig.value.startDate);
-  currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
-  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-}
-
-function nextWeek() {
-  const currentDate = new Date(calendarConfig.value.startDate);
-  currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
-  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-}
-
-// Fetch timeslots when the component is mounted
-onMounted(() => {
-  fetchOffices();
+  // Update the calendar configuration to reflect the changes
+  calendarConfig.value.events = [...events.value]; // Spread syntax to trigger reactivity
 });
+
+  // Cleanup WebSocket connection on component unmount
+  onUnmounted(() => {
+    socket.disconnect();
+  });
+
+  // Fetch all timeslots for the office
+  async function fetchTimeslots() {
+    if (!selectedOfficeId.value) {
+      alert("No office selected.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
+      console.log("Fetched timeslots:", response.data);
+
+      // Map the response data to the format expected by DayPilotCalendar
+      events.value = response.data.timeslots.map((timeslot) => ({
+        id: timeslot._id,
+        text: timeslot.title,
+        start: timeslot.start,
+        end: timeslot.end,
+      }));
+
+      // Update the calendar configuration
+      calendarConfig.value.events = events.value;
+    } catch (error) {
+      console.error("Error fetching timeslots:", error);
+      alert("Failed to fetch timeslots. Please try again.");
+    }
+  }
+
+
+  // Navigation methods
+  function prevWeek() {
+    const currentDate = new Date(calendarConfig.value.startDate);
+    currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
+    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+  }
+
+  function nextWeek() {
+    const currentDate = new Date(calendarConfig.value.startDate);
+    currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
+    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+  }
+
+  // Fetch timeslots when the component is mounted
+  onMounted(() => {
+    fetchOffices();
+  });
 </script>
 
 <style>

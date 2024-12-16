@@ -3,8 +3,19 @@ const Timeslot = require('../models/Timeslot');
 const { publishMessage } = require('./publisher'); 
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose'); // Import mongoose
+const { utcToZonedTime, format } = require('date-fns-tz');
 
-async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
+const adjustToCET = (dateStr) => {
+    const date = new Date(dateStr);
+    const offsetInHours = 1; // CET is UTC+1
+    date.setHours(date.getHours() + offsetInHours);
+    return date;
+};
+
+
+
+
+async function handleCreateTimeslot(message, replyTo, correlationId, channel, emitTimeslotCreated) {
 
     // Extract data from the received message
     const { title, start, end, dentist, office } = message;
@@ -17,6 +28,13 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+
+      
+        
+        const startCET = adjustToCET(start);
+        const endCET = adjustToCET(end);
+        
+        console.log(`Manually adjusted times to CET: Start=${startCET}, End=${endCET}`);
 
 
         // Fetch Dentist ID from User Management Service using RabbitMQ
@@ -51,8 +69,8 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
        // Create the timeslot
         const newTimeslot = new Timeslot({
             title,
-            start,
-            end,
+            start: startCET.toISOString(), // Save as ISO string in UTC
+            end: endCET.toISOString(),     // Save the converted CET time
             dentist: dentistId, // Use the resolved Dentist ID
             office: officeId,   // Use the resolved Office ID
             isBooked: true,
@@ -86,6 +104,11 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
 
         console.log('Timeslot created successfully:', newTimeslot);
+
+         // Emit WebSocket event to update clients in real-time
+         emitTimeslotCreated(office, newTimeslot);
+
+
         const successResponse = { success: true, timeslot: newTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
@@ -294,9 +317,13 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
 
 
 // Initialize subscriptions
-async function initializeSubscriptions() {
+async function initializeSubscriptions(emitTimeslotCreated) {
     try {
-        await subscribeToTopic('timeslot/create', handleCreateTimeslot);
+        await 
+        subscribeToTopic('timeslot/create', (message, replyTo, correlationId, channel) => 
+            handleCreateTimeslot(message, replyTo, correlationId, channel, emitTimeslotCreated)
+        );
+
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);

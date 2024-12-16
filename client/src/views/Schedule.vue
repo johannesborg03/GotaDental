@@ -1,9 +1,9 @@
 <template>
   <div class="mb-4 text-center">
-      <h1 class="text-primary">
-        {{ officeName || "OFFICE NAME" }}
-      </h1>
-    </div>
+    <h1 class="text-primary">
+      {{ officeName || "OFFICE NAME" }}
+    </h1>
+  </div>
   <div>
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
@@ -82,9 +82,9 @@ async function saveTimeslot() {
   try {
     const payload = {
       title: selectedTimeslot.value.title,
-      start: new Date(selectedTimeslot.value.start).toISOString(), // Convert to UTC
-  end: new Date(selectedTimeslot.value.end).toISOString(),     // Convert to UTC
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', 
+      start: selectedTimeslot.value.start, // Send as is without conversion
+      end: selectedTimeslot.value.end, // Send as is without conversion
+      dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
       office: sessionStorage.getItem('Office'),
     };
 
@@ -94,8 +94,8 @@ async function saveTimeslot() {
     console.log("Saved timeslot:", response.data);
 
 
-     // Add the new timeslot directly to the events array
-     const newTimeslot = {
+    // Add the new timeslot directly to the events array
+    const newTimeslot = {
       id: response.data.timeslot._id,
       text: response.data.timeslot.title,
       start: response.data.timeslot.start,
@@ -165,7 +165,6 @@ onMounted(() => {
 </script>
 
 <style>
-
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;

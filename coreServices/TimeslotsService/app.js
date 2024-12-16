@@ -10,6 +10,9 @@ const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
 const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
 //const timeslotRouter = require('./routes/timeslotRoutes');
 
+const http = require('http'); // Import HTTP to create a server
+const socketIo = require('socket.io'); // Import Socket.IO
+
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
 
@@ -42,8 +45,42 @@ app.use(express.json()); // Parse JSON payloads
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+
+// Create an HTTP server for both Express and Socket.IO
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = socketIo(server, {
+    cors: {
+        origin: "*", // Replace with your frontend origin for security
+        methods: ["GET", "POST"],
+    },
+});
+
+// WebSocket logic
+io.on('connection', (socket) => {
+    console.log(`A user connected: ${socket.id}`);
+
+    // Join a specific office room
+    socket.on('joinOffice', (officeId) => {
+        socket.join(officeId);
+        console.log(`User joined office room: ${officeId}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+    });
+});
+
+// Function to emit real-time updates
+function emitTimeslotCreated(officeId, timeslot) {
+    io.to(officeId).emit('timeslotCreated', timeslot); // Notify all clients in the office room
+}
+
+
+
 // Initialize RabbitMQ Subscriptions
-initializeSubscriptions();
+initializeSubscriptions(emitTimeslotCreated);
 
 // Modular Routes
 //app.use(timeslotsRoutes);
@@ -69,4 +106,4 @@ app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/api/`);
 });
 
-module.exports = app;
+module.exports = { app, emitTimeslotCreated };
