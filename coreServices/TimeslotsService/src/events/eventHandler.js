@@ -3,7 +3,7 @@ const Timeslot = require('../models/Timeslot');
 const { publishMessage } = require('./publisher'); 
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose'); // Import mongoose
-const { utcToZonedTime, format } = require('date-fns-tz');
+
 
 const adjustToCET = (dateStr) => {
     const date = new Date(dateStr);
@@ -12,10 +12,7 @@ const adjustToCET = (dateStr) => {
     return date;
 };
 
-
-
-
-async function handleCreateTimeslot(message, replyTo, correlationId, channel, emitTimeslotCreated) {
+async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
     // Extract data from the received message
     const { title, start, end, dentist, office } = message;
@@ -317,13 +314,9 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
 
 
 // Initialize subscriptions
-async function initializeSubscriptions(emitTimeslotCreated) {
+async function initializeSubscriptions (){
     try {
-        await 
-        subscribeToTopic('timeslot/create', (message, replyTo, correlationId, channel) => 
-            handleCreateTimeslot(message, replyTo, correlationId, channel, emitTimeslotCreated)
-        );
-
+        await subscribeToTopic('timeslot/create', handleCreateTimeslot);
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
         await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
         await subscribeToTopic('timeslot/update', handleUpdateTimeslot);

@@ -25,7 +25,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
-import { io } from "socket.io-client";
+
 
 
 
@@ -41,8 +41,7 @@ function getCurrentWeekStart() {
 // State for selected timeslot
 const selectedTimeslot = ref(null);
 
-// Initialize WebSocket connection
-const socket = io("http://localhost:3003"); // Replace with your backend URL
+
 
 
 // State for events fetched from the backend
@@ -79,30 +78,11 @@ function handleOfficeChange() {
     console.log("Office ID selected:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
     fetchTimeslots();
-    socket.emit("joinOffice", selectedOfficeId.value); // Join WebSocket room
+   
   }
 }
 
-// Listen for real-time updates
-socket.on("timeslotCreated", (newTimeslot) => {
-  console.log("New timeslot received:", newTimeslot);
 
-  // Add the new timeslot to the events array
-  events.value.push({
-    id: newTimeslot._id,
-    text: newTimeslot.title,
-    start: newTimeslot.start,
-    end: newTimeslot.end,
-  });
-
-  // Update the calendar configuration to reflect the changes
-  calendarConfig.value.events = [...events.value]; // Spread syntax to trigger reactivity
-});
-
-  // Cleanup WebSocket connection on component unmount
-  onUnmounted(() => {
-    socket.disconnect();
-  });
 
   // Fetch all timeslots for the office
   async function fetchTimeslots() {
