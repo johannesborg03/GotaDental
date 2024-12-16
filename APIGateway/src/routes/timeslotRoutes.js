@@ -16,4 +16,10 @@ router.get('/api/timeslots/:office_id', timeslotController.getAllTimeslotsForOff
 // Retrieve available timeslots
 router.get('/api/timeslots/available', timeslotController.getAvailableTimeslots);
 
+// Update a specific timeslot
+router.patch('/api/timeslots/:timeslot_id', timeslotController.updateTimeslot);
+
+
+
+
 module.exports = router;

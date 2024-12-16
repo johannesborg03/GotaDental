@@ -95,4 +95,45 @@ exports.getAvailableTimeslots = async (req, res) => {
     }
 };
 
-// Additional functions for updating and deleting timeslots can be added similarly...
+// Controller to update a specific timeslot
+exports.updateTimeslot = async (req, res) => {
+    const { timeslot_id } = req.params;
+    const { isBooked, patient } = req.body;
+
+    // Validate required fields
+    if (!timeslot_id) {
+        return res.status(400).json({ message: 'Missing timeslot_id' });
+    }
+
+    if (isBooked === undefined || (isBooked && !patient)) {
+        return res.status(400).json({ message: 'Invalid data: isBooked and patient are required if booking' });
+    }
+
+    // Generate a unique correlation ID
+    const correlationId = uuidv4();
+    const topic = `timeslot/update`;
+
+    try {
+        const updateData = { timeslot_id, isBooked, patient }; // Update payload
+        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
+
+        // Publish the message to RabbitMQ
+        const response = await publishMessage(topic, updateData, correlationId);
+
+        if (!response.success) {
+            return res.status(500).json({ message: 'Failed to update timeslot', error: response.error });
+        }
+
+        // Respond with success
+        res.status(200).json({
+            message: 'Timeslot updated successfully',
+            timeslot: response.timeslot,
+        });
+    } catch (error) {
+        console.error('Error updating timeslot:', error);
+        res.status(500).json({
+            message: 'Failed to update timeslot',
+            error: error.message,
+        });
+    }
+};

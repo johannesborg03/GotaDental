@@ -76,6 +76,7 @@ const calendarConfig = ref({
   },
 });
 
+
 // Fetch all offices for the dropdown
 async function fetchOffices() {
   try {
@@ -132,6 +133,9 @@ function handleOfficeChange() {
       alert("Failed to fetch timeslots. Please try again.");
     }
   }
+
+  //Function to book a timeslot
+  
 
 
   // Navigation methods
