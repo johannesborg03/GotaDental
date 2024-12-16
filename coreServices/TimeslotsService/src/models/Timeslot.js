@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 
 var timeslotSchema = new mongoose.Schema({
 
-    title: {
+    notes: {
         type: String,
       },
       start: {
