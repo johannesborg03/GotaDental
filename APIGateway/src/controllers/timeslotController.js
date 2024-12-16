@@ -57,6 +57,12 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
             return res.status(404).json({ message: 'No timeslots found for this office' });
         }
 
+              // Map response to include 'Booked' or 'Unbooked' based on isBooked
+              const timeslots = response.timeslots.map(timeslot => ({
+                ...timeslot,
+                status: timeslot.isBooked ? 'Booked' : 'Unbooked',
+            }));
+
         res.status(200).json({ message: 'Timeslots retrieved successfully', timeslots: response.timeslots });
     } catch (error) {
         console.error('Error retrieving timeslots:', error);
@@ -75,6 +81,12 @@ exports.getAvailableTimeslots = async (req, res) => {
         if (!response.success || !response.timeslots.length) {
             return res.status(404).json({ message: 'No available timeslots found' });
         }
+
+        // Map response to include 'Booked' or 'Unbooked' based on isBooked
+        const timeslots = response.timeslots.map(timeslot => ({
+            ...timeslot,
+            status: timeslot.isBooked ? 'Booked' : 'Unbooked',
+        }));
 
         res.status(200).json({ message: 'Available timeslots retrieved successfully', timeslots: response.timeslots });
     } catch (error) {
