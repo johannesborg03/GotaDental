@@ -135,7 +135,27 @@ function handleOfficeChange() {
   }
 
   //Function to book a timeslot
-  
+  async function bookTimeslot(timeslotId) {
+  try {
+    const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
+      isBooked: true,
+      patient: sessionStorage.getItem("userIdentifier"), // Assuming the patient ID is stored here
+    });
+
+    alert("Timeslot booked successfully!");
+
+    // Update the calendar
+    const updatedTimeslot = response.data.timeslot;
+    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+      events.value[eventIndex].text = "Booked";
+      calendarConfig.value.events = [...events.value];
+    }
+  } catch (error) {
+    console.error("Error booking timeslot:", error);
+    alert("Failed to book the timeslot. Please try again.");
+  }
+}
 
 
   // Navigation methods
