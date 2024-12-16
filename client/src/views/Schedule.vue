@@ -81,7 +81,6 @@ async function saveTimeslot() {
 
   try {
     const payload = {
-      title: selectedTimeslot.value.title,
       start: selectedTimeslot.value.start, // Send as is without conversion
       end: selectedTimeslot.value.end, // Send as is without conversion
       dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
