@@ -66,7 +66,7 @@ const calendarConfig = ref({
 async function fetchOffices() {
   try {
     const response = await axios.get("http://localhost:4000/api/offices");
-    offices.value = response.data.offices; // Replace with actual API response
+    offices.value = response.data.offices; // 
     console.log("OFFICES:", response.data.offices);
     console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
@@ -106,7 +106,7 @@ function handleOfficeChange() {
       // Map the response data to the format expected by DayPilotCalendar
       events.value = response.data.timeslots.map((timeslot) => ({
         id: timeslot._id,
-        text: timeslot.title,
+        text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
         start: timeslot.start,
         end: timeslot.end,
       }));
@@ -146,7 +146,7 @@ onMounted(() => {
         if (newTimeslot.officeId === selectedOfficeId.value) {
             events.value.push({
                 id: newTimeslot._id,
-                text: newTimeslot.title,
+                text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
                 start: newTimeslot.start,
                 end: newTimeslot.end,
             });
