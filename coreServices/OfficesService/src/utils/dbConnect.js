@@ -3,33 +3,25 @@ require('dotenv').config(); // Load environment variables from .env
 
 let bookingDbConnection = null;
 
+
 // Function to initialize the database connection
 const connectToBookingDB = () => {
-    if (!process.env.BOOKING_DB_URI) {
-        throw new Error('BOOKING_DB_URI is not defined in the environment variables.');
-    }
-
     if (!bookingDbConnection) {
         bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
         });
 
-        // Event handlers for the connection
         bookingDbConnection.on('connected', () => {
-            console.log('TimeslotService Connected to Booking Database');
+            console.log('Office Service Connected to Booking Database');
         });
 
         bookingDbConnection.on('error', (err) => {
-            console.error(`TimeslotService Failed to connect to Booking Database: ${err.message}`);
+            console.error(`Office Service Failed to connect to Booking Database: ${err.message}`);
             process.exit(1);
-        });
-
-        bookingDbConnection.on('disconnected', () => {
-            console.warn('TimeslotService Disconnected from Booking Database');
         });
     }
     return bookingDbConnection;
 };
 
+
 // Export the shared connection
 module.exports = { connectToBookingDB };
-

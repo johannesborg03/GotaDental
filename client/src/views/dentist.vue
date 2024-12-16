@@ -7,6 +7,14 @@
       <router-link to="/dentistTimeslot" class="text-white text-decoration-none">
         Timeslots</router-link>
     </button>
+
+    <button class="btn btn-primary">
+      <router-link to="/schedule" class="text-white text-decoration-none">
+        Schedule</router-link>
+    </button>
+
+
+  
   </div>
 </template>
 
@@ -14,21 +22,25 @@
 <script>
 //import axios from 'axios';
 
+
+
+
+
 export default {
+  
   data() {
     return {
+      
       username: '', // should be change to ssn 
-    };
+    }
+    
   },
 
   async mounted() {
     this.username = sessionStorage.getItem('userIdentifier');
-    await this.fetchOffices();
+   // await this.fetchOffices();
   },
-  mounted() {
-  this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
-  this.fetchUserData(); 
-},
+ 
 
 methods: {
     async fetchUserData() {
@@ -47,3 +59,10 @@ methods: {
   },
 };
 </script>
+
+
+
+<style>
+
+
+</style>

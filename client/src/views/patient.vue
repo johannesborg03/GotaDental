@@ -8,6 +8,11 @@
             <router-link to="/patientTimeslot" class="text-white text-decoration-none">
                 Available Timeslots</router-link>
         </button>
+
+        <button class="btn btn-primary">
+            <router-link to="/PatientSchedule" class="text-white text-decoration-none">
+                Patient Schedule</router-link>
+        </button>
     </div>
 </template>
 

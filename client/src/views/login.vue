@@ -46,6 +46,12 @@ export default {
 
                 console.log("Received response:", response.data);
                 sessionStorage.setItem('userIdentifier', this.username_ssn);
+                sessionStorage.setItem('Office', response.data.office);
+                sessionStorage.setItem('OfficeId', response.data.officeId);
+        
+                console.log('Office in response:', response.data.office);
+                console.log('OfficeId in response:', response.data.officeId);
+                
                 if (/^\d{12}$/.test(this.username_ssn)) {
                     // Redirect to dentist homepage if user is a patient (has 12 digits)
                     this.$router.push('/patient');
