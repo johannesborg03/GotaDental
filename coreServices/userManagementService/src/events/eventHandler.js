@@ -298,6 +298,41 @@ async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
     }
 }
 
+async function handleUpdateAppointments(message, replyTo, correlationId, channel) {
+    const { patientId, timeslotId } = message;
+
+    console.log('Received update appointments message:', message);
+
+    try {
+        if (!patientId || !timeslotId) {
+            const errorResponse = { success: false, error: 'Missing patientId or timeslotId' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Update the patient's appointments array
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            patientId,
+            { $addToSet: { appointments: timeslotId } }, // Use $addToSet to avoid duplicates
+            { new: true }
+        );
+
+        if (!updatedPatient) {
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        console.log('Patient appointments updated successfully:', updatedPatient);
+
+        const successResponse = { success: true, patient: updatedPatient };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating patient appointments:', error);
+        const errorResponse = { success: false, error: 'Failed to update patient appointments' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
 
 
 
@@ -323,6 +358,7 @@ async function initializeSubscriptions() {
         console.log('Subscribed to dentist/getByUsername');
 
         await subscribeToTopic('patient/getBySSN', handleGetPatientBySSN);
+        await subscribeToTopic('patient/updateAppointments', handleUpdateAppointments);
      
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
@@ -345,4 +381,5 @@ module.exports = {
     handleUpdateDentistTimeslot,
     handleGetDentistByUsername,
     handleGetPatientBySSN,
+    handleUpdateAppointments,
 };

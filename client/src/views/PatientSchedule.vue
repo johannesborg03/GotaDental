@@ -62,6 +62,7 @@ const calendarConfig = ref({
   eventClickHandling: "Enabled", // Disable event clicking
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
+    console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     if (selectedTimeslot.text === "Booked") {

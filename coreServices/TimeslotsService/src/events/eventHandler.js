@@ -258,6 +258,18 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
         console.log('Timeslot updated successfully:', existingTimeslot);
 
+          // Publish a message to update the patient's appointments array
+          const updatePatientTopic = 'patient/updateAppointments';
+          const updatePatientMessage = {
+              patientId,
+              appointmentId: timeslot_id,
+          };
+  
+          console.log(`Publishing message to update Patient Appointments for Patient ID: ${patientId}`);
+  
+          await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+  
+
         const successResponse = { success: true, timeslot: existingTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {

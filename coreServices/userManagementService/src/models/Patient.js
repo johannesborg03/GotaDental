@@ -33,7 +33,7 @@ var patientSchema = new mongoose.Schema({
         required : true
     },
     appointments : [{
-        type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'      // Reference to Appointments
+        type: mongoose.Schema.Types.ObjectId, ref: 'Timeslot'      // Reference to Appointments
     }]
 
 
