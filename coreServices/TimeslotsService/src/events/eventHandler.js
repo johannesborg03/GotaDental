@@ -3,6 +3,7 @@ const Timeslot = require('../models/Timeslot');
 const { publishMessage } = require('./publisher'); 
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose'); // Import mongoose
+const eventEmitter = require('./eventEmitter'); // Import the global event emitter
 
 
 const adjustToCET = (dateStr) => {
@@ -76,6 +77,7 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
         console.log('Timeslot created successfully:', newTimeslot);
 
+
          // Publish a message to update the dentist's timeslot array
          const updateDentistTopic = 'dentists/updateTimeslot';
          const updateDentistMessage = {
@@ -100,8 +102,21 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
 
         console.log('Timeslot created successfully:', newTimeslot);
-
        
+          // Emit event with timeslotId
+          const timeslotCreateMessage = {
+            _id: newTimeslot._id, // Include the timeslot ID
+            start: newTimeslot.start,
+            end: newTimeslot.end,
+            isBooked: newTimeslot.isBooked,
+            officeId: newTimeslot.office,
+        };
+
+        const topic = 'timeslot/create';
+        eventEmitter.emit('mqttMessage', { topic, message: timeslotCreateMessage });
+
+        console.log(`WebSocket event emitted for timeslot/create with ID: ${newTimeslot._id}`);
+
 
         const successResponse = { success: true, timeslot: newTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });

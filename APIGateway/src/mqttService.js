@@ -129,14 +129,56 @@ async function subscribeToTopic(topic, callback) {
 // Handle timeslot creation and emit WebSocket events
 function handleTimeslotCreate(message) {
     console.log('Handling timeslot creation:', message);
+    // Extract fields from the message
+    const { _id: timeslotId, start, end, isBooked, officeId } = message;
 
-    
+    if (!timeslotId || !officeId) {
+        console.error('Missing timeslotId or officeId in WebSocket message:', message);
+        return;
+    }
+
+    console.log(`Timeslot created with ID: ${timeslotId}`);
+
+    // Emit the event to the WebSocket clients
+    if (io) {
+        io.to(officeId).emit('timeslot/create', {
+            _id: timeslotId,
+            start,
+            end,
+            isBooked,
+            officeId,
+        });
+        console.log(`WebSocket timeslot/create event emitted with ID: ${timeslotId}`);
+    }
+}
+
+// Handle timeslot updates and emit WebSocket events
+function handleTimeslotUpdate(message) {
+    console.log('Handling timeslot update:', message);
+
+    const { officeId, timeslot_id, isBooked, patient } = message;
+
+    if (!officeId) {
+        console.error('No officeId provided in update message:', message);
+        return;
+    }
+
+    // Broadcast the updated timeslot to the relevant office room
+    if (io) {
+        io.to(officeId).emit('timeslot/update', {
+            timeslot_id,
+            isBooked,
+            patient,
+        });
+        console.log(`WebSocket timeslot update sent to office ${officeId}`);
+    }
 }
 
 // Add topic subscriptions
 async function initializeSubscriptions() {
     await subscribeToTopic('timeslot/create', handleTimeslotCreate);
+    await subscribeToTopic('timeslot/update', handleTimeslotUpdate);
     console.log('Subscriptions initialized');
 }
 
-module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic, initializeWebSocket, initializeSubscriptions };
+module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic, initializeWebSocket, initializeSubscriptions, handleTimeslotUpdate, handleTimeslotCreate };

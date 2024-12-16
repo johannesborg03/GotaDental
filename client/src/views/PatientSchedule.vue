@@ -190,8 +190,23 @@ onMounted(() => {
                 end: newTimeslot.end,
             });
             calendarConfig.value.events = [...events.value];
+            console.log("Updated events after WebSocket create:", events.value);
         }
     });
+
+      // Listen for timeslot updates
+      socket.on("timeslot/update", (updatedTimeslot) => {
+        console.log("Received timeslot update:", updatedTimeslot);
+        
+
+        // Update the calendar with the new state
+        const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot.timeslot_id);
+        if (eventIndex !== -1) {
+            events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
+            calendarConfig.value.events = [...events.value];
+        }
+    });
+
 
     socket.on("disconnect", () => {
         console.log("WebSocket disconnected");
