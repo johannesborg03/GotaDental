@@ -82,8 +82,8 @@ async function saveTimeslot() {
   try {
     const payload = {
       title: selectedTimeslot.value.title,
-      start: selectedTimeslot.value.start,
-      end: selectedTimeslot.value.end,
+      start: new Date(selectedTimeslot.value.start).toISOString(), // Convert to UTC
+  end: new Date(selectedTimeslot.value.end).toISOString(),     // Convert to UTC
       dentist: sessionStorage.getItem('userIdentifier') || 'Guest', 
       office: sessionStorage.getItem('Office'),
     };
