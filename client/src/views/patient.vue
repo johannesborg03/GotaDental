@@ -1,7 +1,7 @@
 <template>
     <div class="container py-4">
         <div class="mb-4 text-center">
-            <h1 class="text-primary">Available Appointments</h1>
+            <h1 class="text-primary">Book an Appointment</h1>
         </div>
 
         <button class="btn btn-primary">

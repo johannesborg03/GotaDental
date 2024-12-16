@@ -17,14 +17,18 @@
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
 
-   
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+import { io } from "socket.io-client";
+
+
+
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -38,6 +42,11 @@ function getCurrentWeekStart() {
 // State for selected timeslot
 const selectedTimeslot = ref(null);
 
+
+// WebSocket setup
+const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
+
+
 // State for events fetched from the backend
 const selectedOfficeId = ref("");
 const offices = ref([]);
@@ -50,16 +59,32 @@ const calendarConfig = ref({
   weekStarts: 1,
   events: [],
   timeRangeSelectedHandling: "Disabled", // Disable time range selection
-  eventClickHandling: "Disabled", // Disable event clicking
+  eventClickHandling: "Enabled", // Disable event clicking
+  onEventClick: async (args) => {
+    const timeslotId = args.e.id();
+    console.log("Timeslot ID:", timeslotId); // Add a log to verify
+    const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
+
+    if (selectedTimeslot.text === "Booked") {
+      alert("This timeslot is already booked.");
+      return;
+    }
+
+    const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
+    if (confirmBooking) {
+      await bookTimeslot(timeslotId);
+    }
+  },
 });
+
 
 // Fetch all offices for the dropdown
 async function fetchOffices() {
   try {
     const response = await axios.get("http://localhost:4000/api/offices");
-    offices.value = response.data.offices; // Replace with actual API response
+    offices.value = response.data.offices; // 
     console.log("OFFICES:", response.data.offices);
-    console.log('OfficeId in response:', response.data.offices.officeId);
+    console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
   } catch (error) {
     console.error("Error fetching offices:", error);
@@ -69,57 +94,131 @@ async function fetchOffices() {
 
 function handleOfficeChange() {
   if (selectedOfficeId.value) {
-    console.log("Office ID selected:", selectedOfficeId.value);
+    console.log("Joining office room:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
+
+       // Emit WebSocket event to join the selected office's room
+       if (socket.connected) {
+            socket.emit("joinOffice", { officeId : selectedOfficeId.value});
+        }
     fetchTimeslots();
+   
   }
 }
 
-// Fetch all timeslots for the office
-async function fetchTimeslots() {
-  if (!selectedOfficeId.value) {
-    alert("No office selected.");
-    return;
+
+
+  // Fetch all timeslots for the office
+  async function fetchTimeslots() {
+    if (!selectedOfficeId.value) {
+      alert("No office selected.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
+      console.log("Fetched timeslots:", response.data);
+
+      // Map the response data to the format expected by DayPilotCalendar
+      events.value = response.data.timeslots.map((timeslot) => ({
+        id: timeslot._id,
+        text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
+        start: timeslot.start,
+        end: timeslot.end,
+      }));
+
+      // Update the calendar configuration
+      calendarConfig.value.events = events.value;
+    } catch (error) {
+      console.error("Error fetching timeslots:", error);
+      alert("Failed to fetch timeslots. Please try again.");
+    }
   }
 
+  //Function to book a timeslot
+  async function bookTimeslot(timeslotId) {
   try {
-    const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
-    console.log("Fetched timeslots:", response.data);
+    const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
+      isBooked: true,
+      patient: sessionStorage.getItem("userIdentifier"), // Assuming the patient ID is stored here
+    });
 
-    // Map the response data to the format expected by DayPilotCalendar
-    events.value = response.data.timeslots.map((timeslot) => ({
-      id: timeslot._id,
-      text: timeslot.title,
-      start: timeslot.start,
-      end: timeslot.end,
-    }));
+    alert("Timeslot booked successfully!");
 
-    // Update the calendar configuration
-    calendarConfig.value.events = events.value;
+    // Update the calendar
+    const updatedTimeslot = response.data.timeslot;
+    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+      events.value[eventIndex].text = "Booked";
+      calendarConfig.value.events = [...events.value];
+    }
   } catch (error) {
-    console.error("Error fetching timeslots:", error);
-    alert("Failed to fetch timeslots. Please try again.");
+    console.error("Error booking timeslot:", error);
+    alert("Failed to book the timeslot. Please try again.");
   }
 }
 
 
-// Navigation methods
-function prevWeek() {
-  const currentDate = new Date(calendarConfig.value.startDate);
-  currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
-  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-}
+  // Navigation methods
+  function prevWeek() {
+    const currentDate = new Date(calendarConfig.value.startDate);
+    currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
+    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+  }
 
-function nextWeek() {
-  const currentDate = new Date(calendarConfig.value.startDate);
-  currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
-  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-}
+  function nextWeek() {
+    const currentDate = new Date(calendarConfig.value.startDate);
+    currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
+    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+  }
 
-// Fetch timeslots when the component is mounted
+ // WebSocket connection and event handling
 onMounted(() => {
   fetchOffices();
+
+  socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+    });
+
+    socket.on("timeslot/create", (newTimeslot) => {
+        console.log("Received timeslot update:", newTimeslot);
+        if (newTimeslot.officeId === selectedOfficeId.value) {
+            events.value.push({
+                id: newTimeslot._id,
+                text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
+                start: newTimeslot.start,
+                end: newTimeslot.end,
+            });
+            calendarConfig.value.events = [...events.value];
+            console.log("Updated events after WebSocket create:", events.value);
+        }
+    });
+
+      // Listen for timeslot updates
+      socket.on("timeslot/update", (updatedTimeslot) => {
+        console.log("Received timeslot update:", updatedTimeslot);
+        
+
+        // Update the calendar with the new state
+        const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot.timeslot_id);
+        if (eventIndex !== -1) {
+            events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
+            calendarConfig.value.events = [...events.value];
+        }
+    });
+
+
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
 });
+
+// Cleanup WebSocket connection
+onUnmounted(() => {
+  socket.disconnect();
+});
+
+
 </script>
 
 <style>

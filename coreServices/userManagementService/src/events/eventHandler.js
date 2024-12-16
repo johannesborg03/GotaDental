@@ -269,6 +269,71 @@ async function handleGetDentistByUsername(message, replyTo, correlationId, chann
     }
 }
 
+async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
+    const { patient_ssn } = message;
+
+    console.log('Received get patient by SSN message:', message);
+
+    try {
+        if (!patient_ssn) {
+            const errorResponse = { success: false, error: 'Missing SSN' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const patient = await Patient.findOne({ patient_ssn });
+
+        if (!patient) {
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, patientId: patient._id };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving patient:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve patient' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+async function handleUpdateAppointments(message, replyTo, correlationId, channel) {
+    const { patientId, timeslotId } = message;
+
+    console.log('Received update appointments message:', message);
+
+    try {
+        if (!patientId || !timeslotId) {
+            const errorResponse = { success: false, error: 'Missing patientId or timeslotId' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Update the patient's appointments array
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            patientId,
+            { $addToSet: { appointments: timeslotId } }, // Use $addToSet to avoid duplicates
+            { new: true }
+        );
+
+        if (!updatedPatient) {
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        console.log('Patient appointments updated successfully:', updatedPatient);
+
+        const successResponse = { success: true, patient: updatedPatient };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error updating patient appointments:', error);
+        const errorResponse = { success: false, error: 'Failed to update patient appointments' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 
 
 // Initialize all subscriptions
@@ -292,6 +357,10 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentist/getByUsername', handleGetDentistByUsername);
         console.log('Subscribed to dentist/getByUsername');
 
+        await subscribeToTopic('patient/getBySSN', handleGetPatientBySSN);
+        await subscribeToTopic('patient/updateAppointments', handleUpdateAppointments);
+     
+
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
 
@@ -310,5 +379,7 @@ module.exports = {
     handleDentistLogin,
     handlePatientLogin,
     handleUpdateDentistTimeslot,
-    handleGetDentistByUsername
+    handleGetDentistByUsername,
+    handleGetPatientBySSN,
+    handleUpdateAppointments,
 };

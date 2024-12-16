@@ -1,7 +1,50 @@
 const amqp = require('amqplib');
+const eventEmitter = require('./events/eventEmitter'); // Import the global event emitter
+
 
 let channel;
 let connection;
+let io;
+
+function initializeWebSocket(serverIO) {
+    io = serverIO;
+    console.log('WebSocket initialized in mqttService');
+
+    // Listen for MQTT messages
+    eventEmitter.on('mqttMessage', ({ topic, message }) => {
+        console.log(`Broadcasting MQTT message to WebSocket for topic: ${topic}`, message);
+
+        const officeId = message.officeId || message.officeId || undefined;
+        if (!officeId) {
+            console.error(`No officeId found in message: ${JSON.stringify(message)}`);
+            return;
+        }
+
+        // Emit WebSocket event to the relevant office room
+        if (io) {
+            io.to(officeId).emit(topic, message);
+            console.log(`WebSocket event emitted to room "${officeId}"`);
+        }
+    });
+
+    // Handle WebSocket client connections
+    io.on('connection', (socket) => {
+        console.log(`Client connected: ${socket.id}`);
+
+        socket.on('joinOffice', ({ officeId }) => {
+            if (officeId) {
+                console.log(`Client ${socket.id} joined office room: ${officeId}`);
+                socket.join(officeId);
+            } else {
+                console.error(`Client ${socket.id} did not provide an office ID.`);
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log(`Client disconnected: ${socket.id}`);
+        });
+    });
+}
 
 async function connectRabbitMQ() {
     connection = await amqp.connect('amqp://localhost');
@@ -70,8 +113,72 @@ async function subscribeToTopic(topic, callback) {
     channel.consume(queue.queue, (msg) => {
         const message = JSON.parse(msg.content.toString());
         console.log(`Received message from topic "${topic}":`, message);
-        callback(message);
-    });
+
+        console.log('Office Id EMEMAM', message.officeId);
+        
+        // Emit an event for WebSocket handling
+        eventEmitter.emit('mqttMessage', { topic, message });
+
+       // Call the callback if provided
+       if (callback) {
+           callback(message);
+       }
+   });
 }
 
-module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic };
+// Handle timeslot creation and emit WebSocket events
+function handleTimeslotCreate(message) {
+    console.log('Handling timeslot creation:', message);
+    // Extract fields from the message
+    const { _id: timeslotId, start, end, isBooked, officeId } = message;
+
+    if (!timeslotId || !officeId) {
+        console.error('Missing timeslotId or officeId in WebSocket message:', message);
+        return;
+    }
+
+    console.log(`Timeslot created with ID: ${timeslotId}`);
+
+    // Emit the event to the WebSocket clients
+    if (io) {
+        io.to(officeId).emit('timeslot/create', {
+            _id: timeslotId,
+            start,
+            end,
+            isBooked,
+            officeId,
+        });
+        console.log(`WebSocket timeslot/create event emitted with ID: ${timeslotId}`);
+    }
+}
+
+// Handle timeslot updates and emit WebSocket events
+function handleTimeslotUpdate(message) {
+    console.log('Handling timeslot update:', message);
+
+    const { officeId, timeslot_id, isBooked, patient } = message;
+
+    if (!officeId) {
+        console.error('No officeId provided in update message:', message);
+        return;
+    }
+
+    // Broadcast the updated timeslot to the relevant office room
+    if (io) {
+        io.to(officeId).emit('timeslot/update', {
+            timeslot_id,
+            isBooked,
+            patient,
+        });
+        console.log(`WebSocket timeslot update sent to office ${officeId}`);
+    }
+}
+
+// Add topic subscriptions
+async function initializeSubscriptions() {
+    await subscribeToTopic('timeslot/create', handleTimeslotCreate);
+    await subscribeToTopic('timeslot/update', handleTimeslotUpdate);
+    console.log('Subscriptions initialized');
+}
+
+module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic, initializeWebSocket, initializeSubscriptions, handleTimeslotUpdate, handleTimeslotCreate };

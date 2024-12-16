@@ -7,9 +7,8 @@ var Schema = mongoose.Schema;
 
 var timeslotSchema = new mongoose.Schema({
 
-    title: {
+    notes: {
         type: String,
-        required: true, // Appointment title is required
       },
       start: {
         type: Date,

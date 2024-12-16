@@ -18,7 +18,10 @@
                 </button>
             </div>
         </div>
-        <p v-else class="text-danger mt-4">No available timeslots for the selected office.</p>
+        <!-- Messages for No Available Slots -->
+        <div v-if="timeslots.length === 0" class="text-center mt-4 text-muted">
+            <p>No available timeslots for now.</p>
+        </div>
     </div>
 </template>
 

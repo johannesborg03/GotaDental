@@ -3,11 +3,11 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
-    console.log("hey");
-    const { title, start, end, dentist, office } = req.body;
+ 
+    const { start, end, dentist, office, officeId } = req.body;
 
     // Validate required fields
-    if (!title || !start || !end || !dentist || !office) {
+    if (!start || !end || !dentist || !office || !officeId) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -18,11 +18,11 @@ exports.createTimeslot = async (req, res) => {
 
     
     try {
-        const timeslotData = { title, start, end, dentist, office }; // Fixed variable name
+        const timeslotData = { start, end, dentist, office, officeId, isBooked: false }; // Fixed variable name
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
-        await publishMessage(topic, timeslotData, correlationId);
+        await publishMessage(topic, timeslotData, correlationId, officeId);
 
         // Respond with success
         res.status(201).json({
@@ -57,6 +57,12 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
             return res.status(404).json({ message: 'No timeslots found for this office' });
         }
 
+              // Map response to include 'Booked' or 'Unbooked' based on isBooked
+              const timeslots = response.timeslots.map(timeslot => ({
+                ...timeslot,
+                status: timeslot.isBooked ? 'Booked' : 'Unbooked',
+            }));
+
         res.status(200).json({ message: 'Timeslots retrieved successfully', timeslots: response.timeslots });
     } catch (error) {
         console.error('Error retrieving timeslots:', error);
@@ -76,6 +82,12 @@ exports.getAvailableTimeslots = async (req, res) => {
             return res.status(404).json({ message: 'No available timeslots found' });
         }
 
+        // Map response to include 'Booked' or 'Unbooked' based on isBooked
+        const timeslots = response.timeslots.map(timeslot => ({
+            ...timeslot,
+            status: timeslot.isBooked ? 'Booked' : 'Unbooked',
+        }));
+
         res.status(200).json({ message: 'Available timeslots retrieved successfully', timeslots: response.timeslots });
     } catch (error) {
         console.error('Error retrieving available timeslots:', error);
@@ -83,4 +95,46 @@ exports.getAvailableTimeslots = async (req, res) => {
     }
 };
 
-// Additional functions for updating and deleting timeslots can be added similarly...
+// Controller to update a specific timeslot
+exports.updateTimeslot = async (req, res) => {
+    console.log("CALLED");
+    const { timeslot_id } = req.params;
+    const { isBooked, patient } = req.body;
+
+    // Validate required fields
+    if (!timeslot_id) {
+        return res.status(400).json({ message: 'Missing timeslot_id' });
+    }
+
+    if (isBooked === undefined || (isBooked && !patient)) {
+        return res.status(400).json({ message: 'Invalid data: isBooked and patient are required if booking' });
+    }
+
+    // Generate a unique correlation ID
+    const correlationId = uuidv4();
+    const topic = `timeslot/update`;
+
+    try {
+        const updateData = { timeslot_id, isBooked, patient }; // Update payload
+        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
+
+        // Publish the message to RabbitMQ
+        const response = await publishMessage(topic, updateData, correlationId);
+
+        if (!response.success) {
+            return res.status(500).json({ message: 'Failed to update timeslot', error: response.error });
+        }
+
+        // Respond with success
+        res.status(200).json({
+            message: 'Timeslot updated successfully',
+            timeslot: response.timeslot,
+        });
+    } catch (error) {
+        console.error('Error updating timeslot:', error);
+        res.status(500).json({
+            message: 'Failed to update timeslot',
+            error: error.message,
+        });
+    }
+};

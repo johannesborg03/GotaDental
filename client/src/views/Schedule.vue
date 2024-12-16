@@ -1,16 +1,16 @@
 <template>
   <div class="mb-4 text-center">
-      <h1 class="text-primary">
-        {{ officeName || "OFFICE NAME" }}
-      </h1>
-    </div>
+    <h1 class="text-primary">
+      {{ officeName || "OFFICE NAME" }}
+    </h1>
+  </div>
   <div>
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
     <div v-if="selectedTimeslot" class="mt-3">
       <p>Selected Timeslot:</p>
-      <p>Title: {{ selectedTimeslot.title }}</p>
+      <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
       <p>Start: {{ selectedTimeslot.start }}</p>
       <p>End: {{ selectedTimeslot.end }}</p>
       <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
@@ -61,14 +61,14 @@ const calendarConfig = ref({
   events: [],
   onTimeRangeSelected: (args) => {
     // Callback triggered when a time range is selected
-    const title = prompt("Enter the appointment title:", "New Appointment");
-    if (title) {
-      selectedTimeslot.value = {
-        title,
-        start: args.start,
-        end: args.end,
+    // Default to "Unbooked" and set the selected timeslot
+    selectedTimeslot.value = {
+      title: "Unbooked", // Default title
+      start: args.start,
+      end: args.end,
+      isBooked: false, // Default state
       };
-    }
+    
   },
 });
 
@@ -81,11 +81,12 @@ async function saveTimeslot() {
 
   try {
     const payload = {
-      title: selectedTimeslot.value.title,
-      start: selectedTimeslot.value.start,
-      end: selectedTimeslot.value.end,
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest', 
+      start: selectedTimeslot.value.start, // Send as is without conversion
+      end: selectedTimeslot.value.end, // Send as is without conversion
+      dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
       office: sessionStorage.getItem('Office'),
+      officeId: sessionStorage.getItem('OfficeId'),
+      isBooked: false,
     };
 
     console.log("Sending payload", payload);
@@ -94,10 +95,10 @@ async function saveTimeslot() {
     console.log("Saved timeslot:", response.data);
 
 
-     // Add the new timeslot directly to the events array
-     const newTimeslot = {
+    // Add the new timeslot directly to the events array
+    const newTimeslot = {
       id: response.data.timeslot._id,
-      text: response.data.timeslot.title,
+      text: response.data.timeslot.isBooked ? "Booked" : "Unbooked",
       start: response.data.timeslot.start,
       end: response.data.timeslot.end,
     };
@@ -129,7 +130,7 @@ async function fetchTimeslots() {
     // Map the response data to the format expected by DayPilotCalendar
     events.value = response.data.timeslots.map((timeslot) => ({
       id: timeslot._id,
-      text: timeslot.title,
+      text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
       start: timeslot.start,
       end: timeslot.end,
     }));
@@ -165,7 +166,6 @@ onMounted(() => {
 </script>
 
 <style>
-
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;
