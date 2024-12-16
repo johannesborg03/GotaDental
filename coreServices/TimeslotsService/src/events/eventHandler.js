@@ -15,12 +15,12 @@ const adjustToCET = (dateStr) => {
 async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
     // Extract data from the received message
-    const { title, start, end, dentist, office } = message;
+    const { start, end, dentist, office } = message;
 
     console.log("Message:", message);
     try {
         // Validate the input data
-        if (!title || !start || !end || !dentist || !office || !officeId) {
+        if (!start || !end || !dentist || !office) {
             const errorResponse = { success: false, error: 'Missing required fields' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
@@ -65,12 +65,11 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
      
        // Create the timeslot
         const newTimeslot = new Timeslot({
-            title,
             start: startCET.toISOString(), // Save as ISO string in UTC
             end: endCET.toISOString(),     // Save the converted CET time
             dentist: dentistId, // Use the resolved Dentist ID
             office: officeId,   // Use the resolved Office ID
-            isBooked: true,
+            isBooked: false,
         });
 
         await newTimeslot.save();
@@ -242,18 +241,12 @@ async function handleGetAvailableTimeslots(message, replyTo, correlationId, chan
     console.log('Received request to retrieve available timeslots:', message);
 
     try {
-        const availableTimeslots = await Timeslot.find({ timeslot_state: 0 });
+        const availableTimeslots = await Timeslot.find({ isBooked: false });
 
-        if (!availableTimeslots || availableTimeslots.length === 0) {
-            const errorResponse = { success: false, error: 'No available timeslots found' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
         const successResponse = { success: true, timeslots: availableTimeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
 
         console.log('Available timeslots sent successfully');
-
     } catch (error) {
         console.error('Error retrieving available timeslots:', error);
         const errorResponse = { success: false, error: 'Failed to retrieve available timeslots' };
