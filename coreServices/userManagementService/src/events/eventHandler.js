@@ -269,6 +269,36 @@ async function handleGetDentistByUsername(message, replyTo, correlationId, chann
     }
 }
 
+async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
+    const { patient_ssn } = message;
+
+    console.log('Received get patient by SSN message:', message);
+
+    try {
+        if (!patient_ssn) {
+            const errorResponse = { success: false, error: 'Missing SSN' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const patient = await Patient.findOne({ patient_ssn });
+
+        if (!patient) {
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, patientId: patient._id };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving patient:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve patient' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
+
 
 
 // Initialize all subscriptions
@@ -292,6 +322,9 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentist/getByUsername', handleGetDentistByUsername);
         console.log('Subscribed to dentist/getByUsername');
 
+        await subscribeToTopic('patient/getBySSN', handleGetPatientBySSN);
+     
+
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');
 
@@ -310,5 +343,6 @@ module.exports = {
     handleDentistLogin,
     handlePatientLogin,
     handleUpdateDentistTimeslot,
-    handleGetDentistByUsername
+    handleGetDentistByUsername,
+    handleGetPatientBySSN,
 };
