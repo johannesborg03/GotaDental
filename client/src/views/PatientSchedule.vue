@@ -59,7 +59,21 @@ const calendarConfig = ref({
   weekStarts: 1,
   events: [],
   timeRangeSelectedHandling: "Disabled", // Disable time range selection
-  eventClickHandling: "Disabled", // Disable event clicking
+  eventClickHandling: "Enabled", // Disable event clicking
+  onEventClick: async (args) => {
+    const timeslotId = args.e.id();
+    const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
+
+    if (selectedTimeslot.text === "Booked") {
+      alert("This timeslot is already booked.");
+      return;
+    }
+
+    const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
+    if (confirmBooking) {
+      await bookTimeslot(timeslotId);
+    }
+  },
 });
 
 // Fetch all offices for the dropdown
