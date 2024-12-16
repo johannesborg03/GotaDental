@@ -86,6 +86,7 @@ async function saveTimeslot() {
       end: selectedTimeslot.value.end, // Send as is without conversion
       dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
       office: sessionStorage.getItem('Office'),
+      officeId: sessionStorage.getItem('OfficeId'),
     };
 
     console.log("Sending payload", payload);

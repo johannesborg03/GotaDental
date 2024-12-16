@@ -3,8 +3,11 @@ const cors = require('cors');
 
 const mqtt = require('mqtt');
 
+const http = require('http'); // Import HTTP for server creation
+const { Server } = require('socket.io'); // Import Socket.IO
+
 //const mqttClient = require('./src/mqttClient');
-const { connectRabbitMQ } = require('./src/mqttService'); // Adjust path to your RabbitMQ module
+const { connectRabbitMQ, initializeWebSocket, initializeSubscriptions } = require('./src/mqttService');
 
 
 const bodyParser = require('body-parser');
@@ -50,10 +53,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded payloads
 app.use(cors()); // Enable CORS
 
+const server = http.createServer(app); // Wrap the Express app with an HTTP server
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173', // Frontend URL
+        methods: ['GET', 'POST'], // Allowed methods
+    },
+});
+
+// Initialize WebSocket in mqttService
+initializeWebSocket(io);
+
+
 
 // Initialize RabbitMQ connection
 connectRabbitMQ().then(() => {
     console.log('RabbitMQ connection established');
+    initializeSubscriptions();
 }).catch((err) => {
     console.error('Failed to connect to RabbitMQ:', err);
     process.exit(1); // Exit if RabbitMQ connection fails
@@ -72,6 +88,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/api/`);
 });

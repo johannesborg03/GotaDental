@@ -20,7 +20,7 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
     console.log("Message:", message);
     try {
         // Validate the input data
-        if (!title || !start || !end || !dentist || !office) {
+        if (!title || !start || !end || !dentist || !office || !officeId) {
             const errorResponse = { success: false, error: 'Missing required fields' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
@@ -102,9 +102,7 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
         console.log('Timeslot created successfully:', newTimeslot);
 
-         // Emit WebSocket event to update clients in real-time
-         emitTimeslotCreated(office, newTimeslot);
-
+       
 
         const successResponse = { success: true, timeslot: newTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });

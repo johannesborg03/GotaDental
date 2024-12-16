@@ -25,6 +25,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+import { io } from "socket.io-client";
 
 
 
@@ -42,6 +43,8 @@ function getCurrentWeekStart() {
 const selectedTimeslot = ref(null);
 
 
+// WebSocket setup
+const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 
 
 // State for events fetched from the backend
@@ -65,7 +68,7 @@ async function fetchOffices() {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // Replace with actual API response
     console.log("OFFICES:", response.data.offices);
-    console.log('OfficeId in response:', response.data.offices.officeId);
+    console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
   } catch (error) {
     console.error("Error fetching offices:", error);
@@ -75,8 +78,13 @@ async function fetchOffices() {
 
 function handleOfficeChange() {
   if (selectedOfficeId.value) {
-    console.log("Office ID selected:", selectedOfficeId.value);
+    console.log("Joining office room:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
+
+       // Emit WebSocket event to join the selected office's room
+       if (socket.connected) {
+            socket.emit("joinOffice", { officeId : selectedOfficeId.value});
+        }
     fetchTimeslots();
    
   }
@@ -125,10 +133,38 @@ function handleOfficeChange() {
     calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
   }
 
-  // Fetch timeslots when the component is mounted
-  onMounted(() => {
-    fetchOffices();
-  });
+ // WebSocket connection and event handling
+onMounted(() => {
+  fetchOffices();
+
+  socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+    });
+
+    socket.on("timeslot/create", (newTimeslot) => {
+        console.log("Received timeslot update:", newTimeslot);
+        if (newTimeslot.officeId === selectedOfficeId.value) {
+            events.value.push({
+                id: newTimeslot._id,
+                text: newTimeslot.title,
+                start: newTimeslot.start,
+                end: newTimeslot.end,
+            });
+            calendarConfig.value.events = [...events.value];
+        }
+    });
+
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
+});
+
+// Cleanup WebSocket connection
+onUnmounted(() => {
+  socket.disconnect();
+});
+
+
 </script>
 
 <style>
