@@ -28,7 +28,7 @@ require('dotenv').config();
 // Enable CORS for all routes
 app.use(cors({
     origin: 'http://localhost:5173', // Replace with your frontend origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
     credentials: true, // Allow cookies if needed
 }));

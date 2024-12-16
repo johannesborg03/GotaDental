@@ -97,6 +97,7 @@ exports.getAvailableTimeslots = async (req, res) => {
 
 // Controller to update a specific timeslot
 exports.updateTimeslot = async (req, res) => {
+    console.log("CALLED");
     const { timeslot_id } = req.params;
     const { isBooked, patient } = req.body;
 
