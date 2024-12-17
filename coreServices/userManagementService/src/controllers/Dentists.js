@@ -129,28 +129,23 @@ router.patch('/api/dentists/:dentist_username', async (req, res) => {
 // DELETE a dentist by username
 router.delete('/api/dentists/:username/delete', async (req, res) => {
     try {
-        // Extract username from the request params
         const username = req.params.username;
 
         // Find the dentist by username and delete it
         const deletedDentist = await Dentist.findOneAndDelete({ dentist_username: username });
 
-        // Check if a dentist was found and deleted
         if (!deletedDentist) {
             return res.status(404).json({ message: `Dentist with username '${username}' not found.` });
         }
 
-        // If you need the ID of the deleted dentist, access it here:
         const deletedDentistId = deletedDentist._id;
 
-        // Respond with success and include the deleted dentist details
         res.status(200).json({
             message: `Dentist with username '${username}' deleted successfully.`,
             deletedDentistId: deletedDentistId,
             deletedDentist: deletedDentist
         });
     } catch (error) {
-        // Handle any errors
         res.status(500).json({ message: 'Error deleting dentist', error: error.message });
     }
 });

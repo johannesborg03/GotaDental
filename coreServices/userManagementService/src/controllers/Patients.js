@@ -115,4 +115,25 @@ router.patch('/api/patients/:patient_ssn', async (req, res) => {
     }
 });
 
+// DELETE a patient by SSN
+router.delete('/api/patients/:patient_ssn/delete', async (req, res) => {
+    try {
+        const patientSSN = req.params.patient_ssn;
+        const deletedPatient = await Patient.findOneAndDelete({ patient_ssn: patientSSN });
+
+        if (!deletedPatient) {
+            return res.status(404).json({ message: `Patient with SSN '${patientSSN}' not found.` });
+        }
+        const deletedPatientId = deletedPatient._id;
+
+        res.status(200).json({
+            message: `Patient with SSN '${patientSSN}' deleted successfully.`,
+            deletedPatientId: deletedPatientId,
+            deletedPatient: deletedPatient
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting patient', error: error.message });
+    }
+});
+
 module.exports = router;
