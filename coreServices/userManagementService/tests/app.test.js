@@ -42,7 +42,7 @@ describe('POST dentist', () => {
 });
 describe('POST patient', () => {
 
-    const testPatientssn = '123456789101'; 
+    const testPatientssn = '123456789109'; 
 
     test('should create a new patient and return 201 status', async () => {
         const newPatient = {

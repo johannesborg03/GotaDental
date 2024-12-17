@@ -6,7 +6,7 @@ vi.mock('../../src/models/Dentist');
 
 describe('Dentist Model Tests', () => {
 
-    test('should create a new patient successfully', async () => {
+    test('should create a new dentist successfully', async () => {
         // Mock the Dentist instance's save method
         const mockSave = vi.fn().mockResolvedValue({
             dentist_username: 'JohnDentist',
