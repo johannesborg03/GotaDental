@@ -42,7 +42,7 @@ describe('POST dentist', () => {
 });
 describe('POST patient', () => {
 
-    const testPatientssn = '123456789109'; 
+    const testPatientssn = '134456719109'; 
 
     test('should create a new patient and return 201 status', async () => {
         const newPatient = {
@@ -68,11 +68,12 @@ describe('POST patient', () => {
             email: newPatient.email
         });
 
-        afterAll(async () => {
-            await request(app)
-                .delete(`/api/dentists/${testDentistUsername}/delete`)
-                .set('Accept', 'application/json')
-        });
+    });
+
+    afterAll(async () => {
+        await request(app) 
+            .delete(`/api/patients/${testPatientssn}/delete`)
+            .set('Accept', 'application/json')
     });
 
     test('should return 400 if patient with same email already exists', async () => {
