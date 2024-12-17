@@ -8,14 +8,14 @@ const { connectToDentistDB } = require('./src/utils/userDbConnect');
 const { connectToPatientDB } = require('./src/utils/userDbConnect');
 
 
-const DentistModel = require('./src/models/Dentist'); // Model loader
+const DentistModel = require('./src/models/Dentist'); 
 // Initialize the database connection
 const dentistDbConnection = connectToDentistDB();
 // Load the Dentist model
 const Dentist = DentistModel(dentistDbConnection);
 
 
-const PatientModel = require('./src/models/Patient'); // Model loader
+const PatientModel = require('./src/models/Patient');
 // Initialize the database connection
 const patientDbConnection = connectToPatientDB();
 // Load the Patient model
@@ -23,24 +23,13 @@ const Patient = PatientModel(patientDbConnection);
 
 require('dotenv').config();
 
-// Import reusable database connection utility
-//const connectToDatabase = require('./src/utils/userDbConnect');
-
 // Variables
 var port = process.env.PORT || 3004; // Use the port defined in .env
-//const dentistDbUri = process.env.DENTIST_DB_URI; // Dentist Database URI
-//const patientDbUri = process.env.PATIENT_DB_URI; // Patient Database URI
 
 // Controllers:
 var dentistsController = require('./src/controllers/Dentists');
 var patientsController = require('./src/controllers/Patients')
-//--
 
-
-
-// Connect to Both Databases
-//connectToDatabase(dentistDbUri, 'Dentist Database');
-//connectToDatabase(patientDbUri, 'Patient Database');
 
 // Create Express app
 var app = express();
@@ -54,12 +43,12 @@ app.use(cors()); // Enable CORS
 // Initialize RabbitMQ Subscriptions
 initializeSubscriptions();
 
+app.use(userRoutes);
 
 //app.use each controller:
-// app.use(dentistsController);
-// app.use(patientsController);
+ app.use(dentistsController);
+ app.use(patientsController);
 
-app.use(userRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {

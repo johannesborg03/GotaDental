@@ -1,6 +1,6 @@
 var express = require ('express');
 var router = express.Router();
-//const Dentist = require('../models/Dentist');
+const Dentist = require('../models/Dentist');
 
 var { publishMessage } = require('../events/publisher');
 
@@ -123,6 +123,30 @@ router.patch('/api/dentists/:dentist_username', async (req, res) => {
         res.status(200).json({ message: 'Dentist updated successfully', dentist: updatedDentist });
     } catch (error) {
         res.status(500).json({ message: 'Error updating dentist', error: error.message });
+    }
+});
+
+// DELETE a dentist by username
+router.delete('/api/dentists/:username/delete', async (req, res) => {
+    try {
+        const username = req.params.username;
+
+        // Find the dentist by username and delete it
+        const deletedDentist = await Dentist.findOneAndDelete({ dentist_username: username });
+
+        if (!deletedDentist) {
+            return res.status(404).json({ message: `Dentist with username '${username}' not found.` });
+        }
+
+        const deletedDentistId = deletedDentist._id;
+
+        res.status(200).json({
+            message: `Dentist with username '${username}' deleted successfully.`,
+            deletedDentistId: deletedDentistId,
+            deletedDentist: deletedDentist
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting dentist', error: error.message });
     }
 });
 
