@@ -1,13 +1,13 @@
 import { describe, test, vi, expect } from 'vitest';
 import Dentist from '../../src/models/Dentist';
 
-// Mock the Patient model
+// Mock the Dentist model
 vi.mock('../../src/models/Dentist');
 
-describe('Patient Model Tests', () => {
+describe('Dentist Model Tests', () => {
 
     test('should create a new patient successfully', async () => {
-        // Mock the Patient instance's save method
+        // Mock the Dentist instance's save method
         const mockSave = vi.fn().mockResolvedValue({
             dentist_username: 'JohnDentist',
             password: 'tooth',
@@ -56,7 +56,7 @@ describe('Patient Model Tests', () => {
 
         // Create a new Dentist with a duplicate SSN
         const newDentist = new Dentist({
-            patient_ssn: '123456789101',
+            Dentist: 'DR.bla',
             password: 'password123',
             name: 'John',
             email: 'john.doe@example.com',
