@@ -12,6 +12,17 @@ describe('POST dentist', () => {
             .set('Accept', 'application/json');
     });
 
+  
+    afterAll(async () => {
+        // Example: Cleanup or shutdown logic
+        // For example, you can delete all dentists after all tests are done (optional, if required)
+        await request(app)
+            .delete('/api/dentists')
+            .set('Accept', 'application/json');
+    });
+
+    // LÄgg till så patient och dentist raderas by id samma så ska en controller för det delete by id for både patient and dentist 
+
     test('should create a new dentist and return 201 status', async () => {
         const newDentist = {
             dentist_username: 'Rav_001',
