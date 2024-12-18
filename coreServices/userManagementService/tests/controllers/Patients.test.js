@@ -9,7 +9,7 @@ describe('Patient Model Tests', () => {
   test('should create a new patient successfully', async () => {
     // Mock the Patient instance's save method
     const mockSave = vi.fn().mockResolvedValue({
-      patient_ssn: '123456789101',
+      patient_ssn: '923456789109',
       password: '123',
       name: 'John',
       email: 'john.doe@example.com',
@@ -24,7 +24,7 @@ describe('Patient Model Tests', () => {
 
     // Create a new patient 
     const newPatient = new Patient({
-      patient_ssn: '123456789101',
+      patient_ssn: '923456789109',
       password: 'password123',
       name: 'John',
       email: 'john.doe@example.com',
@@ -36,7 +36,7 @@ describe('Patient Model Tests', () => {
     const savedPatient = await newPatient.save();
 
     // Assert the returned patient data 
-    expect(savedPatient.patient_ssn).toBe('123456789101');
+    expect(savedPatient.patient_ssn).toBe('923456789109');
     expect(savedPatient.name).toBe('John');
     expect(savedPatient.password).toBe('123');
     expect(savedPatient.email).toBe('john.doe@example.com');

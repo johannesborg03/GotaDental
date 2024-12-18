@@ -13,10 +13,10 @@
         "dotenv": "^16.4.7",
         "express": "^4.21.1",
         "mongoose": "^8.8.2",
-        "mqtt": "^5.10.3",
-        "uuid": "^11.0.3"
+        "mqtt": "^5.10.3"
     },
     "devDependencies": {
+        "supertest": "^7.0.0",
         "vitest": "^2.1.8"
     }
 }

@@ -1,5 +1,6 @@
 var express = require ('express');
 var router = express.Router();
+const Patient = require('../models/Patient');
 
 var { subscribeToTopic } = require('../events/subscriber');
 
@@ -30,7 +31,7 @@ router.post('/api/patients', async function (req, res) {
             });
         }
         res.status(500).json({
-            message : "Server error while creating dentist",
+            message : "Server error while creating patient",
             error : err.message
         });
     }
@@ -95,7 +96,7 @@ router.put('/api/patients/:patient_ssn', async (req, res) => {
     }
 });
 
-// PATCH to update a dentist by dentist_id
+// PATCH to update a patient by patient_id
 router.patch('/api/patients/:patient_ssn', async (req, res) => {
     try {
         const updatedPatient = await Patient.findOneAndUpdate(
@@ -111,6 +112,27 @@ router.patch('/api/patients/:patient_ssn', async (req, res) => {
         res.status(200).json({ message: 'Patient updated successfully', patient: updatedPatient });
     } catch (error) {
         res.status(500).json({ message: 'Error updating patient', error: error.message });
+    }
+});
+
+// DELETE a patient by SSN
+router.delete('/api/patients/:patient_ssn/delete', async (req, res) => {
+    try {
+        const patientSSN = req.params.patient_ssn;
+        const deletedPatient = await Patient.findOneAndDelete({ patient_ssn: patientSSN });
+
+        if (!deletedPatient) {
+            return res.status(404).json({ message: `Patient with SSN '${patientSSN}' not found.` });
+        }
+        const deletedPatientId = deletedPatient._id;
+
+        res.status(200).json({
+            message: `Patient with SSN '${patientSSN}' deleted successfully.`,
+            deletedPatientId: deletedPatientId,
+            deletedPatient: deletedPatient
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting patient', error: error.message });
     }
 });
 
