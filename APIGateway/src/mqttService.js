@@ -6,10 +6,17 @@ let channel;
 let connection;
 let io;
 
+// WebSocket Event Mapping for Topics
+const topicToEventMap = {
+    'timeslot/create': 'timeslot/create',
+    'timeslot/update': 'timeslot/update',
+};
+
 function initializeWebSocket(serverIO) {
     io = serverIO;
     console.log('WebSocket initialized in mqttService');
 
+    /*
     // Listen for MQTT messages
     eventEmitter.on('mqttMessage', ({ topic, message }) => {
         console.log(`Broadcasting MQTT message to WebSocket for topic: ${topic}`, message);
@@ -26,6 +33,7 @@ function initializeWebSocket(serverIO) {
             console.log(`WebSocket event emitted to room "${officeId}"`);
         }
     });
+    */
 
     // Handle WebSocket client connections
     io.on('connection', (socket) => {
@@ -45,6 +53,12 @@ function initializeWebSocket(serverIO) {
         });
     });
 }
+
+function getIO() {
+    if (!io) throw new Error('WebSocket not initialized');
+    return io;
+}
+
 
 async function connectRabbitMQ() {
     connection = await amqp.connect('amqp://localhost');
@@ -79,6 +93,14 @@ console.log(`Correlation ID: ${correlationId}`);
                         clearTimeout(timeout); // Clear the timeout
                         channel.cancel(consumerTag.consumerTag); // Stop consuming
                         resolve(response); // Resolve the promise with the response
+
+                        // Dynamically Emit WebSocket Event
+                        const webSocketEvent = topicToEventMap[topic];
+                        if (response.success && io && webSocketEvent) {
+                            const { officeId } = message;
+                            io.to(officeId).emit(webSocketEvent, response.timeslot);
+                            console.log(`WebSocket event "${webSocketEvent}" emitted for office "${officeId}"`);
+                        }
                     }
                 },
                 { noAck: true }
@@ -176,9 +198,9 @@ function handleTimeslotUpdate(message) {
 
 // Add topic subscriptions
 async function initializeSubscriptions() {
-    await subscribeToTopic('timeslot/create', handleTimeslotCreate);
-    await subscribeToTopic('timeslot/update', handleTimeslotUpdate);
+  //  await subscribeToTopic('timeslot/create', handleTimeslotCreate);
+  //  await subscribeToTopic('timeslot/update', handleTimeslotUpdate);
     console.log('Subscriptions initialized');
 }
 
-module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic, initializeWebSocket, initializeSubscriptions, handleTimeslotUpdate, handleTimeslotCreate };
+module.exports = { connectRabbitMQ, publishMessage, subscribeToTopic, initializeWebSocket, initializeSubscriptions, handleTimeslotUpdate, handleTimeslotCreate, getIO };

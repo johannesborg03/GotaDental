@@ -180,9 +180,12 @@ onMounted(() => {
         console.log("WebSocket connected:", socket.id);
     });
 
+    
     socket.on("timeslot/create", (newTimeslot) => {
-        console.log("Received timeslot update:", newTimeslot);
-        if (newTimeslot.officeId === selectedOfficeId.value) {
+        console.log("Received timeslot new Timeslot Created", newTimeslot);
+        console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
+
+        if (newTimeslot.office === selectedOfficeId.value) {
             events.value.push({
                 id: newTimeslot._id,
                 text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
