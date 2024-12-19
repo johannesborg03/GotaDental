@@ -22,7 +22,7 @@ exports.createTimeslot = async (req, res) => {
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
-        await publishMessage(topic, timeslotData, correlationId, officeId);
+        const response = await publishMessage(topic, timeslotData, correlationId, officeId, patient);
 
         // Respond with success
         res.status(201).json({

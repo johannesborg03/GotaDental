@@ -19,14 +19,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+<<<<<<< HEAD
 import PatientTimeslot from "./patientTimeslot.vue";
+=======
+import { io } from "socket.io-client";
+>>>>>>> b0d0e3d (#72 Fix so all dentists schedules get updated asynchronous)
 
 
 const officeName = ref("");
 
+<<<<<<< HEAD
+=======
+// WebSocket setup
+const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
+
+
+
+
+>>>>>>> b0d0e3d (#72 Fix so all dentists schedules get updated asynchronous)
 // Function to fetch the office name from session storage
 function loadOfficeName() {
   const storedOfficeName = sessionStorage.getItem("Office");
@@ -97,6 +110,7 @@ async function saveTimeslot() {
 
 
     // Add the new timeslot directly to the events array
+    /*
     const newTimeslot = {
       id: response.data.timeslot._id,
       text: response.data.timeslot.isBooked ? "Booked" : "Unbooked",
@@ -108,6 +122,7 @@ async function saveTimeslot() {
     events.value.push(newTimeslot); // Add the new timeslot to the events array
     calendarConfig.value.events = [...events.value]; // Update the calendar configuration
 
+    */
 
     // Clear selected timeslot
     selectedTimeslot.value = null;
@@ -116,6 +131,10 @@ async function saveTimeslot() {
     alert("Failed to save timeslot. Please try again.");
   }
 }
+
+
+
+
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
@@ -160,11 +179,61 @@ function nextWeek() {
   calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
 }
 
+function joinOfficeRoom() {
+    const officeId = sessionStorage.getItem("OfficeId");
+    console.log("Attempting to join room. OfficeId:", officeId, "Socket connected:", socket.connected);
+
+    if (officeId && socket.connected) {
+        socket.emit("joinOffice", { officeId });
+        console.log(`Joined WebSocket room for office: ${officeId}`);
+    } else {
+        console.error("Failed to join room. Either OfficeId is missing or socket is not connected.");
+        console.log("OfficeId:", officeId)
+    }
+}
+
 
 // Fetch timeslots when the component is mounted
 onMounted(() => {
   fetchTimeslots();
   loadOfficeName();
+
+
+  socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+        joinOfficeRoom();
+    });
+
+       // Check if the new timeslot belongs to the current office
+       const officeId = sessionStorage.getItem("OfficeId");
+    socket.on("timeslot/create", (newTimeslot) => {
+        console.log("Received timeslot new Timeslot Created", newTimeslot);
+    
+        console.log("New Timeslot officeID:", newTimeslot.office,)
+
+        if (newTimeslot.office === officeId) {
+            events.value.push({
+                id: newTimeslot._id,
+                text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
+                start: newTimeslot.start,
+                end: newTimeslot.end,
+            });
+            calendarConfig.value.events = [...events.value];
+            console.log("Updated events after WebSocket create:", events.value);
+        }
+    });
+    
+
+
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
+  
+});
+
+// Cleanup WebSocket connection
+onUnmounted(() => {
+  socket.disconnect();
 });
 </script>
 
