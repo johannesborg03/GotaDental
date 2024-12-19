@@ -4,7 +4,7 @@ import { describe, test, expect, afterAll } from 'vitest';
 
 describe('POST dentist', () => {
     const officeId = '64b97f84e91a630d4f0f5abc'; // Mocked ObjectId for the office
-    const testDentistUsername = 'Rav_001'; 
+    const testDentistUsername = 'Rav_001';
 
     test('should create a new dentist and return 201 status', async () => {
         const newDentist = {
@@ -33,6 +33,35 @@ describe('POST dentist', () => {
         });
     });
 
+    test('should return 400 if dentist with same username already exists', async () => {
+        const duplicateDentist = {
+            dentist_username: 'Dr.Scott',
+            password: 'anotherMichael',
+            name: 'Michael Scott',
+            email: 'Dr.Scott@example',
+            appointments: [],
+            timeslots: [],
+            office: officeId
+        };
+
+        await request(app)
+            .post('/api/dentists')
+            .send(duplicateDentist)
+            .set('Accept', 'application/json');
+
+
+        // Attempt to create another patient with the same snn
+        const response = await request(app)
+            .post('/api/dentists')
+            .send(duplicateDentist)
+            .set('Accept', 'application/json')
+            .set('Content-Type', 'application/json');
+
+        expect(response.status).toBe(400);
+        expect(response.body.field).toBe('dentist_username');
+        expect(response.body.message).toBe('A dentist with the same dentist_username already exist');
+    });
+
     afterAll(async () => {
         await request(app)
             .delete(`/api/dentists/${testDentistUsername}/delete`)
@@ -42,7 +71,7 @@ describe('POST dentist', () => {
 });
 describe('POST patient', () => {
 
-    const testPatientssn = '134456719109'; 
+    const testPatientssn = '134456719109';
 
     test('should create a new patient and return 201 status', async () => {
         const newPatient = {
@@ -71,12 +100,12 @@ describe('POST patient', () => {
     });
 
     afterAll(async () => {
-        await request(app) 
+        await request(app)
             .delete(`/api/patients/${testPatientssn}/delete`)
             .set('Accept', 'application/json')
     });
 
-    test('should return 400 if patient with same email already exists', async () => {
+    test('should return 400 if patient with same patient_ssn already exists', async () => {
         const duplicatePatient = {
             patient_ssn: '123456789101',
             password: 'yoda',
