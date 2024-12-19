@@ -102,22 +102,7 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
 
         console.log('Timeslot created successfully:', newTimeslot);
-       
-          // Emit event with timeslotId
-          const timeslotCreateMessage = {
-            _id: newTimeslot._id, // Include the timeslot ID
-            start: newTimeslot.start,
-            end: newTimeslot.end,
-            isBooked: newTimeslot.isBooked,
-            officeId: newTimeslot.office,
-        };
-
-        const topic = 'timeslot/create';
-        eventEmitter.emit('mqttMessage', { topic, message: timeslotCreateMessage });
-
-        console.log(`WebSocket event emitted for timeslot/create with ID: ${newTimeslot._id}`);
-
-
+      
         const successResponse = { success: true, timeslot: newTimeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
