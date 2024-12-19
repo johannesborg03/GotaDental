@@ -35,7 +35,7 @@ describe('POST dentist', () => {
 
     test('should return 400 if dentist with same username already exists', async () => {
         const duplicateDentist = {
-            dentist_username: 'Dr.Scott',
+            dentist_username: testDentistUsername,
             password: 'anotherMichael',
             name: 'Michael Scott',
             email: 'Dr.Scott@example',
@@ -43,12 +43,6 @@ describe('POST dentist', () => {
             timeslots: [],
             office: officeId
         };
-
-        await request(app)
-            .post('/api/dentists')
-            .send(duplicateDentist)
-            .set('Accept', 'application/json');
-
 
         // Attempt to create another patient with the same snn
         const response = await request(app)
@@ -123,20 +117,13 @@ describe('POST patient', () => {
 
     test('should return 400 if patient with same patient_ssn already exists', async () => {
         const duplicatePatient = {
-            patient_ssn: '123456789101',
+            patient_ssn:  testPatientssn,
             password: 'yoda',
             name: 'jabo',
             email: 'jabo@example.com',
             notified: false,
             appointments: []
         };
-
-        // Create the first patient
-        await request(app)
-            .post('/api/patients')
-            .send(duplicatePatient)
-            .set('Accept', 'application/json')
-            .set('Content-Type', 'application/json');
 
         // Attempt to create another patient with the same snn
         const response = await request(app)
