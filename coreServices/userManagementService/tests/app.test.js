@@ -62,7 +62,7 @@ describe('POST dentist', () => {
         expect(response.body.message).toBe('A dentist with the same dentist_username already exist');
     });
 
-    test('should return 500 if there is a server error (Dentist)', async () => {
+    test('should return 500 if there is a server error', async () => {
         const invalidDentist = {
             invalidField: 'invalidData',
         };
@@ -149,7 +149,7 @@ describe('POST patient', () => {
         expect(response.body.field).toBe('patient_ssn');
     });
 
-    test('should return 500 if there is a server error(Patient)', async () => {
+    test('should return 500 if there is a server error', async () => {
         const invalidPatient = {
             invalidField: 'invalidData',
         };
