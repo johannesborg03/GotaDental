@@ -62,6 +62,22 @@ describe('POST dentist', () => {
         expect(response.body.message).toBe('A dentist with the same dentist_username already exist');
     });
 
+    test('should return 500 if there is a server error (Dentist)', async () => {
+        const invalidDentist = {
+            invalidField: 'invalidData',
+        };
+
+        const response = await request(app)
+            .post('/api/dentists')
+            .send(invalidDentist)
+            .set('Accept', 'application/json');
+
+        expect(response.status).toBe(500);
+        expect(response.body.message).toBe('Server error while creating dentist');
+        expect(response.body.error).toBeDefined();
+    });
+
+
     afterAll(async () => {
         await request(app)
             .delete(`/api/dentists/${testDentistUsername}/delete`)
@@ -133,7 +149,7 @@ describe('POST patient', () => {
         expect(response.body.field).toBe('patient_ssn');
     });
 
-    test('should return 500 if there is a server error', async () => {
+    test('should return 500 if there is a server error(Patient)', async () => {
         const invalidPatient = {
             invalidField: 'invalidData',
         };
