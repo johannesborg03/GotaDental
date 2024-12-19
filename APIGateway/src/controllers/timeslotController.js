@@ -1,4 +1,4 @@
-const { publishMessage } = require('../mqttService');
+const { publishMessage, getIO } = require('../mqttService');
 const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
@@ -22,7 +22,7 @@ exports.createTimeslot = async (req, res) => {
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
-        await publishMessage(topic, timeslotData, correlationId, officeId, patient);
+        await publishMessage(topic, timeslotData, correlationId, officeId);
 
         // Respond with success
         res.status(201).json({
