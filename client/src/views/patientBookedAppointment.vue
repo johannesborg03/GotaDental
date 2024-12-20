@@ -55,7 +55,7 @@ export default {
         // Fetch patient appointments 
         async fetchAppointments() {
             try {
-                const patientSSN = sessionStorage.getItem("userIdentifier"); 
+                const patientSSN = sessionStorage.getItem("userIdentifier");
                 if (!patientSSN) {
                     throw new Error("Patient identifier not found.");
                 }
@@ -68,6 +68,9 @@ export default {
             } finally {
                 loading.value = false;
             }
+        },
+        formatDate(date) {
+            return new Date(date).toLocaleString();
         }
     },
 };
