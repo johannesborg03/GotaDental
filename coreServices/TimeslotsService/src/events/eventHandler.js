@@ -245,7 +245,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         }
 
         if (patientRecord.appointments.length >= 5) {
-            const errorResponse = { success: false, error: 'You cannot book more than 5 appointments' };
+            const errorResponse = { success: false, error: 'You have already booked 5 timeslots' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
