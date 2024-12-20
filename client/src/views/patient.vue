@@ -13,6 +13,11 @@
             <router-link to="/PatientSchedule" class="text-white text-decoration-none">
                 Patient Schedule</router-link>
         </button>
+
+        <button class="btn btn-primary">
+            <router-link to="/Appointment" class="text-white text-decoration-none">
+                Booked appointments</router-link>
+        </button>
     </div>
 </template>
 
