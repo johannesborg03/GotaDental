@@ -52,17 +52,23 @@ export default {
     },
 
     methods: {
-        // Fetch patient's appointments
+        // Fetch patient appointments 
         async fetchAppointments() {
             try {
-                const response = await axios.get("http://localhost:4000/api/appointments/patient");
-                this.appointments = response.data.appointments || [];
+                const patientSSN = sessionStorage.getItem("userIdentifier"); 
+                if (!patientSSN) {
+                    throw new Error("Patient identifier not found.");
+                }
+
+                const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/appointments`);
+                appointments.value = response.data.appointments;
             } catch (error) {
-                console.error("Error fetching appointments:", error.response?.data || error.message);
-                this.appointments = []; // Ensure appointments is always defined
-                alert("Failed to load your appointments. Please try again.");
+                console.error("Error fetching appointments:", error);
+                alert("Failed to load booked appointments.");
+            } finally {
+                loading.value = false;
             }
-        },
+        }
     },
 };
 </script>
