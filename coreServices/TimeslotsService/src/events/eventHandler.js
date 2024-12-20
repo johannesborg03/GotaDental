@@ -235,6 +235,14 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
         console.log(`Resolved Patient ID: ${patientId}`);
 
+        const patientRecord = await Patient.findById(patientId);
+
+        if (!patientRecord) {
+            const errorResponse = { success: false, error: 'Patient record not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
         // Check if the timeslot is already booked
         const existingTimeslot = await Timeslot.findById(timeslot_id);
 
