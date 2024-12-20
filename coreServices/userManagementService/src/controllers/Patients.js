@@ -1,4 +1,4 @@
-var express = require ('express');
+var express = require('express');
 var router = express.Router();
 const Patient = require('../models/Patient');
 
@@ -10,29 +10,29 @@ router.post('/api/patients', async function (req, res) {
         var patient = new Patient({
             patient_ssn: req.body.patient_ssn,
             password: req.body.password,
-            name : req.body.name,
+            name: req.body.name,
             email: req.body.email,
-            notified : req.body.notified,
-            appointments : req.body.appointments
+            notified: req.body.notified,
+            appointments: req.body.appointments
         });
 
         const savedPatient = await patient.save();
         res.status(201).json({
-            message : "Patient Created Successfully",
+            message: "Patient Created Successfully",
             patient: patient
         });
     } catch (err) {
         console.error("Error while creating patient:", err);  // Log the error for debugging
-        if (err.code ===11000) {
+        if (err.code === 11000) {
             let duplicateField = Object.keys(err.keyValue)[0];
             return res.status(400).json({
-                message : `A patient with the same ${duplicateField} already exist`,
-                field : duplicateField
+                message: `A patient with the same ${duplicateField} already exist`,
+                field: duplicateField
             });
         }
         res.status(500).json({
-            message : "Server error while creating patient",
-            error : err.message
+            message: "Server error while creating patient",
+            error: err.message
         });
     }
 });
@@ -46,23 +46,17 @@ router.get('/api/patients', async (req, res) => {
     }
 });
 
-router.get('/api/patients/:patient_ssn/appointments', async (req, res) => {
+router.get('/api/patients/:patientSSN/timeslots', async (req, res) => {
+    const { patientSSN } = req.params;
     try {
-        const patient = await Patient.findOne({ patient_ssn: req.params.patient_ssn }).populate('appointments');
-        if (!patient) {
-            return res.status(404).json({ message: 'Patient not found' });
-        }
-
-        // Send the appointments
-        res.status(200).json({
-            message: 'Appointments retrieved successfully',
-            appointments: patient.appointments,
-        });
+        const patient = await Patient.findOne({ patient_ssn: patientSSN }).populate('appointments');
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+        res.status(200).json({ timeslots: patient.appointments });
     } catch (error) {
-        console.error('Error retrieving appointments:', error);
-        res.status(500).json({ message: 'Failed to retrieve appointments', error: error.message });
+        res.status(500).json({ message: 'Error fetching booked timeslots', error });
     }
 });
+
 
 // Subscribe to the slot updates
 router.get('/api/slots', async (req, res) => {
@@ -98,7 +92,7 @@ router.put('/api/patients/:patient_ssn', async (req, res) => {
                 name: req.body.name,
                 password: req.body.password,
                 email: req.body.email,
-                notified : req.body.notified,
+                notified: req.body.notified,
                 appointments: req.body.appointments,    // Optional
             },
             { new: true }  // Return the updated document
