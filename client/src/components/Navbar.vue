@@ -1,6 +1,6 @@
 <template>
   <BNavbar toggleable="lg" class="custom-navbar" expand="lg">
-    <BNavbarBrand class="brand">Göta Dental</BNavbarBrand>
+    <BNavbarBrand class="brand">GötaDental</BNavbarBrand>
 
     <BNavbarToggle target="nav-collapse" @click="toggleNavbar" />
     <BCollapse id="nav-collapse" is-nav v-bind:visible="isNavbarOpen">
@@ -142,4 +142,5 @@ router-link:hover {
   color: #FFFFFF;
   background-color: #004F58;
 }
+
 </style>
