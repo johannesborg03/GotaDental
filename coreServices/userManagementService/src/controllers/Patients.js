@@ -46,6 +46,24 @@ router.get('/api/patients', async (req, res) => {
     }
 });
 
+router.get('/api/patients/:patient_ssn/appointments', async (req, res) => {
+    try {
+        const patient = await Patient.findOne({ patient_ssn: req.params.patient_ssn }).populate('appointments');
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+
+        // Send the appointments
+        res.status(200).json({
+            message: 'Appointments retrieved successfully',
+            appointments: patient.appointments,
+        });
+    } catch (error) {
+        console.error('Error retrieving appointments:', error);
+        res.status(500).json({ message: 'Failed to retrieve appointments', error: error.message });
+    }
+});
+
 // Subscribe to the slot updates
 router.get('/api/slots', async (req, res) => {
     try {
