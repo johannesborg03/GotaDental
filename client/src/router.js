@@ -10,6 +10,7 @@ import DentistTimeslot from './views/dentistTimeslot.vue';
 import schedule from './views/Schedule.vue';
 import PatientTimeslot from './views/patientTimeslot.vue';
 import PatientSchedule from './views/PatientSchedule.vue';
+import PatientBookedAppointment from './views/patientBookedAppointment.vue';
 
 const routes = [
 
@@ -34,6 +35,8 @@ const routes = [
     { path: '/patientTimeslot', name: 'PatientTimeslot',component: PatientTimeslot},
 
     { path: '/PatientSchedule', name: 'PatientSchedule',component: PatientSchedule},
+
+    { path: '/Appointment', name: 'PatientBookedAppointment',component: PatientBookedAppointment},
 
 
 ];
