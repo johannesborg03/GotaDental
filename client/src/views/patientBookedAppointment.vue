@@ -45,20 +45,9 @@ const appointments = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
-export default {
 
-    data() {
-        return {
-            appointments: [],
-        };
-    },
-    async mounted() {
-        await this.fetchAppointments();
-    },
-
-    methods: {
         // Fetch patient appointments 
-        async fetchAppointments() {
+        async function fetchAppointments() {
             try {
                 const patientSSN = sessionStorage.getItem("userIdentifier");
                 if (!patientSSN) {
@@ -73,10 +62,13 @@ export default {
             } finally {
                 loading.value = false;
             }
-        },
-        formatDate(date) {
+        }
+
+        function formatDate(date) {
             return new Date(date).toLocaleString();
         }
-    },
-};
+
+        onMounted(() => {
+        fetchAppointments();
+        });
 </script>
