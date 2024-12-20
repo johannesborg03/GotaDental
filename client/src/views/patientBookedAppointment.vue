@@ -37,8 +37,13 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import axios from "axios";
+
+const appointments = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
 export default {
 
