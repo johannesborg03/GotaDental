@@ -1,21 +1,39 @@
 <template>
-  <div class="mb-4 text-center">
-    <h1 class="text-primary">
-      {{ officeName || "OFFICE NAME" }}
-    </h1>
-  </div>
-  <div>
-    <button @click="prevWeek">Previous Week</button>
-    <button @click="nextWeek">Next Week</button>
-    <DayPilotCalendar :config="calendarConfig" />
-    <div v-if="selectedTimeslot" class="mt-3">
-      <p>Selected Timeslot:</p>
-      <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
-      <p>Start: {{ selectedTimeslot.start }}</p>
-      <p>End: {{ selectedTimeslot.end }}</p>
-      <button @click="saveTimeslot" class="btn btn-primary">Save Timeslot</button>
-    </div>
-  </div>
+  <b-container fluid>
+    <b-row>
+      <!-- Left Side: Office Information -->
+      <b-col md="4" class="text-left">
+        <h2 class="text-primary" style = "margin-top: 60px;">
+          {{ officeName || "OFFICE NAME" }}
+        </h2>
+        <p>
+          <!-- Add additional information here -->
+          Welcome to our office! Here you can manage your schedule.
+        </p>
+        <p>
+          Address:  {{ officeAddress}}<br />
+          Contact: (123) 456-7890<br />
+          Email: info@office.com
+        </p>
+      </b-col>
+
+      <!-- Right Side: Calendar -->
+      <b-col md="8" class="text-right">
+        <div class="mb-3" style ="text-align: right; margin-top: 10px;">
+          <b-button @click="prevWeek" variant="secondary" class="mr-2">Previous Week</b-button>
+          <b-button @click="nextWeek" variant="secondary">Next Week</b-button>
+        </div>
+        <DayPilotCalendar :config="calendarConfig" />
+        <div v-if="selectedTimeslot" class="mt-3">
+          <p>Selected Timeslot:</p>
+          <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
+          <p>Start: {{ selectedTimeslot.start }}</p>
+          <p>End: {{ selectedTimeslot.end }}</p>
+          <b-button @click="saveTimeslot" variant="primary">Save Timeslot</b-button>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script setup>
@@ -25,7 +43,7 @@ import axios from "axios";
 
 
 const officeName = ref("");
-
+const officeAddress = ref("");
 
 // Function to fetch the office name from session storage
 function loadOfficeName() {
@@ -34,6 +52,16 @@ function loadOfficeName() {
     officeName.value = storedOfficeName;
   } else {
     officeName.value = "OFFICE NAME"; // Default fallback
+  }
+}
+
+// Function to fetch the office address from session storage
+function loadOfficeAddress() {
+  const storedAddress = sessionStorage.getItem("OfficeAddress");
+  if (storedAddress) {
+    officeAddress.value = storedAddress;
+  } else {
+    officeAddress.value = "OFFICE ADDRESS"; // Default fallback
   }
 }
 
@@ -162,6 +190,7 @@ function nextWeek() {
 onMounted(() => {
   fetchTimeslots();
   loadOfficeName();
+  loadOfficeAddress();
 });
 </script>
 
