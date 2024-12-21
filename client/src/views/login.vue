@@ -48,6 +48,7 @@ export default {
                 sessionStorage.setItem('userIdentifier', this.username_ssn);
                 sessionStorage.setItem('Office', response.data.office);
                 sessionStorage.setItem('OfficeId', response.data.officeId);
+                sessionStorage.setItem('OfficeAddress', response.data.officeAddress);
         
                 console.log('Office in response:', response.data.office);
                 console.log('OfficeId in response:', response.data.officeId);
