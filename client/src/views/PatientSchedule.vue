@@ -79,26 +79,36 @@ const officeAddress = ref("");
 const officeName = ref("");
 
 // Reactive configuration
+// Updated onEventClick logic to handle both booking and cancellation
 const calendarConfig = ref({
   viewType: "Week",
-  startDate: getCurrentWeekStart(), // Initial week
+  startDate: getCurrentWeekStart(),
   weekStarts: 1,
   events: [],
-  timeRangeSelectedHandling: "Disabled", // Disable time range selection
-  eventClickHandling: "Enabled", // Disable event clicking
+  timeRangeSelectedHandling: "Disabled",
+  eventClickHandling: "Enabled", // Enable event clicking
+  
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
     console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
-    if (selectedTimeslot.text === "Booked") {
-      alert("This timeslot is already booked.");
-      return;
+    // If the timeslot is booked and the current user is the one who booked it
+    if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+      const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
+      if (confirmCancel) {
+        await cancelTimeslot(timeslotId); // Call cancel function
+      }
     }
 
-    const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
-    if (confirmBooking) {
-      await bookTimeslot(timeslotId);
+    // If the timeslot is unbooked, allow the user to book it
+    else if (selectedTimeslot.text === "Unbooked") {
+      const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
+      if (confirmBooking) {
+        await bookTimeslot(timeslotId); // Call book function
+      }
+    } else {
+      alert("This timeslot is already booked by another user.");
     }
   },
 });
