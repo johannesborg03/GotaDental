@@ -1,8 +1,8 @@
 <template>
   <b-container fluid>
     <b-row>
-      <b-col md="4" class="text-left" style="margin-top: 60px;">
-        <h3>Select an Office:</h3>
+      <b-col md="4" class="text-left" style="margin-top: 65px;">
+        <h4>Select an Office:</h4>
         <b-form-select v-model="selectedOfficeId" @change="handleOfficeChange" class="mb-3">
           <option disabled value="" >Select an office</option>
           <option v-for="office in offices" :key="office._id" :value="office._id">
@@ -110,6 +110,7 @@ async function fetchOffices() {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // 
     console.log("OFFICES:", response.data.offices);
+    console.log ('OfficeAddress', response.data.office.OfficeAddress);
     console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
   } catch (error) {
@@ -184,6 +185,28 @@ function handleOfficeChange() {
   }
 }
 
+// Function to cancel a timeslot
+async function cancelTimeslot(timeslotId) {
+  try {
+    const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
+      isBooked: false, // Set isBooked to false to cancel the appointment
+      patient: null, // Remove the patient information since the appointment is being canceled
+    });
+
+    alert("Appointment cancelled successfully!");
+
+    // Update the calendar to reflect the cancellation
+    const updatedTimeslot = response.data.timeslot;
+    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+      events.value[eventIndex].text = "Unbooked"; // Change the status back to "Unbooked"
+      calendarConfig.value.events = [...events.value]; // Re-render the calendar
+    }
+  } catch (error) {
+    console.error("Error cancelling the timeslot:", error);
+    alert("Failed to cancel the timeslot. Please try again.");
+  }
+}
 
   // Navigation methods
   function prevWeek() {
