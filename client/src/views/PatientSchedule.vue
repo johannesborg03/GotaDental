@@ -9,11 +9,53 @@
             {{ office.office_name }}
           </option>
         </b-form-select>
+  <b-container fluid>
+    <b-row>
+      <b-col md="4" class="text-left" style="margin-top: 60px;">
+        <h3>Select an Office:</h3>
+        <b-form-select v-model="selectedOfficeId" @change="handleOfficeChange" class="mb-3">
+          <option disabled value="" >Select an office</option>
+          <option v-for="office in offices" :key="office._id" :value="office._id">
+            {{ office.office_name }}
+          </option>
+        </b-form-select>
 
         <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
           Please select an office to view available timeslots.
         </div>
+        <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
+          Please select an office to view available timeslots.
+        </div>
 
+        <div v-if="selectedOfficeId">
+          <p>
+            Welcome to our office! Here you can manage your schedule.
+          </p>
+          <p>
+            Address: {{ officeAddress }}<br />
+            Contact: (123) 456-7890<br />
+            Email: info@office.com
+          </p>
+        </div>
+      </b-col>
+
+      <!-- Right Side: Calendar -->
+      <b-col md="8" class="text-right">
+        <div class="mb-3" style="text-align: right; margin-top: 10px;">
+          <b-button @click="prevWeek" variant="secondary" class="mr-2">Previous Week</b-button>
+          <b-button @click="nextWeek" variant="secondary">Next Week</b-button>
+        </div>
+        <DayPilotCalendar :config="calendarConfig" />
+        <div v-if="selectedTimeslot" class="mt-3">
+          <p>Selected Timeslot:</p>
+          <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
+          <p>Start: {{ selectedTimeslot.start }}</p>
+          <p>End: {{ selectedTimeslot.end }}</p>
+          <b-button @click="saveTimeslot" variant="primary">Save Timeslot</b-button>
+        </div>
+      </b-col>
+    </b-row>
+  </b-container>
         <div v-if="selectedOfficeId">
           <p>
             Welcome to our office! Here you can manage your schedule.
@@ -75,6 +117,8 @@ const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 const selectedOfficeId = ref("");
 const offices = ref([]);
 const events = ref([]);
+const officeAddress = ref("");
+const officeName = ref("");
 const officeAddress = ref("");
 const officeName = ref("");
 
@@ -267,10 +311,32 @@ function loadOfficeName() {
     officeName.value = "OFFICE NAME"; // Default fallback
   }
 }
+  }
+
+  function loadOfficeAddress() {
+  const storedAddress = sessionStorage.getItem("OfficeAddress");
+  if (storedAddress) {
+    officeAddress.value = storedAddress;
+  } else {
+    officeAddress.value = "OFFICE ADDRESS"; // Default fallback
+  }
+}
+
+// Function to fetch the office name from session storage
+function loadOfficeName() {
+  const storedOfficeName = sessionStorage.getItem("Office");
+  if (storedOfficeName) {
+    officeName.value = storedOfficeName;
+  } else {
+    officeName.value = "OFFICE NAME"; // Default fallback
+  }
+}
 
  // WebSocket connection and event handling
 onMounted(() => {
   fetchOffices();
+  loadOfficeAddress();
+  loadOfficeName();
   loadOfficeAddress();
   loadOfficeName();
 
