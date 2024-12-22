@@ -78,6 +78,7 @@ router.get('/api/timeslot/:office_id/timeslots', async function (req, res) {
     }
 });
 
+// Get Timeslot 
 router.get('/api/timeslots/:timeslot_id', async function (req, res) {
     try {
         const { timeslot_id } = req.params;
