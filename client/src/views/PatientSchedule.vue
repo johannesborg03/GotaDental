@@ -50,6 +50,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { toRaw } from 'vue'; 
 
 
 
@@ -90,11 +91,15 @@ const calendarConfig = ref({
   
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
-    console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     // If the timeslot is booked and the current user is the one who booked it
-    if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+
+    const rawTimeslot = toRaw(timeslotId);  
+    console.log("Raw Timeslot ID:", rawTimeslot);
+    console.log("Timeslot dentist:", rawTimeslot.dentist);  
+
+    if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient_ssn === sessionStorage.getItem("userIdentifier")) {
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
         await cancelTimeslot(timeslotId); // Call cancel function
