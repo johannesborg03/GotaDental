@@ -97,7 +97,17 @@ const calendarConfig = ref({
 
     const rawTimeslot = toRaw(timeslotId);  
     console.log("Raw Timeslot ID:", rawTimeslot);
-    console.log("Timeslot dentist:", rawTimeslot.dentist);  
+
+    const response = await fetch(`http://localhost:4000/api/timeslots/retrieve/${rawTimeslot}`);
+        
+        if (!response.ok) {
+            throw new Error('Timeslot not found');
+        }
+
+        const data = await response.json();
+        
+        console.log(data);
+    
 
     if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient_ssn === sessionStorage.getItem("userIdentifier")) {
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
