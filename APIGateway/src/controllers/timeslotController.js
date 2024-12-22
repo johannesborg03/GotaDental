@@ -95,6 +95,37 @@ exports.getAvailableTimeslots = async (req, res) => {
     }
 };
 
+exports.getTimeslot = async (req, res) => {
+    const correlationId = uuidv4();  // Unique correlation ID for tracking the request
+    const topic = 'timeslot/retrieve';  // Topic to publish the request to
+
+    const { timeslot_id } = req.params;  // Get the timeslot_id from the request params
+
+    if (!timeslot_id) {
+        return res.status(400).json({ message: 'Timeslot ID is required' });
+    }
+
+    try {
+        // Publish the message to request the specific timeslot
+        const response = await publishMessage(topic, { timeslot_id }, correlationId);
+
+        if (!response.success || !response.timeslot) {
+            return res.status(404).json({ message: 'Timeslot not found' });
+        }
+
+        // If timeslot is found, return it with status 'Booked' or 'Unbooked' based on the isBooked field
+        const timeslot = {
+            ...response.timeslot,
+            status: response.timeslot.isBooked ? 'Booked' : 'Unbooked',
+        };
+
+        res.status(200).json({ message: 'Timeslot retrieved successfully', timeslot });
+    } catch (error) {
+        console.error('Error retrieving timeslot:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
 // Controller to update a specific timeslot
 exports.updateTimeslot = async (req, res) => {
     console.log("CALLED");
