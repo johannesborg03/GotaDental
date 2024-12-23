@@ -124,7 +124,7 @@ router.get('/api/timeslots/available', async (req, res) => {
     }
 });
 
-// Update a timeslot for a dentist in a specific office 
+// Update a timeslot  
 router.put('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async function (req, res) {
     try {
         const office = await Office.findOne({ office_id: req.params.office_id });

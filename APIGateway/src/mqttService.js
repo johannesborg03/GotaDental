@@ -114,7 +114,7 @@ async function subscribeToTopic(topic, callback) {
         const message = JSON.parse(msg.content.toString());
         console.log(`Received message from topic "${topic}":`, message);
 
-        console.log('Office Id EMEMAM', message.officeId);
+        console.log('Office Id:', message.officeId);
         
         // Emit an event for WebSocket handling
         eventEmitter.emit('mqttMessage', { topic, message });

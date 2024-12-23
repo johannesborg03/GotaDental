@@ -222,7 +222,7 @@ async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, chan
 }
 
 async function patientHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
-    const { timeslot_id, isBooked, patient } = message;
+    const { timeslot_id, isBooked, patient, action } = message;
 
     console.log('Received update timeslot message:', message);
 

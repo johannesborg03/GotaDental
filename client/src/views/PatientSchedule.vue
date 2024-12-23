@@ -214,7 +214,8 @@ async function cancelTimeslot(timeslotId) {
   try {
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
       isBooked: false,
-      patient: null // Remove the patient 
+      patient: sessionStorage.getItem("userIdentifier"),
+      action: "cancel"
     });
 
     alert("Appointment cancelled successfully!");

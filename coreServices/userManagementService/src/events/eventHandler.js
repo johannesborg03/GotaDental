@@ -299,31 +299,18 @@ async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
 }
 
 async function handleUpdateAppointments(message, replyTo, correlationId, channel) {
-    const { patientId, timeslotId } = message;
+    const { patientId, timeslotId, action } = message; // Added action to the message
 
     console.log('Received update appointments message:', message);
 
     try {
-        if (!patientId || !timeslotId) {
+        if (!timeslotId) {
             const errorResponse = { success: false, error: 'Missing patientId or timeslotId' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        // Update the patient's appointments array
-        const updatedPatient = await Patient.findByIdAndUpdate(
-            patientId,
-            { $addToSet: { appointments: timeslotId } }, // Use $addToSet to avoid duplicates
-            { new: true }
-        );
-
-        if (!updatedPatient) {
-            const errorResponse = { success: false, error: 'Patient not found' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
-
-        console.log('Patient appointments updated successfully:', updatedPatient);
+     
 
         const successResponse = { success: true, patient: updatedPatient };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });

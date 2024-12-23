@@ -130,7 +130,7 @@ exports.getTimeslot = async (req, res) => {
 exports.updateTimeslot = async (req, res) => {
     console.log("CALLED");
     const { timeslot_id } = req.params;
-    const { isBooked, patient } = req.body;
+    const { isBooked, patient, action } = req.body;
 
     // Validate required fields
     if (!timeslot_id) {
@@ -141,12 +141,16 @@ exports.updateTimeslot = async (req, res) => {
         return res.status(400).json({ message: 'Invalid data: isBooked and patient are required if booking' });
     }
 
+    if (action === "cancel"){
+       console.log("cancel appointment")
+    }
+
     // Generate a unique correlation ID
     const correlationId = uuidv4();
     const topic = `timeslot/update`;
 
     try {
-        const updateData = { timeslot_id, isBooked, patient }; // Update payload
+        const updateData = { timeslot_id, isBooked, patient, action}; // Update payload
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
