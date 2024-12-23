@@ -310,7 +310,40 @@ async function handleUpdateAppointments(message, replyTo, correlationId, channel
             return;
         }
 
-     
+        let updatedPatient;
+
+        if (action === 'cancel') {
+            // Remove the timeslot from the patient's appointments array
+            updatedPatient = await Patient.findByIdAndUpdate(
+                patientId,
+                { $pull: { appointments: timeslotId } }, // $pull removes the timeslotId
+                { new: true }
+            );
+
+            console.log("Trying to cancel")
+            if (!updatedPatient) {
+                const errorResponse = { success: false, error: 'Patient not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            console.log('Patient appointments updated successfully (cancel):', updatedPatient);
+        } else {
+            // Add the timeslot to the patient's appointments array
+            updatedPatient = await Patient.findByIdAndUpdate(
+                patientId,
+                { $addToSet: { appointments: timeslotId } }, // $addToSet avoids duplicates
+                { new: true }
+            );
+
+            if (!updatedPatient) {
+                const errorResponse = { success: false, error: 'Patient not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            console.log('Patient appointments updated successfully (book):', updatedPatient);
+        }
 
         const successResponse = { success: true, patient: updatedPatient };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
