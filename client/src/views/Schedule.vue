@@ -122,6 +122,10 @@ async function saveTimeslot() {
   }
 }
 
+
+
+
+
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
   const officeId = sessionStorage.getItem("OfficeId");
@@ -183,6 +187,43 @@ function joinOfficeRoom() {
 onMounted(() => {
   fetchTimeslots();
   loadOfficeName();
+
+
+  socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+        joinOfficeRoom();
+    });
+
+       // Check if the new timeslot belongs to the current office
+       const officeId = sessionStorage.getItem("OfficeId");
+    socket.on("timeslot/create", (newTimeslot) => {
+        console.log("Received timeslot new Timeslot Created", newTimeslot);
+    
+        console.log("New Timeslot officeID:", newTimeslot.office,)
+
+        if (newTimeslot.office === officeId) {
+            events.value.push({
+                id: newTimeslot._id,
+                text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
+                start: newTimeslot.start,
+                end: newTimeslot.end,
+            });
+            calendarConfig.value.events = [...events.value];
+            console.log("Updated events after WebSocket create:", events.value);
+        }
+    });
+    
+
+
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
+  
+});
+
+// Cleanup WebSocket connection
+onUnmounted(() => {
+  socket.disconnect();
 });
 </script>
 
