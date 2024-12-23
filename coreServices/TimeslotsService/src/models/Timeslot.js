@@ -39,6 +39,7 @@ var timeslotSchema = new mongoose.Schema({
       patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Patient", // Reference to the Patient who booked the slot
+        default: null
       },
       
     });

@@ -213,8 +213,8 @@ function handleOfficeChange() {
 async function cancelTimeslot(timeslotId) {
   try {
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
-      isBooked: false, // Set isBooked to false to cancel the appointment
-      patient: null, // Remove the patient information since the appointment is being canceled
+      isBooked: false,
+      patient: null // Remove the patient 
     });
 
     alert("Appointment cancelled successfully!");
