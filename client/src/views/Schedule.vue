@@ -22,6 +22,7 @@
 import { ref, onMounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
+import PatientTimeslot from "./patientTimeslot.vue";
 
 
 const officeName = ref("");
@@ -82,10 +83,11 @@ async function saveTimeslot() {
     const payload = {
       start: selectedTimeslot.value.start, // Send as is without conversion
       end: selectedTimeslot.value.end, // Send as is without conversion
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
+      dentist: sessionStorage.getItem('userIdentifier'),
       office: sessionStorage.getItem('Office'),
       officeId: sessionStorage.getItem('OfficeId'),
       isBooked: false,
+      patient: ""
     };
 
     console.log("Sending payload", payload);
@@ -100,6 +102,7 @@ async function saveTimeslot() {
       text: response.data.timeslot.isBooked ? "Booked" : "Unbooked",
       start: response.data.timeslot.start,
       end: response.data.timeslot.end,
+      patient: ""
     };
 
     events.value.push(newTimeslot); // Add the new timeslot to the events array
@@ -132,6 +135,7 @@ async function fetchTimeslots() {
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
       start: timeslot.start,
       end: timeslot.end,
+      patient: timeslot.patient
     }));
 
     // Update the calendar configuration

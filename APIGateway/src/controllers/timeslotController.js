@@ -4,10 +4,10 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
  
-    const { start, end, dentist, office, officeId } = req.body;
+    const { start, end, dentist, office, officeId, patient} = req.body;
 
     // Validate required fields
-    if (!start || !end || !dentist || !office || !officeId || patient) {
+    if (!start || !end || !dentist || !office || !officeId) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -18,11 +18,11 @@ exports.createTimeslot = async (req, res) => {
 
     
     try {
-        const timeslotData = { start, end, dentist, office, officeId, isBooked: false }; // Fixed variable name
+        const timeslotData = { start, end, dentist, office, officeId, isBooked: false, patient }; // Fixed variable name
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
-        await publishMessage(topic, timeslotData, correlationId, officeId);
+        await publishMessage(topic, timeslotData, correlationId, officeId, patient);
 
         // Respond with success
         res.status(201).json({

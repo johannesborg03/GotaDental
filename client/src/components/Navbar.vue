@@ -80,6 +80,7 @@ export default {
     logout() {
       // Clear the sessionStorage on logout .
       sessionStorage.removeItem("userIdentifier"); // Remove user data from session storage
+      sessionStorage.clear();
       this.$router.push("/"); // Redirect to home page
     }
   }

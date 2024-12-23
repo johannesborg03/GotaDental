@@ -130,7 +130,7 @@ async function subscribeToTopic(topic, callback) {
 function handleTimeslotCreate(message) {
     console.log('Handling timeslot creation:', message);
     // Extract fields from the message
-    const { _id: timeslotId, start, end, isBooked, officeId } = message;
+    const { _id: timeslotId, start, end, isBooked, officeId, patient} = message;
 
     if (!timeslotId || !officeId) {
         console.error('Missing timeslotId or officeId in WebSocket message:', message);
@@ -147,6 +147,7 @@ function handleTimeslotCreate(message) {
             end,
             isBooked,
             officeId,
+            patient
         });
         console.log(`WebSocket timeslot/create event emitted with ID: ${timeslotId}`);
     }

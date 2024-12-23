@@ -101,13 +101,14 @@ const calendarConfig = ref({
     console.log("Axios Response:", response);
     
     const patient = response.data; 
+    const patientID = patient.patient._id; 
 
-    const patientID = patient._id; 
-        console.log("Patient _id:", patientID);
-
-        const timeslotPatient = selectedTimeslot.patient;
+        console.log(patientID);
+       
+        const timeslotPatient = selectedTimeslot["patient"];
+        console.log("Timeslot Patient:", timeslotPatient);
         
-    if (selectedTimeslot.text === "Booked" &&  timeslotPatient ===  patientID) {
+    if (selectedTimeslot.text === "Booked" &&  timeslotPatient  ===  patientID) {
     // If the timeslot is booked and the current user is the one who booked it("userIdentifier")) {
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
@@ -157,8 +158,6 @@ function handleOfficeChange() {
   }
 }
 
-
-
   // Fetch all timeslots for the office
   async function fetchTimeslots() {
     if (!selectedOfficeId.value) {
@@ -176,6 +175,7 @@ function handleOfficeChange() {
         text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
         start: timeslot.start,
         end: timeslot.end,
+        patient: timeslot.patient
       }));
 
       // Update the calendar configuration
@@ -195,6 +195,8 @@ function handleOfficeChange() {
     });
 
     alert("Timeslot booked successfully!");
+
+    console.log(response);
 
     // Update the calendar
     const updatedTimeslot = response.data.timeslot;
