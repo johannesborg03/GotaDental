@@ -4,10 +4,10 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
  
-    const { start, end, dentist, office, officeId } = req.body;
+    const { start, end, dentist, office, officeId, patient } = req.body;
 
     // Validate required fields
-    if (!start || !end || !dentist || !office || !officeId) {
+    if (!start || !end || !dentist || !office || !officeId || patient) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 

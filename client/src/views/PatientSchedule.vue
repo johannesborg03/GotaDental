@@ -107,6 +107,7 @@ const calendarConfig = ref({
         const data = await response.json();
         
         console.log(data);
+        console.log("Timeslot details:", data.timeslot); 
     
 
     if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient_ssn === sessionStorage.getItem("userIdentifier")) {
