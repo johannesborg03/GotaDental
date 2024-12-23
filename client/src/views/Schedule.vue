@@ -23,10 +23,17 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import PatientTimeslot from "./patientTimeslot.vue";
 =======
 import { io } from "socket.io-client";
 >>>>>>> b0d0e3d (#72 Fix so all dentists schedules get updated asynchronous)
+=======
+import { io } from "socket.io-client";
+=======
+import PatientTimeslot from "./patientTimeslot.vue";
+>>>>>>> 806e42b (#61 Fixed timeslot to include patient information for booking verification)
+>>>>>>> 2ff7ff6 (git commit -m "#61 resolve merge conflict")
 
 
 const officeName = ref("");
