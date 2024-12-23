@@ -263,6 +263,42 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
             return;
         }
 
+        // Handle cancellation
+        if (action === 'cancel') {
+            console.log('Processing timeslot cancellation:', message);
+
+            // Check if the timeslot is not booked
+            if (!existingTimeslot.isBooked) {
+                const errorResponse = { success: false, error: 'Timeslot is already unbooked' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            // Unbook the timeslot
+            existingTimeslot.isBooked = false;
+            existingTimeslot.patient = null;
+
+            await existingTimeslot.save();
+
+            console.log('Timeslot unbooked successfully:', existingTimeslot);
+
+            const updatePatientTopic = 'patient/updateAppointments';
+            const updatePatientMessage = {
+                patientId: existingTimeslot.patient, // This will be null after cancellation
+                timeslotId: timeslot_id,             // timeslot ID to identify which appointment to remove
+                action: 'cancel',                    // Action to specify it's a cancellation
+            };
+
+            console.log('Publishing message to update Patient Appointments for Patient ID (now null):', updatePatientMessage);
+
+            await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+
+            const successResponse = { success: true, timeslot: existingTimeslot };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+
+            return;
+        }
+
         if (existingTimeslot.isBooked) {
             const errorResponse = { success: false, error: 'Timeslot already booked' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
