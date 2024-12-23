@@ -50,7 +50,6 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
-import { toRaw } from 'vue'; 
 
 
 
@@ -91,32 +90,31 @@ const calendarConfig = ref({
   
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
+    console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
-    // If the timeslot is booked and the current user is the one who booked it
+    const patientid = sessionStorage.getItem("userIdentifier")
+    console.log("log id "+ patientid);
+   
+    const response = await axios.get(`http://localhost:3004/api/patients/${patientid}`);
 
-    const rawTimeslot = toRaw(timeslotId);  
-    console.log("Raw Timeslot ID:", rawTimeslot);
-
-    const response = await fetch(`http://localhost:4000/api/timeslots/retrieve/${rawTimeslot}`);
-        
-        if (!response.ok) {
-            throw new Error('Timeslot not found');
-        }
-
-        const data = await response.json();
-        
-        console.log(data);
-        console.log("Timeslot details:", data.timeslot); 
+    console.log("Axios Response:", response);
     
+    const patient = response.data; 
 
-    if (selectedTimeslot.text === "Booked" && selectedTimeslot.patient_ssn === sessionStorage.getItem("userIdentifier")) {
+    const patientID = patient._id; 
+        console.log("Patient _id:", patientID);
+
+        const timeslotPatient = selectedTimeslot.patient;
+        
+    if (selectedTimeslot.text === "Booked" &&  timeslotPatient ===  patientID) {
+    // If the timeslot is booked and the current user is the one who booked it("userIdentifier")) {
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
         await cancelTimeslot(timeslotId); // Call cancel function
       }
     }
-
+    
     // If the timeslot is unbooked, allow the user to book it
     else if (selectedTimeslot.text === "Unbooked") {
       const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);

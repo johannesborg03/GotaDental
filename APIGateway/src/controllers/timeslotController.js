@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
  
-    const { start, end, dentist, office, officeId, patient } = req.body;
+    const { start, end, dentist, office, officeId } = req.body;
 
     // Validate required fields
     if (!start || !end || !dentist || !office || !officeId || patient) {

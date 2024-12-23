@@ -61,6 +61,32 @@ router.get('/api/slots', async (req, res) => {
     }
 });
 
+// Get Patient by SSN
+router.get('/api/patients/:patient_ssn', async (req, res) => {
+    try {
+        const { patient_ssn } = req.params;
+
+        // Find the specific patient by their SSN
+        const patient = await Patient.findOne({
+            patient_ssn: patient_ssn 
+        });
+
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        res.status(200).json({
+            message: "Patient retrieved successfully",
+            patient: patient
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error while retrieving the patient",
+            error: error.message,
+        });
+    }
+});
+
 // DELETE all patients
 router.delete('/api/patients', async (req, res) => {
     try {
