@@ -22,34 +22,14 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
-<<<<<<< HEAD
-<<<<<<< HEAD
-import PatientTimeslot from "./patientTimeslot.vue";
-=======
 import { io } from "socket.io-client";
->>>>>>> b0d0e3d (#72 Fix so all dentists schedules get updated asynchronous)
-=======
-import { io } from "socket.io-client";
-=======
-import PatientTimeslot from "./patientTimeslot.vue";
->>>>>>> 806e42b (#61 Fixed timeslot to include patient information for booking verification)
->>>>>>> 2ff7ff6 (git commit -m "#61 resolve merge conflict")
-
 
 const officeName = ref("");
-<<<<<<< HEAD
 
-<<<<<<< HEAD
-=======
 // WebSocket setup
 const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
-
-
-=======
->>>>>>> ace1df4 (git commit -m "#61 resolve merge conflict")
 const officeAddress = ref("");
 
->>>>>>> b0d0e3d (#72 Fix so all dentists schedules get updated asynchronous)
 // Function to fetch the office name from session storage
 function loadOfficeName() {
   const storedOfficeName = sessionStorage.getItem("Office");
@@ -59,7 +39,6 @@ function loadOfficeName() {
     officeName.value = "OFFICE NAME"; // Default fallback
   }
 }
-
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -90,6 +69,7 @@ const calendarConfig = ref({
       start: args.start,
       end: args.end,
       isBooked: false, // Default state
+      patient: ""
       };
     
   },
@@ -141,10 +121,6 @@ async function saveTimeslot() {
     alert("Failed to save timeslot. Please try again.");
   }
 }
-
-
-
-
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
@@ -207,7 +183,6 @@ function joinOfficeRoom() {
 onMounted(() => {
   fetchTimeslots();
   loadOfficeName();
-  loadOfficeAddress();
 });
 </script>
 

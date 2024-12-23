@@ -9,53 +9,11 @@
             {{ office.office_name }}
           </option>
         </b-form-select>
-  <b-container fluid>
-    <b-row>
-      <b-col md="4" class="text-left" style="margin-top: 60px;">
-        <h3>Select an Office:</h3>
-        <b-form-select v-model="selectedOfficeId" @change="handleOfficeChange" class="mb-3">
-          <option disabled value="" >Select an office</option>
-          <option v-for="office in offices" :key="office._id" :value="office._id">
-            {{ office.office_name }}
-          </option>
-        </b-form-select>
 
         <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
           Please select an office to view available timeslots.
         </div>
-        <div v-if="!selectedOfficeId" class="alert alert-info mt-3">
-          Please select an office to view available timeslots.
-        </div>
 
-        <div v-if="selectedOfficeId">
-          <p>
-            Welcome to our office! Here you can manage your schedule.
-          </p>
-          <p>
-            Address: {{ officeAddress }}<br />
-            Contact: (123) 456-7890<br />
-            Email: info@office.com
-          </p>
-        </div>
-      </b-col>
-
-      <!-- Right Side: Calendar -->
-      <b-col md="8" class="text-right">
-        <div class="mb-3" style="text-align: right; margin-top: 10px;">
-          <b-button @click="prevWeek" variant="secondary" class="mr-2">Previous Week</b-button>
-          <b-button @click="nextWeek" variant="secondary">Next Week</b-button>
-        </div>
-        <DayPilotCalendar :config="calendarConfig" />
-        <div v-if="selectedTimeslot" class="mt-3">
-          <p>Selected Timeslot:</p>
-          <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
-          <p>Start: {{ selectedTimeslot.start }}</p>
-          <p>End: {{ selectedTimeslot.end }}</p>
-          <b-button @click="saveTimeslot" variant="primary">Save Timeslot</b-button>
-        </div>
-      </b-col>
-    </b-row>
-  </b-container>
         <div v-if="selectedOfficeId">
           <p>
             Welcome to our office! Here you can manage your schedule.
@@ -119,8 +77,6 @@ const offices = ref([]);
 const events = ref([]);
 const officeAddress = ref("");
 const officeName = ref("");
-const officeAddress = ref("");
-const officeName = ref("");
 
 // Reactive configuration
 // Updated onEventClick logic to handle both booking and cancellation
@@ -137,7 +93,6 @@ const calendarConfig = ref({
     console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
-    console.log("events.value[0]:", events.value[0]);
     const patientid = sessionStorage.getItem("userIdentifier")
     console.log("log id "+ patientid);
    
@@ -154,13 +109,12 @@ const calendarConfig = ref({
         console.log("Timeslot Patient:", timeslotPatient);
         
     if (selectedTimeslot.text === "Booked" &&  timeslotPatient  ===  patientID) {
-    // If the timeslot is booked and the current user is the one who booked it("userIdentifier")) {
+   
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
-        await cancelTimeslot(timeslotId); // Call cancel function
+        await cancelTimeslot(timeslotId); 
       }
     }
-    
     // If the timeslot is unbooked, allow the user to book it
     else if (selectedTimeslot.text === "Unbooked") {
       const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
@@ -311,31 +265,10 @@ function loadOfficeName() {
     officeName.value = "OFFICE NAME"; // Default fallback
   }
 }
-  
-  function loadOfficeAddress() {
-  const storedAddress = sessionStorage.getItem("OfficeAddress");
-  if (storedAddress) {
-    officeAddress.value = storedAddress;
-  } else {
-    officeAddress.value = "OFFICE ADDRESS"; // Default fallback
-  }
-}
-
-// Function to fetch the office name from session storage
-function loadOfficeName() {
-  const storedOfficeName = sessionStorage.getItem("Office");
-  if (storedOfficeName) {
-    officeName.value = storedOfficeName;
-  } else {
-    officeName.value = "OFFICE NAME"; // Default fallback
-  }
-}
 
  // WebSocket connection and event handling
 onMounted(() => {
   fetchOffices();
-  loadOfficeAddress();
-  loadOfficeName();
   loadOfficeAddress();
   loadOfficeName();
 
@@ -343,12 +276,9 @@ onMounted(() => {
         console.log("WebSocket connected:", socket.id);
     });
 
-    
     socket.on("timeslot/create", (newTimeslot) => {
-        console.log("Received timeslot new Timeslot Created", newTimeslot);
-        console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
-
-        if (newTimeslot.office === selectedOfficeId.value) {
+        console.log("Received timeslot update:", newTimeslot);
+        if (newTimeslot.officeId === selectedOfficeId.value) {
             events.value.push({
                 id: newTimeslot._id,
                 text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
