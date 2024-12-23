@@ -93,6 +93,7 @@ const calendarConfig = ref({
     console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
+    console.log("events.value[0]:", events.value[0]);
     const patientid = sessionStorage.getItem("userIdentifier")
     console.log("log id "+ patientid);
    
