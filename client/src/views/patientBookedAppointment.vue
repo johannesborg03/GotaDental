@@ -10,6 +10,14 @@
             {{ error }}
         </div>
 
+        <h3>Select an Office:</h3>
+        <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
+            <option disabled value="">Select an office</option>
+            <option v-for="office in offices" :key="office._id" :value="office._id">
+                {{ office.office_name }}
+            </option>
+        </select>
+
         <div v-if="bookedTimeslots.length > 0">
             <table class="table table-bordered mt-4">
                 <thead class="table-primary">
@@ -37,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { io } from "socket.io-client";
 import axios from "axios";
 
@@ -63,9 +71,24 @@ async function fetchOffices() {
     }
 }
 
+function handleOfficeChange() {
+    if (selectedOfficeId.value) {
+        console.log("Joining office room:", selectedOfficeId.value);
+        // Fetch timeslots for the selected office
+
+        // Emit WebSocket event to join the selected office's room
+        if (socket.connected) {
+            socket.emit("joinOffice", { officeId: selectedOfficeId.value });
+        }
+        fetchBookedTimeslots();
+    }
+}
 // Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
-    if (!selectedOfficeId.value) return;
+    if (!selectedOfficeId.value) {
+        alert("No office selected.");
+        return;
+    }
     loading.value = true;
 
     try {
@@ -75,8 +98,8 @@ async function fetchBookedTimeslots() {
         }
 
         const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
-            { params: { officeId: selectedOfficeId.value } }); 
-            console.log("Fetched Booked Timeslots:", response.data);
+            { params: { officeId: selectedOfficeId.value } });
+        console.log("Fetched Booked Timeslots:", response.data);
         bookedTimeslots.value = response.data.timeslots.filter((t) => t.isBooked);
     } catch (error) {
         console.error("Error fetching appointments:", error);
@@ -91,8 +114,11 @@ function formatDate(date) {
 }
 
 onMounted(() => {
-    fetchBookedTimeslots();
+    fetchOffices();
 
+    socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+    });
     socket.on("timeslot/update", (updatedTimeslot) => {
         if (updatedTimeslot.isBooked && updatedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
             const existingIndex = bookedTimeslots.value.findIndex((slot) => slot.id === updatedTimeslot.timeslot_id);
@@ -101,5 +127,15 @@ onMounted(() => {
             }
         }
     });
+
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
 });
+
+// Cleanup WebSocket connection
+onUnmounted(() => {
+    socket.disconnect();
+});
+
 </script>
