@@ -18,24 +18,13 @@
             </option>
         </select>
 
-        <div v-if="bookedTimeslots.length > 0">
-            <table class="table table-bordered mt-4">
-                <thead class="table-primary">
-                    <tr>
-                        <th>#</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(timeslot, index) in bookedTimeslots" :key="timeslot.id">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ formatDate(timeslot.start) }}</td>
-                        <td>{{ formatDate(timeslot.end) }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Booked Timeslots Display -->
+        <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
+            <div v-for="(timeslot, index) in bookedTimeslots" :key="timeslot._id" class="timeslot-box">
+                <h5>Timeslot {{ index + 1 }}</h5>
+                <p><strong>Start:</strong> {{ formatDate(timeslot.start) }}</p>
+                <p><strong>End:</strong> {{ formatDate(timeslot.end) }}</p>
+            </div>
         </div>
 
         <div v-else-if="!loading" class="alert alert-info mt-3">
@@ -104,7 +93,16 @@ async function fetchBookedTimeslots() {
         const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
             { params: { officeId: selectedOfficeId.value } });
         console.log("Fetched Booked Timeslots:", response.data);
-        bookedTimeslots.value = response.data.timeslots.filter((t) => t.isBooked);
+        // Ensure timeslots are returned in the response
+        if (response.data && response.data.timeslots) {
+            // Update bookedTimeslots with filtered data
+            bookedTimeslots.value = response.data.timeslots.filter(
+                (t) => t.isBooked
+            );
+        } else {
+            console.warn("No timeslots found in response.");
+            bookedTimeslots.value = [];
+        }
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
@@ -143,3 +141,22 @@ onUnmounted(() => {
 });
 
 </script>
+
+<style>
+.booked-timeslots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.timeslot-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
