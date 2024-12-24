@@ -299,31 +299,51 @@ async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
 }
 
 async function handleUpdateAppointments(message, replyTo, correlationId, channel) {
-    const { patientId, timeslotId } = message;
+    const { patientId, timeslotId, action } = message; // Added action to the message
 
     console.log('Received update appointments message:', message);
 
     try {
-        if (!patientId || !timeslotId) {
+        if (!timeslotId) {
             const errorResponse = { success: false, error: 'Missing patientId or timeslotId' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        // Update the patient's appointments array
-        const updatedPatient = await Patient.findByIdAndUpdate(
-            patientId,
-            { $addToSet: { appointments: timeslotId } }, // Use $addToSet to avoid duplicates
-            { new: true }
-        );
+        let updatedPatient;
 
-        if (!updatedPatient) {
-            const errorResponse = { success: false, error: 'Patient not found' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
+        if (action === 'cancel') {
+            // Remove the timeslot from the patient's appointments array
+            updatedPatient = await Patient.findByIdAndUpdate(
+                patientId,
+                { $pull: { appointments: timeslotId } }, // $pull removes the timeslotId
+                { new: true }
+            );
+
+            console.log("Trying to cancel")
+            if (!updatedPatient) {
+                const errorResponse = { success: false, error: 'Patient not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            console.log('Patient appointments updated successfully (cancel):', updatedPatient);
+        } else {
+            // Add the timeslot to the patient's appointments array
+            updatedPatient = await Patient.findByIdAndUpdate(
+                patientId,
+                { $addToSet: { appointments: timeslotId } }, // $addToSet avoids duplicates
+                { new: true }
+            );
+
+            if (!updatedPatient) {
+                const errorResponse = { success: false, error: 'Patient not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            console.log('Patient appointments updated successfully (book):', updatedPatient);
         }
-
-        console.log('Patient appointments updated successfully:', updatedPatient);
 
         const successResponse = { success: true, patient: updatedPatient };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });

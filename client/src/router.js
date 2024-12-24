@@ -35,7 +35,6 @@ const routes = [
 
     { path: '/PatientSchedule', name: 'PatientSchedule',component: PatientSchedule},
 
-
 ];
 
 const router = createRouter({
