@@ -55,7 +55,8 @@ const error = ref(null);
                 }
 
                 const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`);
-                bookedTimeslots.value = response.data.timeslots || [];
+                console.log("Fetched Booked Timeslots:", response.data);
+                bookedTimeslots.value = response.data.timeslots.filter(timeslot => timeslot.isBooked);
             } catch (error) {
                 console.error("Error fetching appointments:", error);
                 error.value = error.response?.data?.message || "Failed to load booked timeslots.";
