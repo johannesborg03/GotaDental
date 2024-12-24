@@ -139,30 +139,34 @@ async function handleGetAllTimeslots(message, replyTo, correlationId, channel) {
 }
 
 
-// Handle retrieving a specific timeslot
-async function handleGetTimeslotById(message, replyTo, correlationId, channel) {
-    console.log('Received retrieve timeslot message:', message);
+async function handleGetTimeslot(message, replyTo, correlationId, channel) {
+    console.log('Received request to retrieve timeslot:', message);
 
-    const { office_id, dentist_username, timeslot_id } = message;
+    const { timeslot_id } = message;
 
     try {
-        if (!office_id || !dentist_username || !timeslot_id) {
-            const errorResponse = { success: false, error: 'Missing required fields' };
+        if (!timeslot_id) {
+            const errorResponse = { success: false, error: 'Missing timeslot_id' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        const timeslot = await Timeslot.findOne({ _id: timeslot_id, dentist_username, office_id });
+        // Find the specific timeslot by its _id (timeslot_id)
+        const timeslot = await Timeslot.findOne({ _id: timeslot_id });
+
         if (!timeslot) {
             const errorResponse = { success: false, error: 'Timeslot not found' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
+        // Successfully found the timeslot, send it back
         const successResponse = { success: true, timeslot };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error retrieving timeslot:', error);
+
+        // Send error response back in case of a server error
         const errorResponse = { success: false, error: 'Failed to retrieve timeslot' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
@@ -203,7 +207,7 @@ async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, chan
 }
 
 async function patientHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
-    const { timeslot_id, isBooked, patient } = message;
+    const { timeslot_id, isBooked, patient, action } = message;
 
     console.log('Received update timeslot message:', message);
 
@@ -241,6 +245,42 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         if (!existingTimeslot) {
             const errorResponse = { success: false, error: 'Timeslot not found' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Handle cancellation
+        if (action === 'cancel') {
+            console.log('Processing timeslot cancellation:', message);
+
+            // Check if the timeslot is not booked
+            if (!existingTimeslot.isBooked) {
+                const errorResponse = { success: false, error: 'Timeslot is already unbooked' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            // Unbook the timeslot
+            existingTimeslot.isBooked = false;
+            existingTimeslot.patient = null;
+
+            await existingTimeslot.save();
+
+            console.log('Timeslot unbooked successfully:', existingTimeslot);
+
+            const updatePatientTopic = 'patient/updateAppointments';
+            const updatePatientMessage = {
+                patientId: existingTimeslot.patient, // This will be null after cancellation
+                timeslotId: timeslot_id,             // timeslot ID to identify which appointment to remove
+                action: 'cancel',                    // Action to specify it's a cancellation
+            };
+
+            console.log('Publishing message to update Patient Appointments for Patient ID (now null):', updatePatientMessage);
+
+            await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+
+            const successResponse = { success: true, timeslot: existingTimeslot };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+
             return;
         }
 
@@ -352,7 +392,7 @@ async function initializeSubscriptions (){
     try {
         await subscribeToTopic('timeslot/create', handleCreateTimeslot);
         await subscribeToTopic('timeslot/office/retrieveAll', handleGetAllTimeslots);
-        await subscribeToTopic('timeslot/retrieve', handleGetTimeslotById);
+        await subscribeToTopic('timeslot/retrieve', handleGetTimeslot);
         //await subscribeToTopic('timeslot/update', dentistHandleUpdateTimeslot);
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
         await subscribeToTopic('timeslot/retrieveByIds', handleRetrieveTimeslotsByIds);
@@ -368,7 +408,7 @@ module.exports = {
     initializeSubscriptions,
     handleCreateTimeslot,
     handleGetAllTimeslots,
-    handleGetTimeslotById,
+    handleGetTimeslot,
    // dentistHandleUpdateTimeslot,
     handleDeleteTimeslot,
     handleRetrieveTimeslotsByIds,

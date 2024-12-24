@@ -24,14 +24,11 @@ import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
 
-
 const officeName = ref("");
 
 // WebSocket setup
 const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
-
-
-
+const officeAddress = ref("");
 
 // Function to fetch the office name from session storage
 function loadOfficeName() {
@@ -42,7 +39,6 @@ function loadOfficeName() {
     officeName.value = "OFFICE NAME"; // Default fallback
   }
 }
-
 
 // Function to calculate the start of the current week (Monday)
 function getCurrentWeekStart() {
@@ -73,6 +69,7 @@ const calendarConfig = ref({
       start: args.start,
       end: args.end,
       isBooked: false, // Default state
+      patient: ""
       };
     
   },
@@ -89,10 +86,11 @@ async function saveTimeslot() {
     const payload = {
       start: selectedTimeslot.value.start, // Send as is without conversion
       end: selectedTimeslot.value.end, // Send as is without conversion
-      dentist: sessionStorage.getItem('userIdentifier') || 'Guest',
+      dentist: sessionStorage.getItem('userIdentifier'),
       office: sessionStorage.getItem('Office'),
       officeId: sessionStorage.getItem('OfficeId'),
       isBooked: false,
+      patient: ""
     };
 
     console.log("Sending payload", payload);
@@ -108,6 +106,7 @@ async function saveTimeslot() {
       text: response.data.timeslot.isBooked ? "Booked" : "Unbooked",
       start: response.data.timeslot.start,
       end: response.data.timeslot.end,
+      patient: ""
     };
 
     events.value.push(newTimeslot); // Add the new timeslot to the events array
@@ -145,6 +144,7 @@ async function fetchTimeslots() {
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
       start: timeslot.start,
       end: timeslot.end,
+      patient: timeslot.patient
     }));
 
     // Update the calendar configuration
