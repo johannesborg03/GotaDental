@@ -349,16 +349,17 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
 async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, channel) {
     console.log('Received request to retrieve booked timeslots:', message);
 
-    const { patientSSN } = message;
+    const { patientSSN, officeId} = message;
 
-    if (!patientSSN) {
-        const errorResponse = { success: false, error: 'Patient SSN is required' };
+    if (!patientSSN || !officeId) {
+        const errorResponse = { success: false, error: 'Missing patientSSN or officeId' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
         return;
     }
 
     try {
-        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientSSN });
+        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientSSN, office: officeId,
+        });
 
         if (!bookedTimeslots || bookedTimeslots.length === 0) {
             const errorResponse = { success: false, error: 'No booked timeslots found' };

@@ -141,9 +141,11 @@ exports.updateTimeslot = async (req, res) => {
 
 exports.getBookedTimeslots = async (req, res) => {
     const { patientSSN } = req.params;
+    const { officeId } = req.query;
 
-    if (!patientSSN) {
-        return res.status(400).json({ message: 'Patient SSN is required' });
+
+    if (!patientSSN || !officeId) {
+        return res.status(400).json({ message: 'Missing patientSSN or officeId' });
     }
 
         // Generate a unique correlation ID
@@ -152,7 +154,7 @@ exports.getBookedTimeslots = async (req, res) => {
     
     try {
         console.log(`Publishing message to RabbitMQ with topic: ${topic}`);
-        const response = await publishMessage(topic, { patientSSN }, correlationId);
+        const response = await publishMessage(topic, { patientSSN, officeId }, correlationId);
 
         // Query the database for timeslots that are booked and linked to the patient
         if (!response.success || !response.timeslots.length) {

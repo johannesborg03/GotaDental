@@ -97,6 +97,10 @@ async function fetchBookedTimeslots() {
             throw new Error("Patient identifier not found.");
         }
 
+        console.log("Making API request with: ", {
+            patientSSN,
+            officeId: selectedOfficeId.value,
+        });
         const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
             { params: { officeId: selectedOfficeId.value } });
         console.log("Fetched Booked Timeslots:", response.data);
