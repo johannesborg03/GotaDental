@@ -44,22 +44,39 @@ import axios from "axios";
 // WebSocket setup
 const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 
+const offices = ref([]);
+const selectedOfficeId = ref("");
 const bookedTimeslots = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+// Fetch available offices
+async function fetchOffices() {
+    try {
+        const response = await axios.get("http://localhost:4000/api/offices");
+        offices.value = response.data.offices;
+        console.log("OFFICES:", response.data.offices);
+        console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+    } catch (err) {
+        console.error("Error fetching offices:", err);
+        error.value = "Failed to load offices. Please try again.";
+    }
+}
 
-// Fetch patient timeslots 
+// Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
+    if (!selectedOfficeId.value) return;
     loading.value = true;
+
     try {
         const patientSSN = sessionStorage.getItem("userIdentifier");
         if (!patientSSN) {
             throw new Error("Patient identifier not found.");
         }
 
-        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`);
-        console.log("Fetched Booked Timeslots:", response.data);
+        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
+            { params: { officeId: selectedOfficeId.value } }); 
+            console.log("Fetched Booked Timeslots:", response.data);
         bookedTimeslots.value = response.data.timeslots.filter((t) => t.isBooked);
     } catch (error) {
         console.error("Error fetching appointments:", error);
