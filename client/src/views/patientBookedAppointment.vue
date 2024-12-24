@@ -38,38 +38,51 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { io } from "socket.io-client";
 import axios from "axios";
+
+// WebSocket setup
+const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 
 const bookedTimeslots = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
 
-        // Fetch patient timeslots 
-        async function fetchBookedTimeslots() {
-            loading.value = true;
-            try {
-                const patientSSN = sessionStorage.getItem("userIdentifier");
-                if (!patientSSN) {
-                    throw new Error("Patient identifier not found.");
-                }
+// Fetch patient timeslots 
+async function fetchBookedTimeslots() {
+    loading.value = true;
+    try {
+        const patientSSN = sessionStorage.getItem("userIdentifier");
+        if (!patientSSN) {
+            throw new Error("Patient identifier not found.");
+        }
 
-                const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`);
-                console.log("Fetched Booked Timeslots:", response.data);
-                bookedTimeslots.value = response.data.timeslots.filter(timeslot => timeslot.isBooked);
-            } catch (error) {
-                console.error("Error fetching appointments:", error);
-                error.value = error.response?.data?.message || "Failed to load booked timeslots.";
-            } finally {
-                loading.value = false;
+        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`);
+        console.log("Fetched Booked Timeslots:", response.data);
+        bookedTimeslots.value = response.data.timeslots.filter((t) => t.isBooked);
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        error.value = error.response?.data?.message || "Failed to load booked timeslots.";
+    } finally {
+        loading.value = false;
+    }
+}
+
+function formatDate(date) {
+    return new Date(date).toLocaleString();
+}
+
+onMounted(() => {
+    fetchBookedTimeslots();
+
+    socket.on("timeslot/update", (updatedTimeslot) => {
+        if (updatedTimeslot.isBooked && updatedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+            const existingIndex = bookedTimeslots.value.findIndex((slot) => slot.id === updatedTimeslot.timeslot_id);
+            if (existingIndex === -1) {
+                bookedTimeslots.value.push(updatedTimeslot);
             }
         }
-
-        function formatDate(date) {
-            return new Date(date).toLocaleString();
-        }
-
-        onMounted(() => {
-            fetchBookedTimeslots();
-        });
+    });
+});
 </script>
