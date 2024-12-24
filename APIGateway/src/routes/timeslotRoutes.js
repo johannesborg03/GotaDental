@@ -19,6 +19,8 @@ router.get('/api/timeslots/available', timeslotController.getAvailableTimeslots)
 // Update a specific timeslot
 router.patch('/timeslots/:timeslot_id', timeslotController.updateTimeslot);
 
+//Retrieve all booked timeslots for a patient
+router.get('/api/patients/:patientSSN/timeslots', timeslotController.getBookedTimeslots);
 
 
 
