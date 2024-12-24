@@ -346,6 +346,35 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
     }
 }
 
+async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, channel) {
+    console.log('Received request to retrieve booked timeslots:', message);
+
+    const { patientSSN } = message;
+
+    if (!patientSSN) {
+        const errorResponse = { success: false, error: 'Patient SSN is required' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+        return;
+    }
+
+    try {
+        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientSSN });
+
+        if (!bookedTimeslots || bookedTimeslots.length === 0) {
+            const errorResponse = { success: false, error: 'No booked timeslots found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const successResponse = { success: true, timeslots: bookedTimeslots };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+    } catch (error) {
+        console.error('Error retrieving booked timeslots:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve booked timeslots' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 
 // Initialize subscriptions
 async function initializeSubscriptions (){
@@ -357,6 +386,8 @@ async function initializeSubscriptions (){
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
         await subscribeToTopic('timeslot/retrieveByIds', handleRetrieveTimeslotsByIds);
         await subscribeToTopic('timeslot/update', patientHandleUpdateTimeslot);
+        await subscribeToTopic('timeslot/patient/booked/retrieve', handleRetrieveBookedTimeslots);
+
 
         console.log('Timeslot subscriptions initialized!');
     } catch (error) {
