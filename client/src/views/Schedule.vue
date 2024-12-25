@@ -212,6 +212,30 @@ onMounted(() => {
             console.log("Updated events after WebSocket create:", events.value);
         }
     });
+
+       // Listen for timeslot updates
+       socket.on("timeslot/update", (updatedTimeslot) => {
+    console.log("Received timeslot update:", updatedTimeslot);
+
+   
+
+    // Find the corresponding timeslot in the events array
+    const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+        // Update the event text to "Booked" or "Unbooked" based on the isBooked status
+        events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
+        // Update the event data
+        events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
+        events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+
+        // Re-render the calendar
+        calendarConfig.value.events = [...events.value];
+        console.log("Updated events after WebSocket update:", events.value);
+    } else {
+        console.error(`No event found with id ${updatedTimeslot.timeslot_id}`);
+    }
+});
+
     
 
 
