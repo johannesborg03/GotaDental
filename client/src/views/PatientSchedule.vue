@@ -134,8 +134,8 @@ async function fetchOffices() {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // 
     console.log("OFFICES:", response.data.offices);
-    console.log ('OfficeAddress', response.data.office.OfficeAddress);
-    console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+   // console.log ('OfficeAddress', response.data.office.OfficeAddress);
+   // console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
   } catch (error) {
     console.error("Error fetching offices:", error);
@@ -147,6 +147,7 @@ function handleOfficeChange() {
   if (selectedOfficeId.value) {
     console.log("Joining office room:", selectedOfficeId.value);
     // Fetch timeslots for the selected office
+    sessionStorage.setItem('OfficeId', selectedOfficeId.value);
 
        // Emit WebSocket event to join the selected office's room
        if (socket.connected) {
@@ -190,7 +191,10 @@ function handleOfficeChange() {
   try {
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
       isBooked: true,
-      patient: sessionStorage.getItem("userIdentifier"), // Assuming the patient ID is stored here
+      patient: sessionStorage.getItem("userIdentifier"),
+      action: "book",
+      officeId: sessionStorage.getItem("OfficeId")
+
     });
 
     alert("Timeslot booked successfully!");
@@ -295,16 +299,26 @@ onMounted(() => {
 
       // Listen for timeslot updates
       socket.on("timeslot/update", (updatedTimeslot) => {
-        console.log("Received timeslot update:", updatedTimeslot);
-        
+    console.log("Received timeslot update:", updatedTimeslot);
 
-        // Update the calendar with the new state
-        const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot.timeslot_id);
-        if (eventIndex !== -1) {
-            events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
-            calendarConfig.value.events = [...events.value];
-        }
-    });
+   
+
+    // Find the corresponding timeslot in the events array
+    const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+        // Update the event text to "Booked" or "Unbooked" based on the isBooked status
+        events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
+        // Update the event data
+        events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
+        events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+
+        // Re-render the calendar
+        calendarConfig.value.events = [...events.value];
+        console.log("Updated events after WebSocket update:", events.value);
+    } else {
+        console.error(`No event found with id ${updatedTimeslot.timeslot_id}`);
+    }
+});
 
 
     socket.on("disconnect", () => {
