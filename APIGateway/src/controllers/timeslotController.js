@@ -130,7 +130,7 @@ exports.getTimeslot = async (req, res) => {
 exports.updateTimeslot = async (req, res) => {
     console.log("CALLED");
     const { timeslot_id } = req.params;
-    const { isBooked, patient, action } = req.body;
+    const { isBooked, patient, action, officeId } = req.body;
 
     // Validate required fields
     if (!timeslot_id) {
@@ -145,14 +145,26 @@ exports.updateTimeslot = async (req, res) => {
        console.log("cancel appointment")
     }
 
+    if (action === "book"){
+        console.log("book appointment")
+     }
+
+    if (!officeId){
+        console.log("MISSING OFFICEID");
+        return res.status(400).json({ message: 'Missing OfficeId' });
+     }
+
     // Generate a unique correlation ID
     const correlationId = uuidv4();
     const topic = `timeslot/update`;
 
+    console.log("TImeslotId:", timeslot_id);
+
     try {
-        const updateData = { timeslot_id, isBooked, patient, action}; // Update payload
+        const updateData = { timeslot_id, isBooked, patient, action, officeId}; // Update payload
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
 
+        console.log("OFFICE ID FOR THIS:", officeId );
         // Publish the message to RabbitMQ
         const response = await publishMessage(topic, updateData, correlationId);
 
