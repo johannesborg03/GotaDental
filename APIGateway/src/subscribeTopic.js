@@ -56,10 +56,15 @@ function processCreateOffice(message) {
     console.log('Processing office creation event:', message);
 }
 
+function processRetrieveTimeslot(message) {
+    console.log('Processing timeslot retrieval event:', message);
+}
+
 subscribeToTopic('dentist_topic', processTimeslot);
 subscribeToTopic('timeslot_topic', processTimeslot);
 subscribeToTopic('offices/retrieveAll', processRetrieveAllOffices);
 subscribeToTopic('offices/create', processCreateOffice);
 subscribeToTopic('timeslot_topic', processTimeslot); // Handle timeslot-related events
 subscribeToTopic('timeslot/available/retrieve', processAvailableTimeslots); // Handle available timeslots
+subscribeToTopic('timeslot/retrieve', processRetrieveTimeslot); 
         

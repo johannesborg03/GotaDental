@@ -3,8 +3,8 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
-
-    const { start, end, dentist, office, officeId } = req.body;
+ 
+    const { start, end, dentist, office, officeId, patient} = req.body;
 
     // Validate required fields
     if (!start || !end || !dentist || !office || !officeId) {
@@ -18,11 +18,11 @@ exports.createTimeslot = async (req, res) => {
 
 
     try {
-        const timeslotData = { start, end, dentist, office, officeId, isBooked: false }; // Fixed variable name
+        const timeslotData = { start, end, dentist, office, officeId, isBooked: false, patient }; // Fixed variable name
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
         // Publish the message to RabbitMQ
-        const response = await publishMessage(topic, timeslotData, correlationId, officeId);
+        const response = await publishMessage(topic, timeslotData, correlationId, officeId, patient);
 
         // Respond with success
         res.status(201).json({
@@ -95,11 +95,42 @@ exports.getAvailableTimeslots = async (req, res) => {
     }
 };
 
+exports.getTimeslot = async (req, res) => {
+    const correlationId = uuidv4();  // Unique correlation ID for tracking the request
+    const topic = 'timeslot/retrieve';  // Topic to publish the request to
+
+    const { timeslot_id } = req.params;  // Get the timeslot_id from the request params
+
+    if (!timeslot_id) {
+        return res.status(400).json({ message: 'Timeslot ID is required' });
+    }
+
+    try {
+        // Publish the message to request the specific timeslot
+        const response = await publishMessage(topic, { timeslot_id }, correlationId);
+
+        if (!response.success || !response.timeslot) {
+            return res.status(404).json({ message: 'Timeslot not found' });
+        }
+
+        // If timeslot is found, return it with status 'Booked' or 'Unbooked' based on the isBooked field
+        const timeslot = {
+            ...response.timeslot,
+            status: response.timeslot.isBooked ? 'Booked' : 'Unbooked',
+        };
+
+        res.status(200).json({ message: 'Timeslot retrieved successfully', timeslot });
+    } catch (error) {
+        console.error('Error retrieving timeslot:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
 // Controller to update a specific timeslot
 exports.updateTimeslot = async (req, res) => {
     console.log("CALLED");
     const { timeslot_id } = req.params;
-    const { isBooked, patient } = req.body;
+    const { isBooked, patient, action, officeId } = req.body;
 
     // Validate required fields
     if (!timeslot_id) {
@@ -110,14 +141,30 @@ exports.updateTimeslot = async (req, res) => {
         return res.status(400).json({ message: 'Invalid data: isBooked and patient are required if booking' });
     }
 
+    if (action === "cancel"){
+       console.log("cancel appointment")
+    }
+
+    if (action === "book"){
+        console.log("book appointment")
+     }
+
+    if (!officeId){
+        console.log("MISSING OFFICEID");
+        return res.status(400).json({ message: 'Missing OfficeId' });
+     }
+
     // Generate a unique correlation ID
     const correlationId = uuidv4();
     const topic = `timeslot/update`;
 
+    console.log("TImeslotId:", timeslot_id);
+
     try {
-        const updateData = { timeslot_id, isBooked, patient }; // Update payload
+        const updateData = { timeslot_id, isBooked, patient, action, officeId}; // Update payload
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
 
+        console.log("OFFICE ID FOR THIS:", officeId );
         // Publish the message to RabbitMQ
         const response = await publishMessage(topic, updateData, correlationId);
 

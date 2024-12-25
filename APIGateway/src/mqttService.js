@@ -136,7 +136,7 @@ async function subscribeToTopic(topic, callback) {
         const message = JSON.parse(msg.content.toString());
         console.log(`Received message from topic "${topic}":`, message);
 
-        console.log('Office Id EMEMAM', message.officeId);
+        console.log('Office Id:', message.officeId);
         
         // Emit an event for WebSocket handling
         eventEmitter.emit('mqttMessage', { topic, message });
@@ -152,7 +152,7 @@ async function subscribeToTopic(topic, callback) {
 function handleTimeslotCreate(message) {
     console.log('Handling timeslot creation:', message);
     // Extract fields from the message
-    const { _id: timeslotId, start, end, isBooked, officeId } = message;
+    const { _id: timeslotId, start, end, isBooked, officeId, patient} = message;
 
     if (!timeslotId || !officeId) {
         console.error('Missing timeslotId or officeId in WebSocket message:', message);
@@ -169,6 +169,7 @@ function handleTimeslotCreate(message) {
             end,
             isBooked,
             officeId,
+            patient
         });
         console.log(`WebSocket timeslot/create event emitted with ID: ${timeslotId}`);
     }
