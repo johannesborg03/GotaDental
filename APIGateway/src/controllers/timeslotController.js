@@ -150,6 +150,7 @@ exports.updateTimeslot = async (req, res) => {
      }
 
     if (!officeId){
+        console.log("MISSING OFFICEID");
         return res.status(400).json({ message: 'Missing OfficeId' });
      }
 

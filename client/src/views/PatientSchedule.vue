@@ -216,11 +216,15 @@ function handleOfficeChange() {
 
 // Function to cancel a timeslot
 async function cancelTimeslot(timeslotId) {
+  sessionStorage.setItem('OfficeId', selectedOfficeId.value);
+  const officeId = sessionStorage.getItem("OfficeId");
   try {
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
       isBooked: false,
       patient: sessionStorage.getItem("userIdentifier"),
-      action: "cancel"
+      action: "cancel",
+      officeId: officeId
+
     });
 
     alert("Appointment cancelled successfully!");
