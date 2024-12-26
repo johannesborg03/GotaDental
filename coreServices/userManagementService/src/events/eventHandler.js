@@ -302,7 +302,7 @@ async function handleUpdateAppointments(message, replyTo, correlationId, channel
     const { patientId, timeslotId, action } = message; // Added action to the message
 
     console.log('Received update appointments message:', message);
-
+    console.log('Received action message:', action);
     try {
         if (!timeslotId) {
             const errorResponse = { success: false, error: 'Missing patientId or timeslotId' };
@@ -328,7 +328,7 @@ async function handleUpdateAppointments(message, replyTo, correlationId, channel
             }
 
             console.log('Patient appointments updated successfully (cancel):', updatedPatient);
-        } else {
+        } else if (action === 'book') {
             // Add the timeslot to the patient's appointments array
             updatedPatient = await Patient.findByIdAndUpdate(
                 patientId,

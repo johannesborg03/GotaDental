@@ -240,8 +240,9 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         console.log(`Resolved Patient ID: ${patientId}`);
 
         //Check to see if the record of the patient and the number of appointments in their record
-        const patientRecord = await Patient.findById(patientId);
+      //  const patientRecord = await Patient.findById(patientId);
 
+      /*
         if (!patientRecord) {
             const errorResponse = { success: false, error: 'Patient record not found' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
@@ -253,6 +254,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+        */
 
         // Check if the timeslot is already booked
         const existingTimeslot = await Timeslot.findById(timeslot_id);
@@ -275,8 +277,13 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
             }
 
             // Unbook the timeslot
+
+
+            const oldTimeslotPatient = existingTimeslot.patient;
+
             existingTimeslot.isBooked = false;
             existingTimeslot.patient = null;
+
 
             await existingTimeslot.save();
 
@@ -284,7 +291,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
             const updatePatientTopic = 'patient/updateAppointments';
             const updatePatientMessage = {
-                patientId: existingTimeslot.patient, // This will be null after cancellation
+                patientId: oldTimeslotPatient, // This will be null after cancellation
                 timeslotId: timeslot_id,             // timeslot ID to identify which appointment to remove
                 action: 'cancel',                    // Action to specify it's a cancellation
             };
@@ -317,7 +324,8 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         const updatePatientTopic = 'patient/updateAppointments';
         const updatePatientMessage = {
             patientId,
-            appointmentId: timeslot_id,
+            timeslotId: timeslot_id,
+            action: 'book',  
         };
 
         console.log(`Publishing message to update Patient Appointments for Patient ID: ${patientId}`);
