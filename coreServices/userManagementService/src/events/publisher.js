@@ -8,17 +8,45 @@ let channel;
 
 // Connect to RabbitMQ and create the channel
 async function connectRabbitMQ() {
-    try {
-        connection = await amqp.connect('amqp://localhost');
-        channel = await connection.createChannel();
-        console.log('RabbitMQ Publisher connected');
+    let retryCount = 0;
+    const maxRetries = 5;
+    const retryDelay = 5000; // Retry every 5 seconds
 
-        // Assert the exchange only once
-        await channel.assertExchange('default_exchange', 'fanout', { durable: false });
-    } catch (error) {
-        console.error('Failed to connect to RabbitMQ:', error);
-        process.exit(1); // Exit if connection fails
+    async function attemptReconnect() {
+        try {
+            connection = await amqp.connect('amqp://localhost?heartbeat=60');
+            connection.on('error', (err) => {
+                console.error('Connection error:', err);
+            });
+            connection.on('close', () => {
+                console.log('RabbitMQ connection closed');
+                if (retryCount < maxRetries) {
+                    console.log(`Reconnecting in ${retryDelay / 1000}s...`);
+                    setTimeout(attemptReconnect, retryDelay);
+                    retryCount++;
+                } else {
+                    console.log('Max retries reached. Exiting...');
+                    process.exit(1);
+                }
+            });
+
+            channel = await connection.createChannel();
+            console.log('RabbitMQ Publisher connected');
+            await channel.assertExchange('default_exchange', 'fanout', { durable: false });
+        } catch (error) {
+            console.error('Failed to connect to RabbitMQ:', error);
+            if (retryCount < maxRetries) {
+                console.log(`Retrying in ${retryDelay / 1000}s...`);
+                setTimeout(attemptReconnect, retryDelay);
+                retryCount++;
+            } else {
+                console.log('Max retries reached. Exiting...');
+                process.exit(1);
+            }
+        }
     }
+
+    attemptReconnect(); // Start the connection attempt
 }
 
 //Publish messages 
