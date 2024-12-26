@@ -209,9 +209,22 @@ function handleOfficeChange() {
       calendarConfig.value.events = [...events.value];
     }
   } catch (error) {
-    console.error("Error booking timeslot:", error);
-    alert("Failed to book the timeslot. Please try again.");
-  }
+        console.error("Error booking timeslot:", error);
+
+        // Check for specific error message from the backend
+        if (error.response && error.response.data.message) {
+            const errorMessage = error.response.data.message;
+
+            // Check if it's the "already booked 5 timeslots" error
+            if (errorMessage.includes("You have already booked 5 timeslots")) {
+                alert("You cannot book more than 5 timeslots. Please cancel an existing booking to book a new one.");
+            } else {
+                alert(errorMessage);
+            }
+        } else {
+            alert("Failed to book the timeslot. Please try again.");
+        }
+    }
 }
 
 // Function to cancel a timeslot
