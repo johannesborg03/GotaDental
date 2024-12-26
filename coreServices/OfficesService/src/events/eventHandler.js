@@ -60,9 +60,6 @@ async function handleRetrieveOfficesByID(message, replyTo, correlationId, channe
 async function handleCreateOffice(message, replyTo, correlationId, channel) {
     console.log('Received message from topic "offices/create":', message);
 
-
-
-
        // Destructure and validate the incoming message
        const { office_name, latitude, longitude, dentists, office_address } = message;
 
@@ -72,7 +69,6 @@ async function handleCreateOffice(message, replyTo, correlationId, channel) {
            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
            return;
        }
-
 
     try {
         // Create the new office in the database

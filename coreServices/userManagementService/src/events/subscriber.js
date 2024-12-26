@@ -8,18 +8,16 @@ let channel;
 //Subscribe to topics
 async function subscribeToTopic(topic, callback) {
     const connection = await amqp.connect('amqp://localhost');
-   // console.log('Connection established');
+    connection.on('error', (err) => {
+        console.error('Connection error:', err);
+    });
+    connection.on('close', () => {
+        console.log('RabbitMQ connection closed');
+    });
 
     channel = await connection.createChannel();
-   // console.log('Channel created');
-
     await channel.assertExchange(topic, 'fanout', { durable: false });
-   // console.log(`Exchange "${topic}" asserted`);
-
     const queue = await channel.assertQueue('', { exclusive: true });
-   // console.log(`Queue "${queue.queue}" asserted for "${topic}" `);
-
-   // console.log(`Subscribed to topic "${topic}"`);
 
     channel.bindQueue(queue.queue, topic, '');
     console.log(`Queue "${queue.queue}" bound to topic "${topic}"`);
