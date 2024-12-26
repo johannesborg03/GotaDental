@@ -16,7 +16,7 @@ exports.createTimeslot = async (req, res) => {
     const correlationId = uuidv4();
     const topic = 'timeslot/create';
 
-    
+
     try {
         const timeslotData = { start, end, dentist, office, officeId, isBooked: false, patient }; // Fixed variable name
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
@@ -57,11 +57,11 @@ exports.getAllTimeslotsForOffice = async (req, res) => {
             return res.status(404).json({ message: 'No timeslots found for this office' });
         }
 
-              // Map response to include 'Booked' or 'Unbooked' based on isBooked
-              const timeslots = response.timeslots.map(timeslot => ({
-                ...timeslot,
-                status: timeslot.isBooked ? 'Booked' : 'Unbooked',
-            }));
+        // Map response to include 'Booked' or 'Unbooked' based on isBooked
+        const timeslots = response.timeslots.map(timeslot => ({
+            ...timeslot,
+            status: timeslot.isBooked ? 'Booked' : 'Unbooked',
+        }));
 
         res.status(200).json({ message: 'Timeslots retrieved successfully', timeslots: response.timeslots });
     } catch (error) {
@@ -183,5 +183,37 @@ exports.updateTimeslot = async (req, res) => {
             message: 'Failed to update timeslot',
             error: error.message,
         });
+    }
+};
+
+exports.getBookedTimeslots = async (req, res) => {
+    const { patientSSN } = req.params;
+    const { officeId } = req.query;
+
+
+    if (!patientSSN || !officeId) {
+        return res.status(400).json({ message: 'Missing patientSSN or officeId' });
+    }
+
+        // Generate a unique correlation ID
+        const correlationId = uuidv4();
+        const topic = 'timeslot/patient/booked/retrieve';
+    
+    try {
+        console.log(`Publishing message to RabbitMQ with topic: ${topic}`);
+        const response = await publishMessage(topic, { patientSSN, officeId }, correlationId);
+
+        // Query the database for timeslots that are booked and linked to the patient
+        if (!response.success || !response.timeslots.length) {
+            return res.status(404).json({ message: 'No booked timeslots found' });
+        }
+
+        res.status(200).json({
+            message: 'Booked timeslots retrieved successfully',
+            timeslots,
+        });
+    } catch (error) {
+        console.error('Error fetching booked timeslots:', error);
+        res.status(500).json({ message: 'Failed to fetch booked timeslots', error: error.message });
     }
 };

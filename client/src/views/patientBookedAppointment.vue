@@ -1,76 +1,162 @@
 <template>
-    <div class="container py-4">
-        <div class="mb-4 text-center">
-            <h1 class="text-primary">Your Booked Appointments</h1>
+    <div class="container mt-5">
+        <h1 class="text-primary text-center">Your Booked Timeslots</h1>
+
+        <div v-if="loading" class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
 
-        <div>
-            <!-- Booked Appointments Section -->
-            <div v-if="appointments && appointments.length > 0">
-                <div v-for="appointment in appointments" :key="appointment._id" class="card my-2 p-2">
-                    <p>
-                        <strong>Date:</strong> {{ new Date(appointment.date_and_time).toLocaleDateString() }} <br>
-                        <strong>Time:</strong> {{ new Date(appointment.date_and_time).toLocaleTimeString() }} <br>
-                        <strong>Dentist:</strong> {{ appointment.dentist_username }}
-                    </p>
-                    <button class="btn btn-danger" @click="cancelAppointment(appointment._id)" :disabled="isCanceling">
-                        Cancel Appointment
-                    </button>
-                </div>
+        <div v-if="error" class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+
+        <h3>Select an Office:</h3>
+        <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
+            <option disabled value="">Select an office</option>
+            <option v-for="office in offices" :key="office._id" :value="office._id">
+                {{ office.office_name }}
+            </option>
+        </select>
+
+        <!-- Booked Timeslots Display -->
+        <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
+            <div v-for="(timeslot, index) in bookedTimeslots" :key="timeslot._id" class="timeslot-box">
+                <h5>Timeslot {{ index + 1 }}</h5>
+                <p><strong>Start:</strong> {{ formatDate(timeslot.start) }}</p>
+                <p><strong>End:</strong> {{ formatDate(timeslot.end) }}</p>
             </div>
-            <!-- Messages for No Booked appointments -->
-            <p v-else class="text-muted text-center mt-4">No booked appointments found.</p>
         </div>
 
+        <div v-else-if="!loading" class="alert alert-info mt-3">
+            You currently have no booked timeslots.
+        </div>
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue";
+import { io } from "socket.io-client";
 import axios from "axios";
 
-export default {
+// WebSocket setup
+const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 
-    data() {
-        return {
-            appointments: [],
-            isCanceling: false,
-        };
-    },
-    async mounted() {
-        await this.fetchAppointments();
-    },
+const offices = ref([]);
+const selectedOfficeId = ref("");
+const bookedTimeslots = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
-    methods: {
-        // Fetch patient's appointments
-        async fetchAppointments() {
-            try {
-                const response = await axios.get("http://localhost:4000/api/appointments/patient");
-                this.appointments = response.data.appointments || [];
-            } catch (error) {
-                console.error("Error fetching appointments:", error.response?.data || error.message);
-                this.appointments = []; // Ensure appointments is always defined
-                alert("Failed to load your appointments. Please try again.");
+// Fetch available offices
+async function fetchOffices() {
+    try {
+        const response = await axios.get("http://localhost:4000/api/offices");
+        offices.value = response.data.offices;
+        console.log("OFFICES:", response.data.offices);
+        console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+    } catch (err) {
+        console.error("Error fetching offices:", err);
+        error.value = "Failed to load offices. Please try again.";
+    }
+}
+
+function handleOfficeChange() {
+    if (selectedOfficeId.value) {
+        console.log("Joining office room:", selectedOfficeId.value);
+        // Fetch timeslots for the selected office
+
+        // Emit WebSocket event to join the selected office's room
+        if (socket.connected) {
+            socket.emit("joinOffice", { officeId: selectedOfficeId.value });
+        }
+        fetchBookedTimeslots();
+    }
+}
+// Fetch booked timeslots for the selected office
+async function fetchBookedTimeslots() {
+    if (!selectedOfficeId.value) {
+        alert("No office selected.");
+        return;
+    }
+    loading.value = true;
+
+    try {
+        const patientSSN = sessionStorage.getItem("userIdentifier");
+        if (!patientSSN) {
+            throw new Error("Patient identifier not found.");
+        }
+
+        console.log("Making API request with: ", {
+            patientSSN,
+            officeId: selectedOfficeId.value,
+        });
+        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
+            { params: { officeId: selectedOfficeId.value } });
+        console.log("Fetched Booked Timeslots:", response.data);
+        // Ensure timeslots are returned in the response
+        if (response.data && response.data.timeslots) {
+            // Update bookedTimeslots with filtered data
+            bookedTimeslots.value = response.data.timeslots.filter(
+                (t) => t.isBooked
+            );
+        } else {
+            console.warn("No timeslots found in response.");
+            bookedTimeslots.value = [];
+        }
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        error.value = error.response?.data?.message || "Failed to load booked timeslots.";
+    } finally {
+        loading.value = false;
+    }
+}
+
+function formatDate(date) {
+    return new Date(date).toLocaleString();
+}
+
+onMounted(() => {
+    fetchOffices();
+
+    socket.on("connect", () => {
+        console.log("WebSocket connected:", socket.id);
+    });
+    socket.on("timeslot/update", (updatedTimeslot) => {
+        if (updatedTimeslot.isBooked && updatedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+            const existingIndex = bookedTimeslots.value.findIndex((slot) => slot.id === updatedTimeslot.timeslot_id);
+            if (existingIndex === -1) {
+                bookedTimeslots.value.push(updatedTimeslot);
             }
-        },
-        // Cancel a booked appointment
-        async cancelAppointment(appointmentId) {
-            if (!confirm("Are you sure you want to cancel this appointment?")) return;
+        }
+    });
 
-            this.isCanceling = true; // Disable button during API call
+    socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+    });
+});
 
-            try {
-                const response = await axios.delete(`http://localhost:4000/api/appointments/${appointmentId}`);
-                if (response.status === 200) {
-                    alert("Appointment canceled successfully!");
-                    this.fetchAppointments(); // Refresh appointments after cancellation
-                }
-            } catch (error) {
-                console.error("Error canceling appointment:", error.response?.data || error.message);
-                alert("Failed to cancel the appointment. Please try again.");
-            } finally {
-                this.isCanceling = false;
-            }
-        },
-    },
-};
+// Cleanup WebSocket connection
+onUnmounted(() => {
+    socket.disconnect();
+});
+
 </script>
+
+<style>
+.booked-timeslots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.timeslot-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>

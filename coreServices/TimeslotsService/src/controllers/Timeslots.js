@@ -189,6 +189,33 @@ router.delete('/api/timeslots/:office_id/:dentist_username/:timeslot_id', async 
     }
 });
 
+// Backend handler for fetching booked timeslots
+router.get('/api/patients/:patientSSN/timeslots', async (req, res) => {
+    const { patientSSN } = req.params;
+    const { officeId } = req.query;
+
+    if (!patientSSN || !officeId) {
+        return res.status(400).json({ message: 'Missing patientSSN or officeId' });
+    }
+
+    try {
+        const timeslots = await Timeslot.find({
+            patient: patientSSN,
+            office: officeId,
+            isBooked: true,
+        });
+
+        if (!timeslots.length) {
+            return res.status(404).json({ message: 'No booked timeslots found' });
+        }
+
+        res.status(200).json({ message: 'Booked timeslots retrieved successfully', timeslots });
+    } catch (error) {
+        console.error('Error fetching booked timeslots:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 /*
 router.post('/api/timeslots', async function (req, res) {
     try {
