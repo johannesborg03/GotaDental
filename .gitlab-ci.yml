@@ -35,6 +35,11 @@ test:
     - npm ci
     - npm install
     - npm test
+    - cd coreServices
+    - cd userManagementService
+    - npm ci
+    - npm install
+    - npm test
 
 
 build:
