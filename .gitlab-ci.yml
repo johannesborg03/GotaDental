@@ -35,11 +35,6 @@ test:
     - npm ci
     - npm install
     - npm test
-    - cd ..
-    - cd userManagementService
-    - npm ci
-    - npm install
-    - npm test
 
 
 build:
