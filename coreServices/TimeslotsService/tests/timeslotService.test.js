@@ -5,11 +5,14 @@ import Timeslot from '../src/models/Timeslot'; // Adjust the path based on your 
 vi.mock('../src/models/Timeslot', () => {
   const mockSave = vi.fn();
   const mockFindOne = vi.fn();
+  const mockFindById = vi.fn(); // Mock findById for retrieving a timeslot by ID
+
 
   return {
     default: vi.fn().mockImplementation(() => ({
       save: mockSave,
       findOne: mockFindOne, // Mock findOne to check for overlapping timeslots
+      findById: mockFindById, // Mock findById method
     })),
   };
 });
@@ -64,5 +67,31 @@ describe('Timeslot Model Tests', () => {
 
     // Try to create a new timeslot that overlaps with the existing one
     await expect(new Timeslot(overlappingTimeslotData).save()).rejects.toThrow('Invalid data format');
+  });
+
+  it('should return a timeslot when queried by a valid timeslot ID', async () => {
+    const mockTimeslotData = {
+      _id: 'valid-timeslot-id',
+      start: '2024-12-25T10:00:00Z',
+      end: '2024-12-25T11:00:00Z',
+      dentist: 'some-dentist-id',
+      office: 'some-office-id',
+    };
+
+    // Mock findById to return a valid timeslot based on ID
+    Timeslot().findById.mockResolvedValue(mockTimeslotData);
+
+    const timeslot = await Timeslot().findById('valid-timeslot-id');
+
+    // Assertions
+    expect(timeslot).toEqual(mockTimeslotData);
+    expect(Timeslot().findById).toHaveBeenCalledWith('valid-timeslot-id');
+  });
+
+  it('should throw an error when querying by an invalid timeslot ID', async () => {
+    // Mock findById to reject with an error when an invalid ID is queried
+    Timeslot().findById.mockRejectedValue(new Error('Timeslot not found'));
+
+    await expect(Timeslot().findById('invalid-timeslot-id')).rejects.toThrow('Timeslot not found');
   });
 });
