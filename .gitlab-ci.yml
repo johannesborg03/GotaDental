@@ -2,6 +2,7 @@ image: node:22-alpine  # Use Alpine-based image with Node.js 22
 
 stages:
   - install
+  - test
   - build
   - deploy
 
@@ -16,7 +17,20 @@ install_dependencies:
   script:
     - apk add --no-cache nodejs npm  # Install Node.js and npm in Alpine image
     - cd client
-    - npm ci  # Use ci for clean installation
+    - npm ci  # Use ci for clean installatio
+
+# New test stage
+test:
+  stage: test
+  tags:
+    - docker
+  script:
+    - cd coreServices
+    - cd TimeslotsService
+    - npm ci  # Ensure dependencies are installed in the timeslot folder
+    - npm install
+    - npm test  # Run tests (ensure your package.json has the test script configured)
+
 
 build:
   stage: build
