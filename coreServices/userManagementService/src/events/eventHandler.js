@@ -377,7 +377,9 @@ async function initializeSubscriptions() {
         await subscribeToTopic('dentist/getByUsername', handleGetDentistByUsername);
         console.log('Subscribed to dentist/getByUsername');
 
-        await subscribeToTopic('patient/getBySSN', handleGetPatientBySSN);
+        await subscribeToTopic('patients/getBySSN', handleGetPatientBySSN);
+        console.log('Subscribed to patients/getBySSN');
+
         await subscribeToTopic('patient/updateAppointments', handleUpdateAppointments);
      
 
