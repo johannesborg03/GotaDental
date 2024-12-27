@@ -236,7 +236,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
         // Fetch Patient ID from User Management Service using RabbitMQ
         const patientCorrelationId = uuidv4();
-        const patientTopic = 'patient/getBySSN';
+        const patientTopic = 'patients/getBySSN';
         const patientMessage = { patient_ssn: patient };
 
         console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
