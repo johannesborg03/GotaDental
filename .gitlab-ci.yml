@@ -30,12 +30,12 @@ test:
     - npm ci  # Ensure dependencies are installed in the timeslot folder
     - npm install
     - npm test  # Run tests (ensure your package.json has the test script configured)
-    - cd coreServices
+    - cd ..
     - cd OfficesService
     - npm ci
     - npm install
     - npm test
-    - cd coreServices
+    - cd ..
     - cd userManagementService
     - npm ci
     - npm install
