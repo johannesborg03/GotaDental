@@ -34,3 +34,44 @@ exports.registerPatient = async (req, res) => {
         res.status(500).json({ message: 'Server error while registering patient' });
     }
 };
+
+exports.getPatientBySSN = async (req, res) => {
+    console.log('Received SSN request:', req.params); // Debug log
+ 
+ 
+    const { patient_ssn } = req.params;
+ 
+ 
+    // Validate the input data
+    if (!patient_ssn) {
+        return res.status(400).json({ message: 'Missing required SSN parameter' });
+    }
+ 
+ 
+    const correlationId = uuidv4(); // Unique ID for this request
+    const topic = 'patients/getBySSN';
+ 
+ 
+    // Prepare the message for the RabbitMQ broker
+    const messageData = { patient_ssn };
+ 
+ 
+    try {
+        // Publish the message to the topic (exchange)
+        const response = await publishMessage(topic, messageData, correlationId);
+ 
+ 
+        if (response.error) {
+            return res.status(404).json({ message: response.error });
+        }
+ 
+ 
+        res.status(200).json({
+            message: 'Patient retrieved successfully',
+            patient: response
+        });
+    } catch (error) {
+        console.error('Error handling get patient by SSN:', error);
+        res.status(500).json({ message: 'Server error while retrieving patient' });
+    }
+ }; 
