@@ -96,7 +96,7 @@ const calendarConfig = ref({
     const patientid = sessionStorage.getItem("userIdentifier")
     console.log("log id "+ patientid);
    
-    const response = await axios.get(`http://localhost:3004/api/patients/${patientid}`);
+    const response = await axios.get(`http://localhost:4000/api/patients/${patientid}`);
 
     console.log("Axios Response:", response);
     
