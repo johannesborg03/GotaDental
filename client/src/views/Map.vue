@@ -16,46 +16,63 @@
 </template>
 
 <script>
+import axios from "axios";
 
 
 export default {
     name: "Map",
     data() {
         return {
-            
+            offices: [], // Array to store office data
             map: null, //Reference to leaflet map instance
         };
     },
     async mounted() {
-        
+   //   this.initMap();
+      try {
+      // Fetch office data
+      const response = await axios.get("http://localhost:4000/api/offices");
+      this.offices = response.data.offices; // Save the office data
 
+      // Initialize the map
+      this.initMap();
 
-        this.initMap();
+      // Add markers for each office
+      this.addMarkers();
+    } catch (error) {
+      console.error("Error fetching offices:", error);
+    }
 },
+
 methods: {
     
-    initMap(){
-        try{
-        // Create a Leaflet map instance and attach it to the #map div
-        this.map = L.map("map").setView([57.707, 11.966], 13); // [lat, lng], zoom level
+  initMap() {
+      // Create a Leaflet map instance and attach it to the #map div
+      this.map = L.map("map").setView([57.707, 11.966], 13); // [lat, lng], zoom level
 
-        // Add a tile layer to the map (e.g., OpenStreetMap tiles)
+      // Add a tile layer to the map (e.g., OpenStreetMap tiles)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(this.map);
+    },
+    addMarkers() {
+      // Loop through all the offices and place a marker for each one
+      this.offices.forEach((office) => {
+        const { latitude, longitude, office_name, office_address } = office;
 
-      // Add a marker to the map
-      L.marker([57.707, 11.966])
-        .addTo(this.map)
-        .bindPopup("A sample marker.")
-        .openPopup();
-    } catch (error) {
-    console.error("Error initializing the Leaflet map:", error);
-  }
-}
-}
-}
+        // Add a marker to the map
+        const marker = L.marker([latitude, longitude])
+          .addTo(this.map)
+          .bindPopup(`
+            <strong>${office_name}</strong><br>
+            ${office_address}
+          `)
+          .openPopup();
+      });
+    },
+  },
+};
 
 
 
