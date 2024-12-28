@@ -9,6 +9,21 @@
     <b-row class="justify-content-center">
   <div id="map"></div>
     </b-row>
+
+      <!-- Office Information Box -->
+      <b-row v-if="selectedOffice">
+        <b-col>
+          <b-card>
+            <h5>{{ selectedOffice.office_name }}</h5>
+            <p>{{ selectedOffice.office_address }}</p>
+            <b-button @click="selectOffice" variant="primary">
+              Go to Schedule
+            </b-button>
+          </b-card>
+        </b-col>
+      </b-row>
+
+
 </b-container>
 </b-card>
 
@@ -18,6 +33,10 @@
 <script>
 import axios from "axios";
 
+import { ref } from "vue";
+import { useRouter } from "vue-router"; // For redirecting to patient schedule
+
+
 
 export default {
     name: "Map",
@@ -25,6 +44,7 @@ export default {
         return {
             offices: [], // Array to store office data
             map: null, //Reference to leaflet map instance
+            selectedOffice: null, // Store the selected office data
         };
     },
     async mounted() {
@@ -74,10 +94,27 @@ methods: {
           <strong>${office_name}</strong><br>
           ${office_address}
         `);
+
+
+          // Add click event for selecting the office
+          marker.on("click", () => {
+            this.selectedOffice = office; // Set the selected office
+          });
+
+
     } else {
       console.warn(`Skipping office with invalid coordinates: ${office_name}`);
     }
   });
+    },
+
+    
+    selectOffice() {
+      // Store the selected office ID and redirect to the patient schedule
+      sessionStorage.setItem("selectedOfficeId", this.selectedOffice._id);
+      
+      // Using Vue Router to navigate to the patient schedule page
+      this.$router.push({ name: "PatientSchedule", params: { officeId: this.selectedOffice._id } });
     },
   },
 };
