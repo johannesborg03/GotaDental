@@ -10,21 +10,22 @@
   <div id="map"></div>
     </b-row>
 
-      <!-- Office Information Box -->
-      <b-row v-if="selectedOffice">
-        <b-col>
-          <b-card>
-            <h5>{{ selectedOffice.office_name }}</h5>
-            <p>{{ selectedOffice.office_address }}</p>
-            <b-button @click="selectOffice" variant="primary">
-              Go to Schedule
-            </b-button>
-          </b-card>
-        </b-col>
-      </b-row>
 
 
 </b-container>
+   <!-- Office Information Box -->
+   <!-- Office Information Box -->
+<b-row v-if="selectedOffice" class="info-box mt-3"> <!-- Added mt-3 for margin-top -->
+    <b-col>
+        <b-card>
+            <h5>{{ selectedOffice.office_name }}</h5>
+            <p>{{ selectedOffice.office_address }}</p>
+            <b-button @click="selectOffice" variant="primary">
+                Go to Timeslot Schedule
+            </b-button>
+        </b-card>
+    </b-col>
+</b-row>
 </b-card>
 
 
@@ -153,6 +154,8 @@ methods: {
   color: #E0E0E0;
   
 }
+
+
 
 @media (max-width: 768px) {
   .map-card {
