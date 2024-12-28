@@ -55,21 +55,29 @@ methods: {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(this.map);
+       // Ensure zooming works well by adding a listener
+  this.map.on("zoomend", () => {
+    console.log("Zoomed");
+  });
     },
     addMarkers() {
-      // Loop through all the offices and place a marker for each one
-      this.offices.forEach((office) => {
-        const { latitude, longitude, office_name, office_address } = office;
+     // Loop through all the offices and place a marker for each one
+  this.offices.forEach((office) => {
+    const { latitude, longitude, office_name, office_address } = office;
 
-        // Add a marker to the map
-        const marker = L.marker([latitude, longitude])
-          .addTo(this.map)
-          .bindPopup(`
-            <strong>${office_name}</strong><br>
-            ${office_address}
-          `)
-          .openPopup();
-      });
+    // Ensure the latitude and longitude are valid
+    if (latitude && longitude) {
+      // Add a marker to the map
+      const marker = L.marker([latitude, longitude])
+        .addTo(this.map)
+        .bindPopup(`
+          <strong>${office_name}</strong><br>
+          ${office_address}
+        `);
+    } else {
+      console.warn(`Skipping office with invalid coordinates: ${office_name}`);
+    }
+  });
     },
   },
 };
