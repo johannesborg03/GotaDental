@@ -4,7 +4,6 @@ const amqp = require('amqplib');
 
 let channel;
 
-
 //Subscribe to topics
 async function subscribeToTopic(topic, callback) {
     const connection = await amqp.connect('amqp://rabbitmq:5672');

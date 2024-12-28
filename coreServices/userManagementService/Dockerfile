@@ -18,6 +18,7 @@ EXPOSE 3004
 ENV PORT=3004
 ENV DENTIST_DB_URI=mongodb://localhost:27017/dentist-database
 ENV PATIENT_DB_URI=mongodb://localhost:27017/patient-database
+ENV RABBITMQ_URI=amqp://rabbitmq:5672
 
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]

@@ -16,7 +16,8 @@ EXPOSE 3003
 
 # Set environment variables
 ENV PORT=3003
-ENV BOOKING_DB_URI=mongodb://localhost:27017/booking-database
+ENV BOOKING_DB_URI=mongodb://mongodb:27017/booking-database
+ENV RABBITMQ_URI=amqp://rabbitmq:5672
 
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]
