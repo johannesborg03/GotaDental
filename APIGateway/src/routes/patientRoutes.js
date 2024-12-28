@@ -5,4 +5,6 @@ const patientController = require('../controllers/patientController'); // Import
 // Route for patient registration
 router.post('/', patientController.registerPatient);
 
+router.get('/:patient_ssn', patientController.getPatientBySSN);
+
 module.exports = router;
