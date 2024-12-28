@@ -95,21 +95,21 @@ const calendarConfig = ref({
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     const sessionID = sessionStorage.getItem("userIdentifier")
-    console.log("log id "+ sessionID);
-   
+    console.log("log id " + sessionID);
+
     const response = await axios.get(`http://localhost:4000/api/patients/${sessionID}`);
 
     console.log("Axios Response:", response);
-    
-    const patient = response.data.patient; 
+
+    const patient = response.data.patient;
     const patientID = patient.patientId;
-      console.log(patientID);
-       
-        const timeslotPatient = selectedTimeslot["patient"];
-        console.log("Timeslot Patient:", timeslotPatient);
-        
-    if (selectedTimeslot.text === "Booked" &&  timeslotPatient  ===  patientID) {
-   
+    console.log(patientID);
+
+    const timeslotPatient = selectedTimeslot["patient"];
+    console.log("Timeslot Patient:", timeslotPatient);
+
+    if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
+
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
         await cancelTimeslot(timeslotId);
