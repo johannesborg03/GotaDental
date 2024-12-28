@@ -204,9 +204,11 @@ exports.getBookedTimeslots = async (req, res) => {
         const response = await publishMessage(topic, { patientSSN, officeId }, correlationId);
 
         // Query the database for timeslots that are booked and linked to the patient
-        if (!response.success || !response.timeslots.length) {
+        if (!response.success || !response.timeslots || response.timeslots.length === 0) {
             return res.status(404).json({ message: 'No booked timeslots found' });
         }
+
+        const timeslots = response.timeslots;
 
         res.status(200).json({
             message: 'Booked timeslots retrieved successfully',
