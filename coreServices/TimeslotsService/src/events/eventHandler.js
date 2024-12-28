@@ -34,6 +34,21 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
         console.log(`Manually adjusted times to CET: Start=${startCET}, End=${endCET}`);
 
+         // Check for overlapping timeslots for the same dentist and office
+         const existingTimeslot = await Timeslot.findOne({
+            dentist: dentist,   // Check for the same dentist
+            office: office,     // Check for the same office
+            start: startCET,    // Check for the same start time
+            end: endCET         // Check for the same end time
+        });
+
+        if (existingTimeslot) {
+            const errorResponse = { success: false, error: 'Timeslot overlaps with another one' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+
 
         // Fetch Dentist ID from User Management Service using RabbitMQ
         const dentistCorrelationId = uuidv4(); // Unique ID for this request
@@ -221,7 +236,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
         // Fetch Patient ID from User Management Service using RabbitMQ
         const patientCorrelationId = uuidv4();
-        const patientTopic = 'patient/getBySSN';
+        const patientTopic = 'patients/getBySSN';
         const patientMessage = { patient_ssn: patient };
 
         console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
