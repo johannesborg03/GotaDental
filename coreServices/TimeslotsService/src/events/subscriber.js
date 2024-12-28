@@ -7,7 +7,7 @@ let channel;
 
 //Subscribe to topics
 async function subscribeToTopic(topic, callback) {
-    const connection = await amqp.connect('amqp://localhost');
+    const connection = await amqp.connect('amqp://rabbitmq:5672');
     console.log('Connection established');
 
     channel = await connection.createChannel();

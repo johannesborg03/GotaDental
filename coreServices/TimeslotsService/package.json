@@ -8,6 +8,7 @@
         "test": "vitest"
     },
     "dependencies": {
+        "amqplib": "^0.10.5",
         "axios": "^1.7.9",
         "cors": "^2.8.5",
         "date-fns": "^4.1.0",
