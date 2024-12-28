@@ -207,13 +207,13 @@ async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, chan
 }
 
 async function patientHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
-    const { timeslot_id, isBooked, patient, action } = message;
+    const { timeslot_id, isBooked, patient, action, officeId } = message;
 
     console.log('Received update timeslot message:', message);
 
     try {
         // Validate inputs
-        if (!timeslot_id || !patient) {
+        if (!timeslot_id || !patient || !officeId) {
             const errorResponse = { success: false, error: 'Missing timeslot_id or patient SSN' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
@@ -239,22 +239,19 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
 
         console.log(`Resolved Patient ID: ${patientId}`);
 
-        //Check to see if the record of the patient and the number of appointments in their record
-      //  const patientRecord = await Patient.findById(patientId);
+        // Check if patient already has 5 bookings for the same office
+        const existingBookings = await Timeslot.find({
+            isBooked: true,
+            patient: patientId,
+            office: officeId,
+        });
 
-      /*
-        if (!patientRecord) {
-            const errorResponse = { success: false, error: 'Patient record not found' };
+        if (existingBookings.length >= 5) {
+            console.error('Patient has reached the maximum booking limit.');
+            const errorResponse = { success: false, error: 'You have already booked 5 timeslots for this office.' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
-
-        if (patientRecord.appointments.length >= 5) {
-            const errorResponse = { success: false, error: 'You have already booked 5 timeslots' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
-        */
 
         // Check if the timeslot is already booked
         const existingTimeslot = await Timeslot.findById(timeslot_id);
@@ -325,7 +322,7 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         const updatePatientMessage = {
             patientId,
             timeslotId: timeslot_id,
-            action: 'book',  
+            action: 'book',
         };
 
         console.log(`Publishing message to update Patient Appointments for Patient ID: ${patientId}`);
@@ -412,7 +409,7 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
 async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, channel) {
     console.log('Received request to retrieve booked timeslots:', message);
 
-    const { patientSSN, officeId} = message;
+    const { patientSSN, officeId } = message;
 
     if (!patientSSN || !officeId) {
         const errorResponse = { success: false, error: 'Missing patientSSN or officeId' };
@@ -421,7 +418,7 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     }
 
     try {
-        const patientCorrelationId = uuidv4(); 
+        const patientCorrelationId = uuidv4();
         const patientTopic = 'patient/getBySSN';
         const patientMessage = { patient_ssn: patientSSN };
         console.log(`Publishing message to fetch Patient ID for SSN: ${patientSSN}`);
@@ -438,7 +435,8 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
         const { patientId } = patientResponse;
         console.log(`Resolved Patient ID: ${patientId}`);
 
-        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientId, office: officeId,
+        const bookedTimeslots = await Timeslot.find({
+            isBooked: true, patient: patientId, office: officeId,
         });
 
         if (!bookedTimeslots || bookedTimeslots.length === 0) {
@@ -481,7 +479,7 @@ module.exports = {
     handleCreateTimeslot,
     handleGetAllTimeslots,
     handleGetTimeslot,
-   // dentistHandleUpdateTimeslot,
+    // dentistHandleUpdateTimeslot,
     handleDeleteTimeslot,
     handleRetrieveTimeslotsByIds,
     patientHandleUpdateTimeslot,
