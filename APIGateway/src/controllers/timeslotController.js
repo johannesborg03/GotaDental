@@ -3,8 +3,8 @@ const { v4: uuidv4 } = require('uuid');
 
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
- 
-    const { start, end, dentist, office, officeId, patient} = req.body;
+
+    const { start, end, dentist, office, officeId, patient } = req.body;
 
     // Validate required fields
     if (!start || !end || !dentist || !office || !officeId) {
@@ -141,18 +141,18 @@ exports.updateTimeslot = async (req, res) => {
         return res.status(400).json({ message: 'Invalid data: isBooked and patient are required if booking' });
     }
 
-    if (action === "cancel"){
-       console.log("cancel appointment")
+    if (action === "cancel") {
+        console.log("cancel appointment")
     }
 
-    if (action === "book"){
+    if (action === "book") {
         console.log("book appointment")
-     }
+    }
 
-    if (!officeId){
+    if (!officeId) {
         console.log("MISSING OFFICEID");
         return res.status(400).json({ message: 'Missing OfficeId' });
-     }
+    }
 
     // Generate a unique correlation ID
     const correlationId = uuidv4();
@@ -161,10 +161,10 @@ exports.updateTimeslot = async (req, res) => {
     console.log("TImeslotId:", timeslot_id);
 
     try {
-        const updateData = { timeslot_id, isBooked, patient, action, officeId}; // Update payload
+        const updateData = { timeslot_id, isBooked, patient, action, officeId }; // Update payload
         console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
 
-        console.log("OFFICE ID FOR THIS:", officeId );
+        console.log("OFFICE ID FOR THIS:", officeId);
         // Publish the message to RabbitMQ
         const response = await publishMessage(topic, updateData, correlationId);
 
@@ -195,10 +195,10 @@ exports.getBookedTimeslots = async (req, res) => {
         return res.status(400).json({ message: 'Missing patientSSN or officeId' });
     }
 
-        // Generate a unique correlation ID
-        const correlationId = uuidv4();
-        const topic = 'timeslot/patient/booked/retrieve';
-    
+    // Generate a unique correlation ID
+    const correlationId = uuidv4();
+    const topic = 'timeslot/patient/booked/retrieve';
+
     try {
         console.log(`Publishing message to RabbitMQ with topic: ${topic}`);
         const response = await publishMessage(topic, { patientSSN, officeId }, correlationId);

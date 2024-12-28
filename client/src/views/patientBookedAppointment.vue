@@ -2,10 +2,6 @@
     <div class="container mt-5">
         <h1 class="text-primary text-center">Your Booked Timeslots</h1>
 
-        <div v-if="loading" class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-
         <div v-if="error" class="alert alert-danger" role="alert">
             {{ error }}
         </div>
@@ -18,7 +14,7 @@
             </option>
         </select>
 
-        <!-- Booked Timeslots Display -->
+        <!-- Display Booked Timeslots-->
         <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
             <div v-for="(timeslot, index) in bookedTimeslots" :key="timeslot._id" class="timeslot-box">
                 <h5>Timeslot {{ index + 1 }}</h5>
@@ -26,9 +22,8 @@
                 <p><strong>End:</strong> {{ formatDate(timeslot.end) }}</p>
             </div>
         </div>
-
-        <div v-else-if="!loading" class="alert alert-info mt-3">
-            You currently have no booked timeslots.
+        <div v-else>
+            <p class="text-muted">You currently have no booked timeslots.</p>
         </div>
     </div>
 </template>
@@ -44,7 +39,6 @@ const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 const offices = ref([]);
 const selectedOfficeId = ref("");
 const bookedTimeslots = ref([]);
-const loading = ref(true);
 const error = ref(null);
 
 // Fetch available offices
@@ -78,7 +72,6 @@ async function fetchBookedTimeslots() {
         alert("No office selected.");
         return;
     }
-    loading.value = true;
 
     try {
         const patientSSN = sessionStorage.getItem("userIdentifier");
@@ -106,8 +99,6 @@ async function fetchBookedTimeslots() {
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
-    } finally {
-        loading.value = false;
     }
 }
 
