@@ -421,7 +421,24 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     }
 
     try {
-        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientSSN, office: officeId,
+        const patientCorrelationId = uuidv4(); 
+        const patientTopic = 'patient/getBySSN';
+        const patientMessage = { patient_ssn: patientSSN };
+        console.log(`Publishing message to fetch Patient ID for SSN: ${patientSSN}`);
+
+        const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
+
+        if (!patientResponse || !patientResponse.success) {
+            console.error('Failed to fetch Patient ID:', patientResponse);
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const { patientId } = patientResponse;
+        console.log(`Resolved Patient ID: ${patientId}`);
+
+        const bookedTimeslots = await Timeslot.find({ isBooked: true, patient: patientId, office: officeId,
         });
 
         if (!bookedTimeslots || bookedTimeslots.length === 0) {
