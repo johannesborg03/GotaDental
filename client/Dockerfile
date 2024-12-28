@@ -1,23 +1,20 @@
 # Use official Node.js image as a base
 FROM node:22-alpine
 
-# Set environment to production by default
-ENV NODE_ENV=production
-
 # Set the working directory inside the container
-WORKDIR /usr/src/client
+WORKDIR /usr/src/app
 
-# Copy package files first to leverage caching for dependencies
+# Copy the local client directory's package files into the container
 COPY package.json package-lock.json ./
 
-# Install dependencies (for production builds)
-RUN npm install --production
+# Install dependencies
+RUN npm install
 
-# Copy the rest of the application source code
+# Copy the rest of the client application source code into the container
 COPY . .
 
 # Expose the port the app will run on
 EXPOSE 5173
 
-# Define the default command to build and run the app
-CMD ["npm", "run", "serve"]
+# Run the app with Vite binding to all network interfaces
+CMD ["npm", "run", "dev", "--", "--host"]
