@@ -17,7 +17,7 @@ RUN npm install --production
 COPY . .
 
 # Expose the port the app will run on
-EXPOSE 8080
+EXPOSE 5173
 
 # Define the default command to build and run the app
 CMD ["npm", "run", "serve"]
