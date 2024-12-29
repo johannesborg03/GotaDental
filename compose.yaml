@@ -64,6 +64,8 @@ services:
       - rabbitmq
       - patientdb
       - dentistdb
+    ports:
+      - "3004:3004"
     environment:
       - PATIENT_DB_URI=mongodb://patientdb:27017/patient-database
       - DENTIST_DB_URI=mongodb://dentistdb:27017/dentist-database
@@ -76,16 +78,19 @@ services:
       context: ./APIGateway  # Link to the API Gateway Dockerfile
     depends_on:
       - rabbitmq
+    ports:
+    - "4000:4000"
     networks:
       - mynetwork
 
-client:
-  build:
-    context: ./client  
-  ports:
-    - "5173:5173"  
-  networks:
-    - mynetwork
+  # Client Service
+  client:
+    build:
+      context: ./client  # Link to the Client Dockerfile
+    ports:
+      - "5173:5173"
+    networks:
+      - mynetwork
 
 # Define the networks
 networks:
