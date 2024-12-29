@@ -127,3 +127,82 @@ export default {
 };
 </script>
 
+<style scoped>
+/* Custom Styling */
+.card {
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.side-text {
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
+    margin-bottom: 50px;
+}
+
+.toast {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.btn-primary {
+    background-color: #356bbb;
+    border: none;
+}
+
+/* Custom Grid and Flexbox Layout for Columns */
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.row {
+    height: 100vh;
+}
+
+.col-lg-6 {
+    height: 100vh;
+}
+
+.d-flex {
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Ensure the right column fills its parent container */
+.col-lg-6 {
+    padding-left: 0;
+    padding-right: 0;
+    height: 100vh;
+}
+
+.card {
+    height: 100%;
+}
+</style>
