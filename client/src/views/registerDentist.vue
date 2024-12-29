@@ -1,65 +1,94 @@
 <template>
-    <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <h2 class="text-center mb-4">Register as a Dentist</h2>
-            <form @submit.prevent="registerDentist">
-                <div class="form-group mb-3">
+    <div class="container-fluid p-0">
+        <!-- Full-width Grid (Left side with image and right side with form) -->
+        <div class="row m-0 align-items-start">
+            <!-- Left Column for GötaDental Text and Description (Hidden on smaller screens) -->
+            <div class="col-lg-6 d-flex flex-column justify-content-start align-items-start bg-muted text-white p-4 d-none d-lg-block">
+                <h3 class="side-text mb-2">GötaDental</h3>
+            </div>
 
-                    <input type="name" id="name" v-model="input.name" class="form-control"
-                        placeholder="Enter your full name" required />
-                </div>
+            <!-- Right Column (Registration Form) -->
+            <div class="col-lg-6 d-flex justify-content-center align-items-center p-0">
+                <div class="card shadow-lg w-100 h-100 border-0">
+                    <div class="card-body p-5">
+                        <h3 class="title mb-4">Register as a Dentist</h3>
 
-                <div class="form-group mb-3">
+                        <form @submit.prevent="registerDentist">
+                            <!-- Full Name -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" id="name" v-model="input.name" class="form-control"
+                                    placeholder="Enter your full name" required />
+                            </div>
 
-                    <input type="text" id="username" v-model="input.username" class="form-control"
-                        placeholder="Enter a username" required />
-                </div>
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" id="username" v-model="input.username" class="form-control"
+                                    placeholder="Enter a username" required />
+                            </div>
 
-                <div class="form-group mb-3">
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" v-model="input.email" class="form-control"
+                                    placeholder="Enter your email" required />
+                            </div>
 
-                    <input type="email" id="email" v-model="input.email" class="form-control"
-                        placeholder="Enter your email" required />
-                </div>
-                <div class="form-group mb-3">
+                            <!-- Date of Birth -->
+                            <div class="mb-3">
+                                <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                <input type="text" id="date_of_birth" v-model="input.date_of_birth" class="form-control"
+                                    placeholder="Enter your date of birth (YYYY-MM-DD)" required />
+                            </div>
 
-                    <input type="text" id="date_of_birth" v-model="input.date_of_birth" class="form-control"
-                        placeholder="Enter your date of birth (YYYY-MM-DD)" required />
-                </div>
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" v-model="input.password" class="form-control"
+                                    placeholder="Enter a password" required />
+                            </div>
 
-                <div class="form-group mb-3">
-                    <input type="password" id="password" v-model="input.password" class="form-control"
-                        placeholder="Enter a password" required />
-                </div>
-                <div class="form-group mb-3">
-                    <input type="password" id="confirmPassword" v-model="input.confirmPassword" class="form-control"
-                        placeholder="Confirm password" required />
-                </div>
-                <div class="form-group mb-3">
-                    <select id="office" v-model="input.officeId" class="form-control" required>
-                        <option value="" disabled>Select your office</option>
-                        <option v-for="office in offices" :key="office._id" :value="office._id">
-                            {{ office.office_name }}
-                        </option>
-                    </select>
-                </div>
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" id="confirmPassword" v-model="input.confirmPassword"
+                                    class="form-control" placeholder="Confirm password" required />
+                            </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </div>
+                            <!-- Office Selection -->
+                            <div class="mb-3">
+                                <label for="office" class="form-label">Select Office</label>
+                                <select id="office" v-model="input.officeId" class="form-select" required>
+                                    <option value="" disabled>Select your office</option>
+                                    <option v-for="office in offices" :key="office._id" :value="office._id">
+                                        {{ office.office_name }}
+                                    </option>
+                                </select>
+                            </div>
 
-                <div v-if="errorMessage" class="alert alert-danger mt-3">
-                    {{ errorMessage }}
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+
+                            <!-- Error and Success Messages -->
+                            <div v-if="errorMessage" class="alert alert-danger mt-3">
+                                {{ errorMessage }}
+                            </div>
+                            <div v-if="successMessage" class="alert alert-success mt-3">
+                                {{ successMessage }}
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div v-if="successMessage" class="alert alert-success mt-3">
-                    {{ successMessage }}
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-import axios from "axios";
+import axios from 'axios';
 
 export default {
     name: "registrationDentist",
@@ -67,7 +96,7 @@ export default {
         return {
             input: {
                 name: '',
-                username: '', // Added username
+                username: '',
                 email: '',
                 date_of_birth: '',
                 password: '',
@@ -80,11 +109,9 @@ export default {
         };
     },
     methods: {
-
         async fetchOffices() {
             try {
                 const response = await axios.get("http://localhost:4000/api/offices");
-                // Extract and assign offices from the response
                 if (response.data && response.data.offices) {
                     this.offices = response.data.offices;
                 } else {
@@ -95,48 +122,27 @@ export default {
                 console.error("Error fetching offices:", error);
             }
         },
-
-
-
-
-
         async registerDentist() {
-
-
-            // Validate date_of_birth format (YYYY-MM-DD)
             const dateOfBirthRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
             if (!dateOfBirthRegex.test(this.input.date_of_birth)) {
                 this.errorMessage = 'Date of Birth must be in the format YYYY-MM-DD.';
                 return;
             }
 
-            // Check if the date is valid
             const date = new Date(this.input.date_of_birth);
             if (isNaN(date.getTime())) {
                 this.errorMessage = 'Invalid Date of Birth. Please enter a valid date.';
                 return;
             }
 
-            // Validate username format
-            if (/^\d{12}$/.test(this.input.username)) {
-                this.errorMessage = 'username cant be a SSN!';
+            if (this.input.password !== this.input.confirmPassword) {
+                this.errorMessage = 'Passwords do not match.';
                 return;
             }
 
-            //Validate password 
-            if (this.input.password != this.input.confirmPassword) {
-                console.log(this.password, this.confirmPassword);
-                alert('Password do not match');
-                this.password = ''
-                this.confirmPassword = ''
-                return;
-            }
-
-            this.errorMessage = ''; // Clear error message if validation passes
+            this.errorMessage = '';
 
             try {
-                // this.successMessage = "";
-
                 const response = await axios.post('http://localhost:4000/api/dentists', {
                     name: this.input.name,
                     username: this.input.username,
@@ -145,28 +151,96 @@ export default {
                     password: this.input.password,
                     officeId: this.input.officeId,
                 });
-
-
-                alert(response.data.message);
-                this.$router.push('/login');
                 this.successMessage = response.data.message || 'Registration successful!';
-
+                this.$router.push('/login');  // Redirect to login after successful registration
             } catch (err) {
-                //   console.error('Error registering patient:', err);
                 if (err.response && err.response.data) {
-                    alert(err.response.data.message || 'Failed to register');
+                    this.errorMessage = err.response.data.message || 'Failed to register';
                 } else {
-                    alert('An error has occurred. Please try again.');
+                    this.errorMessage = 'An error occurred. Please try again later.';
                 }
             }
         },
     },
     mounted() {
-        this.fetchOffices(); // Fetch offices when the component is mounted
+        this.fetchOffices();
     },
 };
 </script>
 
-<style>
-/* Add your styles here */
+<style scoped>
+/* Custom Styling */
+.card {
+    max-width: 600px; /* Limit card width */
+    margin: 0 auto; /* Center card in its column */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.side-text {
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
+    margin-bottom: 50px;
+}
+
+.toast {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.btn-primary {
+    background-color: #356bbb;
+    border: none;
+}
+
+/* Adjust Grid Layout */
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.row {
+    height: 100vh;
+}
+
+.col-lg-8 {
+    height: 100vh;
+}
+
+.col-lg-4 {
+    height: 100vh;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.d-flex {
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+
 </style>
