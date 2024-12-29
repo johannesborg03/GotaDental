@@ -1,16 +1,21 @@
-version: '3.8'
 
 services:
-  # RabbitMQ Service
+  # RabbitMQ Service with Health Check
   rabbitmq:
-    image: "rabbitmq:3"  # Default RabbitMQ image without management plugin
+    image: "rabbitmq:3"
     networks:
       - mynetwork
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]  # Check if RabbitMQ is ready
+      interval: 10s  # Check every 10 seconds
+      retries: 5  # Retry 5 times if it fails
+      start_period: 30s  # Wait for 30 seconds before the first check
+      timeout: 20s  # Timeout after 20 seconds if the health check fails
 
   # MongoDB Service for Booking DB
   bookingdb:
-    image: "mongo:6"  # MongoDB for booking database
+    image: "mongo:6"
     volumes:
       - bookingdata:/data/db
     networks:
@@ -18,7 +23,7 @@ services:
 
   # MongoDB for Patient DB
   patientdb:
-    image: "mongo:6"  # MongoDB for patient database
+    image: "mongo:6"
     volumes:
       - patientdata:/data/db
     networks:
@@ -26,7 +31,7 @@ services:
 
   # MongoDB for Dentist DB
   dentistdb:
-    image: "mongo:6"  # MongoDB for dentist database
+    image: "mongo:6"
     volumes:
       - dentistdata:/data/db
     networks:
@@ -35,10 +40,14 @@ services:
   # Timeslot Service
   timeslot:
     build:
-      context: ./coreServices/TimeslotsService  # Link to the Timeslot service Dockerfile
+      context: ./coreServices/TimeslotsService
     depends_on:
-      - rabbitmq
-      - bookingdb
+      rabbitmq:
+        condition: service_healthy  # Wait until RabbitMQ is healthy
+      bookingdb:
+        condition: service_started  # Wait until the database is started
+    ports:
+      - "3003:3003"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
     networks:
@@ -47,10 +56,14 @@ services:
   # Office Service
   office:
     build:
-      context: ./coreServices/OfficesService  # Link to the Office service Dockerfile
+      context: ./coreServices/OfficesService
     depends_on:
-      - rabbitmq
-      - bookingdb
+      rabbitmq:
+        condition: service_healthy  # Wait until RabbitMQ is healthy
+      bookingdb:
+        condition: service_started  # Wait until the database is started
+    ports:
+      - "3005:3005"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
     networks:
@@ -59,11 +72,14 @@ services:
   # User Management Service
   usermanagement:
     build:
-      context: ./coreServices/userManagementService  # Link to the User Management service Dockerfile
+      context: ./coreServices/userManagementService
     depends_on:
-      - rabbitmq
-      - patientdb
-      - dentistdb
+      rabbitmq:
+        condition: service_healthy  # Wait until RabbitMQ is healthy
+      patientdb:
+        condition: service_started  # Wait until the patient DB is started
+      dentistdb:
+        condition: service_started  # Wait until the dentist DB is started
     ports:
       - "3004:3004"
     environment:
@@ -72,30 +88,31 @@ services:
     networks:
       - mynetwork
 
-  # API Gateway Service
-  apigate:
-    build:
-      context: ./APIGateway  # Link to the API Gateway Dockerfile
-    depends_on:
-      - rabbitmq
-    ports:
-    - "4000:4000"
-    networks:
-      - mynetwork
-
   # Client Service
   client:
     build:
-      context: ./client  # Link to the Client Dockerfile
+      context: ./client
     ports:
       - "5173:5173"
+    networks:
+      - mynetwork
+
+  # API Gateway Service
+  apigate:
+    build:
+      context: ./APIGateway
+    depends_on:
+      rabbitmq:
+        condition: service_healthy  # Wait until RabbitMQ is healthy
+    ports:
+      - "4000:4000"
     networks:
       - mynetwork
 
 # Define the networks
 networks:
   mynetwork:
-    external: true  # Use the existing 'mynetwork' Docker network
+    external: true
 
 # Define the volumes
 volumes:
