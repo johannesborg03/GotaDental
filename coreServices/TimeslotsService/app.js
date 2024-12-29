@@ -8,7 +8,6 @@ const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
 const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
-//const timeslotRouter = require('./routes/timeslotRoutes');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();

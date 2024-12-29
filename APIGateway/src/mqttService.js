@@ -61,7 +61,7 @@ function getIO() {
 
 
 async function connectRabbitMQ() {
-    connection = await amqp.connect('amqp://localhost');
+    connection = await amqp.connect('amqp://rabbitmq:5672');
     channel = await connection.createChannel();
     console.log('RabbitMQ connected');
 }
