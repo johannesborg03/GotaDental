@@ -1,126 +1,98 @@
 version: '3.8'
 
 services:
-  apigate:
-    build:
-      context: ./APIGateway  # Path to your ApiGateway directory
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-    ports:
-      - "4000:4000"  # Expose API Gateway on port 4000
-    depends_on:
-      - rabbitmq  # Ensure RabbitMQ is up before starting API Gateway
+  # RabbitMQ Service
+  rabbitmq:
+    image: "rabbitmq:3"  # Default RabbitMQ image without management plugin
     networks:
-      - app-network
+      - mynetwork
+    restart: always
 
-  client:
-    build:
-      context: ./client  # Path to your Client directory
-    environment:
-      NODE_ENV: production
-    ports:
-      - "8080:8080"  # Expose Client on port 8080
-    depends_on:
-      - apigate  # Client communicates with the API Gateway
+  # MongoDB Service for Booking DB
+  bookingdb:
+    image: "mongo:6"  # MongoDB for booking database
+    volumes:
+      - bookingdata:/data/db
     networks:
-      - app-network
+      - mynetwork
 
+  # MongoDB for Patient DB
+  patientdb:
+    image: "mongo:6"  # MongoDB for patient database
+    volumes:
+      - patientdata:/data/db
+    networks:
+      - mynetwork
+
+  # MongoDB for Dentist DB
+  dentistdb:
+    image: "mongo:6"  # MongoDB for dentist database
+    volumes:
+      - dentistdata:/data/db
+    networks:
+      - mynetwork
+
+  # Timeslot Service
+  timeslot:
+    build:
+      context: ./coreServices/TimeslotsService  # Link to the Timeslot service Dockerfile
+    depends_on:
+      - rabbitmq
+      - bookingdb
+    environment:
+      - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+    networks:
+      - mynetwork
+
+  # Office Service
+  office:
+    build:
+      context: ./coreServices/OfficesService  # Link to the Office service Dockerfile
+    depends_on:
+      - rabbitmq
+      - bookingdb
+    environment:
+      - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+    networks:
+      - mynetwork
+
+  # User Management Service
   usermanagement:
     build:
-      context: ./UserManagement  # Path to UserManagement directory
-    environment:
-      NODE_ENV: production
-      PATIENT_DB_URI: mongodb://patientdb:27017/patient-database
-      DENTIST_DB_URI: mongodb://dentistdb:27017/dentist-database
-      RABBITMQ_URI: amqp://rabbitmq:5672
-    ports:
-      - "3001:3001"  # Expose UserManagement on port 3001
+      context: ./coreServices/userManagementService  # Link to the User Management service Dockerfile
     depends_on:
       - rabbitmq
       - patientdb
       - dentistdb
-    networks:
-      - app-network
-
-  patientdb:
-    image: "mongo:6"  # MongoDB for patient database
     environment:
-      MONGO_INITDB_DATABASE: patient-database
-    volumes:
-      - patientdata:/data/db
-    ports:
-      - "27018:27017"  # Expose on a different port for PatientDB
+      - PATIENT_DB_URI=mongodb://patientdb:27017/patient-database
+      - DENTIST_DB_URI=mongodb://dentistdb:27017/dentist-database
     networks:
-      - app-network
+      - mynetwork
 
-  dentistdb:
-    image: "mongo:6"  # MongoDB for dentist database
-    environment:
-      MONGO_INITDB_DATABASE: dentist-database
-    volumes:
-      - dentistdata:/data/db
-    ports:
-      - "27019:27017"  # Expose on a different port for DentistDB
-    networks:
-      - app-network
-
-  timeslot:
+  # API Gateway Service
+  apigate:
     build:
-      context: ./TimeSlot  # Path to TimeSlot service directory
-    environment:
-      NODE_ENV: production
-      BOOKING_DB_URI: mongodb://bookingdb:27017/booking-database
-      RABBITMQ_URI: amqp://rabbitmq:5672
-    ports:
-      - "3003:3003"  # Expose TimeSlot on port 3003
+      context: ./APIGateway  # Link to the API Gateway Dockerfile
     depends_on:
       - rabbitmq
-      - bookingdb
     networks:
-      - app-network
+      - mynetwork
 
-  office:
-    build:
-      context: ./Office  # Path to Office service directory
-    environment:
-      NODE_ENV: production
-      BOOKING_DB_URI: mongodb://bookingdb:27017/booking-database
-      RABBITMQ_URI: amqp://rabbitmq:5672
-    ports:
-      - "3004:3004"  # Expose Office on port 3004
-    depends_on:
-      - rabbitmq
-      - bookingdb
-    networks:
-      - app-network
+client:
+  build:
+    context: ./client  
+  ports:
+    - "5173:5173"  
+  networks:
+    - mynetwork
 
-  bookingdb:
-    image: "mongo:6"  # MongoDB for booking database
-    environment:
-      MONGO_INITDB_DATABASE: booking-database
-    volumes:
-      - bookingdata:/data/db
-    ports:
-      - "27017:27017"  # Expose on default port for BookingDB
-    networks:
-      - app-network
-
-  rabbitmq:
-    image: "rabbitmq:3-management"  # RabbitMQ image with management plugin
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    ports:
-      - "5672:5672"  # RabbitMQ broker port
-      - "15672:15672"  # RabbitMQ management console port
-    networks:
-      - app-network
-
+# Define the networks
 networks:
-  app-network:
-    driver: bridge
+  mynetwork:
+    external: true  # Use the existing 'mynetwork' Docker network
 
+# Define the volumes
 volumes:
   patientdata:
   dentistdata:
