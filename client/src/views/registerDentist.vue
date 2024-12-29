@@ -167,3 +167,65 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+/* Remove any padding/margin on the right side */
+.card-body {
+    padding: 1.5rem;
+    /* Customize padding if needed */
+}
+
+.card {
+    border-radius: 0;
+    /* Optional: Remove card border-radius */
+}
+
+.side-text {
+    color: #356BBB;
+    font-family: 'Filson Pro';
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+color: #356BBB;
+font-family: 'Filson Pro';
+margin-bottom: 50px;
+}
+
+.container {
+    position: relative;
+    padding: 20px;
+}
+
+.text-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.row {
+    height: 100vh;
+}
+
+.col-lg-6 {
+    height: 100vh;
+}
+
+.d-flex {
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+</style>
