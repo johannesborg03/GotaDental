@@ -14,7 +14,7 @@
                         <h3 class="title mb-4">Register as a Dentist</h3>
 
                         <form @submit.prevent="registerDentist">
-                            <!-- Name -->
+                            <!-- Full Name -->
                             <div class="mb-3">
                                 <label for="name" class="form-label">Full Name</label>
                                 <input type="text" id="name" v-model="input.name" class="form-control"
@@ -169,40 +169,47 @@ export default {
 </script>
 
 <style scoped>
-/* Remove any padding/margin on the right side */
-.card-body {
-    padding: 1.5rem;
-    /* Customize padding if needed */
+/* Custom Styling */
+.card {
+    max-width: 600px; /* Limit card width */
+    margin: 0 auto; /* Center card in its column */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.card {
-    border-radius: 0;
-    /* Optional: Remove card border-radius */
+.card-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 .side-text {
-    color: #356BBB;
-    font-family: 'Filson Pro';
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .title {
-color: #356BBB;
-font-family: 'Filson Pro';
-margin-bottom: 50px;
+    color: #356bbb;
+    font-family: 'Filson Pro', sans-serif;
+    margin-bottom: 50px;
 }
 
-.container {
-    position: relative;
-    padding: 20px;
-}
-
-.text-left {
+.toast {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
 }
 
+.btn-primary {
+    background-color: #356bbb;
+    border: none;
+}
+
+/* Adjust Grid Layout */
 .container-fluid {
     padding-left: 0;
     padding-right: 0;
@@ -212,8 +219,14 @@ margin-bottom: 50px;
     height: 100vh;
 }
 
-.col-lg-6 {
+.col-lg-8 {
     height: 100vh;
+}
+
+.col-lg-4 {
+    height: 100vh;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .d-flex {
@@ -228,4 +241,6 @@ margin-bottom: 50px;
     justify-content: center;
     height: 100%;
 }
+
+
 </style>
