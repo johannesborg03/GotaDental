@@ -6,12 +6,11 @@
             <div class="col-lg-6 d-flex flex-column justify-content-start align-items-start bg-muted text-white p-4 d-none d-lg-block">
                 <h3 class="side-text mb-2">GötaDental</h3>
             </div>
-
             <!-- Right Column (Login Form) -->
             <div class="col-lg-6 d-flex justify-content-center align-items-center p-0">
                 <div class="card shadow-lg w-100 h-100 border-0">
                     <div class="card-body p-5">
-                        <h3 class="title mb-4 text-center">Login</h3>
+                        <h3 class="title mb-4 text-start">Login</h3>
 
                         <form @submit.prevent="onSubmit">
                             <!-- Username or SSN -->
@@ -97,7 +96,7 @@ export default {
 </script>
 
 <style scoped>
-/* Custom Styling */
+
 .card {
     max-width: 600px;
     margin: 0 auto;
@@ -137,7 +136,6 @@ export default {
     border: none;
 }
 
-/* Custom Grid and Flexbox Layout for Columns */
 .container-fluid {
     padding-left: 0;
     padding-right: 0;
@@ -164,7 +162,6 @@ export default {
     height: 100%;
 }
 
-/* Ensure the right column fills its parent container */
 .col-lg-6 {
     padding-left: 0;
     padding-right: 0;
