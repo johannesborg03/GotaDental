@@ -152,7 +152,7 @@ export default {
                     officeId: this.input.officeId,
                 });
                 this.successMessage = response.data.message || 'Registration successful!';
-                this.$router.push('/login');  // Redirect to login after successful registration
+                this.$router.push('/');  // Redirect to login after successful registration
             } catch (err) {
                 if (err.response && err.response.data) {
                     this.errorMessage = err.response.data.message || 'Failed to register';

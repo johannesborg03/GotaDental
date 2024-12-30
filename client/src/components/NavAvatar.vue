@@ -27,8 +27,8 @@
     name: "AvatarDropdown",
     data() {
       return {
-        sessionName: sessionStorage.getItem('name') || 'User',  // Default name if no session data
-        sessionEmail: sessionStorage.getItem('email') 
+        sessionName: sessionStorage.getItem('name') || 'testUser', 
+        sessionEmail: sessionStorage.getItem('email') || 'testemail'
       };
     },
     computed: {
@@ -39,7 +39,7 @@
     methods: {
       logout() {
         sessionStorage.clear();
-        window.location.href = '/login';  // Replace with your actual logout logic
+        this.$router.push('/'); 
       }
     }
   };
