@@ -1,6 +1,6 @@
 <template>
   <BNavbar toggleable="lg" class="custom-navbar" expand="lg">
-    <BNavbarBrand class="brand">GötaDental</BNavbarBrand>
+    <BNavbarBrand class="brand">Göta Dental</BNavbarBrand>
 
     <BNavbarToggle target="nav-collapse" @click="toggleNavbar" />
     <BCollapse id="nav-collapse" is-nav v-bind:visible="isNavbarOpen">
@@ -80,7 +80,6 @@ export default {
     logout() {
       // Clear the sessionStorage on logout .
       sessionStorage.removeItem("userIdentifier"); // Remove user data from session storage
-      sessionStorage.clear();
       this.$router.push("/"); // Redirect to home page
     }
   }
@@ -143,5 +142,4 @@ router-link:hover {
   color: #FFFFFF;
   background-color: #004F58;
 }
-
 </style>
