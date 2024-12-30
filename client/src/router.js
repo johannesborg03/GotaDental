@@ -16,7 +16,7 @@ const routes = [
 
     { path: '/registerPatient', name: 'RegisterPatient', component: registerPatient, meta: { hideNavbar: true }},
 
-    { path: '/dentist', name: 'Dentist', component: dentist },
+    { path: '/dentist', name: 'Dentist', component: dentist, meta: { dentistNavbar: true, hideNavbar: true } },
     
     { path: '/patient', name: 'Patient', component: patient},
 
