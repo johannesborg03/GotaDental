@@ -17,7 +17,6 @@
 
       <!-- Right-Side Section with Token Name and Avatar -->
       <BNavbarNav class="ms-auto d-flex align-items-center">
-        <!-- Display session token name -->
         <span class="text-white me-3" style="font-family: 'Filson Pro', sans-serif;">
           {{ sessionTokenName }}
         </span>
@@ -41,8 +40,8 @@ export default {
     };
   },
   created() {
-    const tokenName = sessionStorage.getItem('name');
-    this.sessionTokenName = tokenName || 'Guest'; // Default to 'Guest' if no name is found
+    const tokenName = sessionStorage.getItem('Name');
+    this.sessionTokenName = tokenName; 
   },
 };
 </script>
