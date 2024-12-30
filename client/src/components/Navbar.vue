@@ -9,19 +9,12 @@
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
-  <BNavItem>
-    <router-link to="/patient" class="nav-link">Home</router-link>
-  </BNavItem>
-  <BNavItem>
-    <router-link to="/Map" class="nav-link">Book Appointment</router-link>
-  </BNavItem>
-  <BNavItem>
-    <router-link to="/Map" class="nav-link">Bookings</router-link>
-  </BNavItem>
-  <BNavItem>
-    <router-link to="/Map" class="nav-link">Map</router-link>
-  </BNavItem>
-</BNavbarNav>
+        <BNavItem> <router-link to="/patient" class="nav-link">Home</router-link></BNavItem>
+        <BNavItem> <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link> </BNavItem>
+        <BNavItem>  <router-link to="/Map" class="nav-link">Bookings</router-link>  </BNavItem>
+        <BNavItem> <router-link to="/Map" class="nav-link">Map</router-link>
+        </BNavItem>
+      </BNavbarNav>
 
       <!-- Right-Side Section with Token Name and Avatar -->
       <BNavbarNav class="ms-auto d-flex align-items-center">
@@ -49,25 +42,29 @@ export default {
   },
   created() {
     const tokenName = sessionStorage.getItem('Name');
-    this.sessionTokenName = tokenName || "guest"; 
+    this.sessionTokenName = tokenName || "guest";
   },
 };
 </script>
 
 <style scoped>
-/* Custom background color */
+
 .bg-custom {
   background-color: #356bbb !important;
 }
 
-/* Navbar link styles */
-a.nav-link {
-  color: #356bbb;
-  font-family: 'Filson Pro', sans-serif;
-  transition: color 0.3s ease;
+.nav-link {
+  color: white !important;
+  text-decoration: none !important;
+  padding: 0px;
+  font-size: 15px;
 }
 
-/* Responsive styles for small screens */
+.nav-link:hover {
+  color: white !important;
+  text-decoration: none !important;
+}
+
 @media (max-width: 768px) {
   .navbuttons {
     display: none;
@@ -82,15 +79,4 @@ a.nav-link {
   }
 }
 
-.nav-link {
-  color: white !important; 
-  text-decoration: none !important; 
-  padding: 0px;
-  font-size: 15px;
-}
-
-.nav-link:hover {
-  color: white !important; 
-  text-decoration: none !important; 
-}
 </style>
