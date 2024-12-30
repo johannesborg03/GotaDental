@@ -15,21 +15,34 @@
         <BNavItem href="#">Map</BNavItem>
       </BNavbarNav>
 
-      <!-- Right-Side Avatar Dropdown -->
-      <BNavbarNav class="ms-auto">
-        <NavAvatar /> <!-- Avatar Dropdown Component -->
+      <!-- Right-Side Section with Token Name and Avatar -->
+      <BNavbarNav class="ms-auto d-flex align-items-center">
+        <!-- Display session token name -->
+        <span class="text-white me-3" style="font-family: 'Filson Pro', sans-serif;">
+          {{ sessionTokenName }}
+        </span>
+        <NavAvatar />
       </BNavbarNav>
     </BCollapse>
   </BNavbar>
 </template>
 
 <script>
-import NavAvatar from './NavAvatar.vue';  // Import AvatarDropdown component
+import NavAvatar from './NavAvatar.vue';
 
 export default {
   name: 'MainNavbar',
   components: {
-    NavAvatar, // Register the AvatarDropdown component
+    NavAvatar,
+  },
+  data() {
+    return {
+      sessionTokenName: '', // To store the token name
+    };
+  },
+  created() {
+    const tokenName = sessionStorage.getItem('name');
+    this.sessionTokenName = tokenName || 'Guest'; // Default to 'Guest' if no name is found
   },
 };
 </script>
@@ -47,22 +60,18 @@ a.nav-link {
   transition: color 0.3s ease;
 }
 
-/* Media Query for screens smaller than 768px (iPad or smaller) */
+/* Responsive styles for small screens */
 @media (max-width: 768px) {
-  /* Hide the navbar links and show toggle only */
   .navbuttons {
     display: none;
   }
 
-  /* Display the navbar toggle button */
   .navbar-toggler {
     display: block;
   }
 
-  /* Right-Side Avatar Dropdown (Optional, if needed) */
   .ms-auto {
     display: block;
   }
 }
-
 </style>
