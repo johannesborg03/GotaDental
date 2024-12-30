@@ -24,6 +24,7 @@ declare module 'vue' {
     BNavbarToggle: typeof import('bootstrap-vue-next/components/BNavbar')['BNavbarToggle']
     BNavItem: typeof import('bootstrap-vue-next/components/BNav')['BNavItem']
     BRow: typeof import('bootstrap-vue-next/components/BContainer')['BRow']
+    DentistNavbar: typeof import('./src/components/dentistNavbar.vue')['default']
     NavAvatar: typeof import('./src/components/NavAvatar.vue')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
