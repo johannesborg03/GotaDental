@@ -41,7 +41,7 @@ export default {
   },
   created() {
     const tokenName = sessionStorage.getItem('Name');
-    this.sessionTokenName = tokenName; 
+    this.sessionTokenName = tokenName || "guest"; 
   },
 };
 </script>

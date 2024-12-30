@@ -128,7 +128,6 @@ export default {
 </script>
 
 <style scoped>
-/* Custom Styling */
 .card {
     max-width: 600px;
     margin: 0 auto;

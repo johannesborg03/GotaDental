@@ -33,8 +33,8 @@
     name: "AvatarDropdown",
     data() {
       return {
-        sessionName: sessionStorage.getItem('Name'), 
-        sessionEmail: sessionStorage.getItem('Email') 
+        sessionName: sessionStorage.getItem('Name') || "guest", 
+        sessionEmail: sessionStorage.getItem('Email') || "guest" 
       };
     },
     computed: {

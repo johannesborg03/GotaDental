@@ -169,10 +169,9 @@ export default {
 </script>
 
 <style scoped>
-/* Custom Styling */
 .card {
-    max-width: 600px; /* Limit card width */
-    margin: 0 auto; /* Center card in its column */
+    max-width: 600px; 
+    margin: 0 auto; 
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
