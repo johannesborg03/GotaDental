@@ -4,21 +4,27 @@
       <!-- Avatar as the button with the first letter of the session name -->
       <template #button-content>
         <div
-          class="rounded-circle bg-white  d-flex justify-content-center align-items-center"
-          style="width: 30px; height: 30px; font-size: 20px; color:  #356bbb  ">
+          class="rounded-circle bg-white d-flex justify-content-center align-items-center"
+          style="width: 30px; height: 30px; font-size: 20px; color: #356bbb;">
           {{ avatarLetter }}
         </div>
       </template>
   
       <!-- Dropdown Menu -->
-      <BDropdownItemButton class="py-2 px-3 d-flex flex-column align-items-start">
-        <strong class="fs-5">{{ sessionName }}</strong>
-        <span class="text-muted fs-6">{{ sessionEmail }}</span>
-      </BDropdownItemButton>
+      <BDropdownItem class="px-3 d-flex flex-column align-items-start" v-b-color-mode="'dark'"
+        style="color: #356bbb; font-family: 'Filson Pro', sans-serif; padding: 0px;">
+        <p class="fs-6" style="color: white; font-size: 12px; margin-bottom: 2px;">{{ sessionName }}</p>
+        <p class="text-muted fs-7" style="font-size: 15px; margin-top: 0; margin-bottom: 4px">{{ sessionEmail }}</p>
+      </BDropdownItem>
   
       <BDropdownDivider />
   
-      <BDropdownItemButton class="text-danger" @click="logout">Logout</BDropdownItemButton>
+      <BDropdownItemButton 
+        class="text-danger" 
+        @click="logout" 
+        style="font-family: 'Filson Pro', sans-serif; padding-left: 13px;">
+        Logout
+      </BDropdownItemButton>
     </BDropdown>
   </template>
   
@@ -45,11 +51,3 @@
   };
   </script>
   
-  <style scoped>
-  .fs-5 {
-    font-size: 12px;
-  }
-  .fs-6 {
-    font-size: 8px;
-  }
-  </style>  
