@@ -8,7 +8,7 @@
 
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
-      <BNavbarNav class ="navbuttons">
+      <BNavbarNav class="navbuttons">
         <BNavItem href="#">Home</BNavItem>
         <BNavItem href="#">Book</BNavItem>
         <BNavItem href="#">Appointment</BNavItem>
@@ -45,6 +45,24 @@ a.nav-link {
   color: #356bbb;
   font-family: 'Filson Pro', sans-serif;
   transition: color 0.3s ease;
+}
+
+/* Media Query for screens smaller than 768px (iPad or smaller) */
+@media (max-width: 768px) {
+  /* Hide the navbar links and show toggle only */
+  .navbuttons {
+    display: none;
+  }
+
+  /* Display the navbar toggle button */
+  .navbar-toggler {
+    display: block;
+  }
+
+  /* Right-Side Avatar Dropdown (Optional, if needed) */
+  .ms-auto {
+    display: block;
+  }
 }
 
 </style>
