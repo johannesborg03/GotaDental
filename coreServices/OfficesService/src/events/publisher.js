@@ -11,8 +11,7 @@ async function connectRabbitMQ() {
     async function attemptReconnect() {
         try {
             connection = await amqp.connect('amqp://rabbitmq:5672?heartbeat=60');
-            connection.on('error', (err) => {
-                console.error('Connection error:', err);
+            connection.on('error', (err) => {console.error('Connection error:', err);
             });
             connection.on('close', () => {
                 console.log('RabbitMQ connection closed');
