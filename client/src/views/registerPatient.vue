@@ -114,7 +114,7 @@ export default {
                 });
 
                 this.toastMessage = response.data.message || 'Registration successful!';
-                this.$router.push('/login');
+                this.$router.push('/');
             } catch (err) {
                 if (err.response && err.response.data) {
                     this.errorMessage = err.response.data.message || 'Failed to register';
