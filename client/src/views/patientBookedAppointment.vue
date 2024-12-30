@@ -76,7 +76,8 @@ async function fetchBookedTimeslots() {
     try {
         const patientSSN = sessionStorage.getItem("userIdentifier");
         if (!patientSSN) {
-            throw new Error("Patient identifier not found.");
+            error.value = "User not logged in. Please log in to view your timeslots.";
+            return;
         }
 
         console.log("Making API request with: ", {
@@ -87,15 +88,8 @@ async function fetchBookedTimeslots() {
             { params: { officeId: selectedOfficeId.value } });
         console.log("Fetched Booked Timeslots:", response.data);
         // Ensure timeslots are returned in the response
-        if (response.data && response.data.timeslots) {
-            // Update bookedTimeslots with filtered data
-            bookedTimeslots.value = response.data.timeslots.filter(
-                (t) => t.isBooked
-            );
-        } else {
-            console.warn("No timeslots found in response.");
-            bookedTimeslots.value = [];
-        }
+        bookedTimeslots.value = response.data.timeslots || [];
+
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
@@ -113,10 +107,13 @@ onMounted(() => {
         console.log("WebSocket connected:", socket.id);
     });
     socket.on("timeslot/update", (updatedTimeslot) => {
-        if (updatedTimeslot.isBooked && updatedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+        const patientSSN = sessionStorage.getItem("userIdentifier");
+        if (updatedTimeslot.isBooked && updatedTimeslot.patient === patientSSN && updatedTimeslot.office === selectedOfficeId.value) {
             const existingIndex = bookedTimeslots.value.findIndex((slot) => slot.id === updatedTimeslot.timeslot_id);
-            if (existingIndex === -1) {
-                bookedTimeslots.value.push(updatedTimeslot);
+            if (existingIndex !== -1) {
+                bookedTimeslots.value[existingIndex] = updatedTimeslot;
+            } else {
+                bookedTimeslots.value.push(updatedTimeslot); // Add new timeslot
             }
         }
     });
