@@ -138,7 +138,6 @@ async function fetchOffices() {
 
   } catch (error) {
     console.error("Error fetching offices:", error);
-    alert("Failed to fetch offices. Please try again.");
   }
 }
 
