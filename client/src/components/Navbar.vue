@@ -9,11 +9,19 @@
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
-        <BNavItem href="#">Home</BNavItem>
-        <BNavItem href="#">Book</BNavItem>
-        <BNavItem href="#">Appointment</BNavItem>
-        <BNavItem href="#">Map</BNavItem>
-      </BNavbarNav>
+  <BNavItem>
+    <router-link to="/patient" class="nav-link">Home</router-link>
+  </BNavItem>
+  <BNavItem>
+    <router-link to="/Map" class="nav-link">Book Appointment</router-link>
+  </BNavItem>
+  <BNavItem>
+    <router-link to="/Map" class="nav-link">Bookings</router-link>
+  </BNavItem>
+  <BNavItem>
+    <router-link to="/Map" class="nav-link">Map</router-link>
+  </BNavItem>
+</BNavbarNav>
 
       <!-- Right-Side Section with Token Name and Avatar -->
       <BNavbarNav class="ms-auto d-flex align-items-center">
@@ -72,5 +80,17 @@ a.nav-link {
   .ms-auto {
     display: block;
   }
+}
+
+.nav-link {
+  color: white !important; 
+  text-decoration: none !important; 
+  padding: 0px;
+  font-size: 15px;
+}
+
+.nav-link:hover {
+  color: white !important; 
+  text-decoration: none !important; 
 }
 </style>
