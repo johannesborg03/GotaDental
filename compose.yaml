@@ -43,6 +43,7 @@ services:
       context: ./coreServices/TimeslotsService
     volumes:
     - ./coreServices/TimeslotsService:/app  # Bind local code to /app
+    command: npm run dev
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
@@ -61,6 +62,7 @@ services:
       context: ./coreServices/OfficesService
     volumes:
     - ./coreServices/OfficesService:/app  # Bind local code to /app
+    command: npm run dev
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
@@ -79,6 +81,7 @@ services:
       context: ./coreServices/userManagementService
     volumes:
     - ./coreServices/userManagementService:/app  # Bind local code to /app
+    command: npm run dev
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
@@ -101,6 +104,7 @@ services:
     volumes:
     - ./client:/app  # Bind local code to /app
     - /app/node_modules  # Prevent overwriting node_modules
+    command: npm run dev
     ports:
       - "5173:5173"
     networks:
@@ -112,6 +116,7 @@ services:
       context: ./APIGateway
     volumes:
     - ./APIGateway:/app  # Bind local code to /app
+    command: npm run dev
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
