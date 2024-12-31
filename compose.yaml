@@ -59,6 +59,8 @@ services:
   office:
     build:
       context: ./coreServices/OfficesService
+    volumes:
+    - ./coreServices/OfficesService:/app  # Bind local code to /app
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
