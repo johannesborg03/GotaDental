@@ -98,6 +98,9 @@ services:
   client:
     build:
       context: ./client
+    volumes:
+    - ./client:/app  # Bind local code to /app
+    - /app/node_modules  # Prevent overwriting node_modules
     ports:
       - "5173:5173"
     networks:
