@@ -41,6 +41,8 @@ services:
   timeslot:
     build:
       context: ./coreServices/TimeslotsService
+    volumes:
+    - ./coreServices/TimeslotsService:/app  # Bind local code to /app
     depends_on:
       rabbitmq:
         condition: service_healthy  # Wait until RabbitMQ is healthy
