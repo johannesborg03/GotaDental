@@ -68,8 +68,6 @@ export default {
 
                 console.log("Received response:", response.data);
                 sessionStorage.setItem('userIdentifier', this.username_ssn);
-                sessionStorage.setItem('Name', response.data.name);
-                sessionStorage.setItem('Email', response.data.email);
                 sessionStorage.setItem('Office', response.data.office);
                 sessionStorage.setItem('OfficeId', response.data.officeId);
                 sessionStorage.setItem('OfficeAddress', response.data.officeAddress);

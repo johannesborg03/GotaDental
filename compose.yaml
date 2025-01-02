@@ -1,4 +1,3 @@
-
 services:
   # RabbitMQ Service with Health Check
   rabbitmq:
@@ -7,11 +6,11 @@ services:
       - mynetwork
     restart: always
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]  # Check if RabbitMQ is ready
-      interval: 10s  # Check every 10 seconds
-      retries: 5  # Retry 5 times if it fails
-      start_period: 30s  # Wait for 30 seconds before the first check
-      timeout: 20s  # Timeout after 20 seconds if the health check fails
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 20s
 
   # MongoDB Service for Booking DB
   bookingdb:
@@ -41,54 +40,63 @@ services:
   timeslot:
     build:
       context: ./coreServices/TimeslotsService
-    volumes:
-    - ./coreServices/TimeslotsService:/app  # Bind local code to /app
-    command: npm run dev
     depends_on:
       rabbitmq:
-        condition: service_healthy  # Wait until RabbitMQ is healthy
+        condition: service_healthy # Wait until RabbitMQ is healthy
       bookingdb:
-        condition: service_started  # Wait until the database is started
+        condition: service_started # Wait until the database is started
     ports:
       - "3003:3003"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
     networks:
       - mynetwork
+    develop:
+      watch:
+        - path: ./coreServices/TimeslotsService/package.json
+          action: rebuild
+        - path: ./coreServices/TimeslotsService
+          target: /app
+          action: sync+restart
+          ignore:
+            - node_modules/
 
   # Office Service
   office:
     build:
       context: ./coreServices/OfficesService
-    volumes:
-    - ./coreServices/OfficesService:/app  # Bind local code to /app
-    command: npm run dev
     depends_on:
       rabbitmq:
-        condition: service_healthy  # Wait until RabbitMQ is healthy
+        condition: service_healthy # Wait until RabbitMQ is healthy
       bookingdb:
-        condition: service_started  # Wait until the database is started
+        condition: service_started # Wait until the database is started
     ports:
       - "3005:3005"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
     networks:
       - mynetwork
+    develop:
+      watch:
+        - path: ./coreServices/OfficesService/package.json
+          action: rebuild
+        - path: ./coreServices/OfficesService
+          target: /app
+          action: sync+restart
+          ignore:
+            - node_modules/
 
   # User Management Service
   usermanagement:
     build:
       context: ./coreServices/userManagementService
-    volumes:
-    - ./coreServices/userManagementService:/app  # Bind local code to /app
-    command: npm run dev
     depends_on:
       rabbitmq:
-        condition: service_healthy  # Wait until RabbitMQ is healthy
+        condition: service_healthy # Wait until RabbitMQ is healthy
       patientdb:
-        condition: service_started  # Wait until the patient DB is started
+        condition: service_started # Wait until the patient DB is started
       dentistdb:
-        condition: service_started  # Wait until the dentist DB is started
+        condition: service_started # Wait until the dentist DB is started
     ports:
       - "3004:3004"
     environment:
@@ -96,41 +104,58 @@ services:
       - DENTIST_DB_URI=mongodb://dentistdb:27017/dentist-database
     networks:
       - mynetwork
+    develop:
+      watch:
+        - path: ./coreServices/userManagementService/package.json
+          action: rebuild
+        - path: ./coreServices/userManagementService
+          target: /app
+          action: sync+restart
+          ignore:
+            - node_modules/
 
   # Client Service
   client:
     build:
       context: ./client
-    volumes:
-    - ./client:/app  # Bind local code to /app
-    - /app/node_modules  # Prevent overwriting node_modules
-    command: npm run dev
     ports:
       - "5173:5173"
     networks:
       - mynetwork
+    develop:
+     watch:
+     - path: ./client/package.json
+       action: rebuild
+     - path: ./client
+       action: rebuild
+       ignore:
+          - node_modules
 
   # API Gateway Service
   apigate:
     build:
       context: ./APIGateway
-    volumes:
-    - ./APIGateway:/app  # Bind local code to /app
-    command: npm run dev
     depends_on:
       rabbitmq:
-        condition: service_healthy  # Wait until RabbitMQ is healthy
+        condition: service_healthy
     ports:
       - "4000:4000"
     networks:
       - mynetwork
+    develop:
+      watch:
+        - path: ./APIGateway/package.json
+          action: rebuild
+        - path: ./APIGateway
+          target: /app
+          action: sync+restart
+          ignore:
+            - node_modules
 
-# Define the networks
 networks:
   mynetwork:
     external: true
 
-# Define the volumes
 volumes:
   patientdata:
   dentistdata:
