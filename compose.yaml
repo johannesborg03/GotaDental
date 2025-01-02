@@ -144,9 +144,12 @@ services:
           action: rebuild
         - path: ./client
           target: /app
-          action: sync+restart
+          action: rebuild
           ignore:
           - node_modules
+        - path: ./client
+          target: /app
+          action: sync+restart
 
   # API Gateway Service
   apigate:
@@ -173,7 +176,6 @@ services:
           action: sync+restart
           ignore:
             - node_modules
-          
 
 networks:
   mynetwork:
