@@ -6,7 +6,7 @@ exports.login = async (req, res) => {
     const { username_ssn, password } = req.body;
 
     // Validate the input data
-    if (!username_ssn || !password) {
+    if (!username_ssn || !password ) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
