@@ -465,6 +465,7 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+        
 
         const successResponse = { success: true, timeslots: bookedTimeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
