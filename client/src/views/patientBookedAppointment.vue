@@ -6,13 +6,7 @@
             {{ error }}
         </div>
 
-        <h3>Select an Office:</h3>
-        <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
-            <option disabled value="">Select an office</option>
-            <option v-for="office in offices" :key="office._id" :value="office._id">
-                {{ office.office_name }}
-            </option>
-        </select>
+       
 
         <!-- Display Booked Timeslots-->
         <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
@@ -54,6 +48,7 @@ async function fetchOffices() {
     }
 }
 
+/*
 function handleOfficeChange() {
     if (selectedOfficeId.value) {
         console.log("Joining office room:", selectedOfficeId.value);
@@ -66,12 +61,15 @@ function handleOfficeChange() {
         fetchBookedTimeslots();
     }
 }
+*/
 // Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
+    /*
     if (!selectedOfficeId.value) {
         alert("No office selected.");
         return;
     }
+    */
 
     try {
         const patient = sessionStorage.getItem("userIdentifier");
@@ -99,7 +97,8 @@ function formatDate(date) {
 }
 
 onMounted(() => {
-    fetchOffices();
+    //fetchOffices();
+    fetchBookedTimeslots();
 
     socket.on("connect", () => {
         console.log("WebSocket connected:", socket.id);
