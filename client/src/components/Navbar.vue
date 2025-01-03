@@ -4,16 +4,42 @@
       GötaDental
     </BNavbarBrand>
 
+    <!-- Toggle Button for Mobile -->
     <BNavbarToggle target="main-navbar-nav" />
 
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
-        <BNavItem> <router-link to="/patient" class="nav-link">Home</router-link></BNavItem>
-        <BNavItem> <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link> </BNavItem>
-        <BNavItem>  <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>  </BNavItem>
-        <BNavItem> <router-link to="/Map" class="nav-link">Map</router-link>
+        <BNavItem> 
+          <router-link to="/patient" class="nav-link">Home</router-link>
         </BNavItem>
+        <BNavItem> 
+          <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link>
+        </BNavItem>
+        <BNavItem>  
+          <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>
+        </BNavItem>
+        <BNavItem> 
+          <router-link to="/Map" class="nav-link">Map</router-link>
+        </BNavItem>
+      </BNavbarNav>
+
+       <!-- Dropdown Button for Mobile (Visible only on small screens) -->
+      <BNavbarNav class="ms-auto d-block d-md-none">
+        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white">
+          <BDropdownItem>
+            <router-link to="/patient" class="nav-link">Home</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link to="/Map" class="nav-link">Map</router-link>
+          </BDropdownItem>
+        </BNavItemDropdown>
       </BNavbarNav>
 
       <!-- Right-Side Section with Token Name and Avatar -->
@@ -65,6 +91,11 @@ export default {
   text-decoration: none !important;
 }
 
+/* Make the Menu text white */
+.text-white {
+  color: white !important;
+}
+
 @media (max-width: 768px) {
   .navbuttons {
     display: none;
@@ -77,6 +108,13 @@ export default {
   .ms-auto {
     display: block;
   }
+  .d-block.d-md-none {
+    display: block;
+  }
+  /* Make the Menu text white */
+.text-white {
+  color: white !important;
+}
 }
 
 </style>
