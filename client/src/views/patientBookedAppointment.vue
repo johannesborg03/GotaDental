@@ -130,6 +130,7 @@ onUnmounted(() => {
 <style>
 .booked-timeslots-container {
     display: flex;
+    justify-content: center; /* Centers content horizontally */
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 20px;
