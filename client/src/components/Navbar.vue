@@ -66,10 +66,11 @@ export default {
       sessionTokenName: '', // To store the token name
     };
   },
-  created() {
-    const tokenName = sessionStorage.getItem('Name');
-    this.sessionTokenName = tokenName; 
-  },
+  mounted() {
+    this.sessionTokenName = sessionStorage.getItem("userIdentifier") || "Guest";
+    console.log('Token Name:', this.sessionTokenName);  // Check what value is fetched from sessionStorage
+   
+  }
 };
 </script>
 
