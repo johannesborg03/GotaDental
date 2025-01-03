@@ -2,10 +2,6 @@
     <div class="container mt-5">
         <h1 class="text-primary text-center">Your Booked Timeslots</h1>
 
-        <div v-if="loading" class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-
         <div v-if="error" class="alert alert-danger" role="alert">
             {{ error }}
         </div>
@@ -18,7 +14,7 @@
             </option>
         </select>
 
-        <!-- Booked Timeslots Display -->
+        <!-- Display Booked Timeslots-->
         <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
             <div v-for="(timeslot, index) in bookedTimeslots" :key="timeslot._id" class="timeslot-box">
                 <h5>Timeslot {{ index + 1 }}</h5>
@@ -26,9 +22,8 @@
                 <p><strong>End:</strong> {{ formatDate(timeslot.end) }}</p>
             </div>
         </div>
-
-        <div v-else-if="!loading" class="alert alert-info mt-3">
-            You currently have no booked timeslots.
+        <div v-else>
+            <p class="text-muted">You currently have no booked timeslots.</p>
         </div>
     </div>
 </template>
@@ -44,7 +39,6 @@ const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 const offices = ref([]);
 const selectedOfficeId = ref("");
 const bookedTimeslots = ref([]);
-const loading = ref(true);
 const error = ref(null);
 
 // Fetch available offices
@@ -60,6 +54,7 @@ async function fetchOffices() {
     }
 }
 
+
 function handleOfficeChange() {
     if (selectedOfficeId.value) {
         console.log("Joining office room:", selectedOfficeId.value);
@@ -72,42 +67,38 @@ function handleOfficeChange() {
         fetchBookedTimeslots();
     }
 }
+
 // Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
+    
     if (!selectedOfficeId.value) {
         alert("No office selected.");
         return;
     }
-    loading.value = true;
+    
 
     try {
-        const patientSSN = sessionStorage.getItem("userIdentifier");
-        if (!patientSSN) {
-            throw new Error("Patient identifier not found.");
+        const patient = sessionStorage.getItem("userIdentifier");
+        if (!patient) {
+            error.value = "User not logged in. Please log in to view your timeslots.";
+            return;
         }
 
         console.log("Making API request with: ", {
-            patientSSN,
-            officeId: selectedOfficeId.value,
+            patient
         });
-        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
-            { params: { officeId: selectedOfficeId.value } });
+        const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`, {
+            params: { officeId: selectedOfficeId.value }
+        });
+
+
         console.log("Fetched Booked Timeslots:", response.data);
         // Ensure timeslots are returned in the response
-        if (response.data && response.data.timeslots) {
-            // Update bookedTimeslots with filtered data
-            bookedTimeslots.value = response.data.timeslots.filter(
-                (t) => t.isBooked
-            );
-        } else {
-            console.warn("No timeslots found in response.");
-            bookedTimeslots.value = [];
-        }
+        bookedTimeslots.value = response.data.timeslots || [];
+
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
-    } finally {
-        loading.value = false;
     }
 }
 
@@ -117,15 +108,19 @@ function formatDate(date) {
 
 onMounted(() => {
     fetchOffices();
+    //fetchBookedTimeslots();
 
     socket.on("connect", () => {
         console.log("WebSocket connected:", socket.id);
     });
     socket.on("timeslot/update", (updatedTimeslot) => {
-        if (updatedTimeslot.isBooked && updatedTimeslot.patient === sessionStorage.getItem("userIdentifier")) {
+        const patientSSN = sessionStorage.getItem("userIdentifier");
+        if (updatedTimeslot.isBooked && updatedTimeslot.patient === patientSSN && updatedTimeslot.office === selectedOfficeId.value) {
             const existingIndex = bookedTimeslots.value.findIndex((slot) => slot.id === updatedTimeslot.timeslot_id);
-            if (existingIndex === -1) {
-                bookedTimeslots.value.push(updatedTimeslot);
+            if (existingIndex !== -1) {
+                bookedTimeslots.value[existingIndex] = updatedTimeslot;
+            } else {
+                bookedTimeslots.value.push(updatedTimeslot); // Add new timeslot
             }
         }
     });
@@ -146,6 +141,7 @@ onUnmounted(() => {
 .booked-timeslots-container {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center; /* Centers content horizontally */
     gap: 20px;
     margin-top: 20px;
 }

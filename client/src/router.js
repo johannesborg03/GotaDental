@@ -30,7 +30,7 @@ const routes = [
 
     { path: '/PatientSchedule', name: 'PatientSchedule',component: PatientSchedule},
 
-    { path: '/Appointment', name: 'PatientBookedAppointment',component: PatientBookedAppointment},
+    { path: '/PatientBookedAppointment', name: 'PatientBookedAppointment',component: PatientBookedAppointment},
 
 
 ];

@@ -11,7 +11,7 @@
       <BNavbarNav class="navbuttons">
         <BNavItem> <router-link to="/patient" class="nav-link">Home</router-link></BNavItem>
         <BNavItem> <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link> </BNavItem>
-        <BNavItem>  <router-link to="/Map" class="nav-link">Bookings</router-link>  </BNavItem>
+        <BNavItem>  <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>  </BNavItem>
         <BNavItem> <router-link to="/Map" class="nav-link">Map</router-link>
         </BNavItem>
       </BNavbarNav>

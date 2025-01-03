@@ -4,7 +4,7 @@
       <b-col md="4" class="text-left" style="margin-top: 65px;">
         <h4>Select an Office:</h4>
         <b-form-select v-model="selectedOfficeId" @change="handleOfficeChange" class="mb-3">
-          <option disabled value="" >Select an office</option>
+          <option disabled value="">Select an office</option>
           <option v-for="office in offices" :key="office._id" :value="office._id">
             {{ office.office_name }}
           </option>
@@ -77,6 +77,7 @@ const offices = ref([]);
 const events = ref([]);
 const officeAddress = ref("");
 const officeName = ref("");
+const bookedTimeslots = ref([]);
 
 // Reactive configuration
 // Updated onEventClick logic to handle both booking and cancellation
@@ -87,31 +88,31 @@ const calendarConfig = ref({
   events: [],
   timeRangeSelectedHandling: "Disabled",
   eventClickHandling: "Enabled", // Enable event clicking
-  
+
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
     console.log("Timeslot ID:", timeslotId); // Add a log to verify
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     const sessionID = sessionStorage.getItem("userIdentifier")
-    console.log("log id "+ sessionID);
-   
+    console.log("log id " + sessionID);
+
     const response = await axios.get(`http://localhost:4000/api/patients/${sessionID}`);
 
     console.log("Axios Response:", response);
-    
-    const patient = response.data.patient; 
+
+    const patient = response.data.patient;
     const patientID = patient.patientId;
-      console.log(patientID);
-       
-        const timeslotPatient = selectedTimeslot["patient"];
-        console.log("Timeslot Patient:", timeslotPatient);
-        
-    if (selectedTimeslot.text === "Booked" &&  timeslotPatient  ===  patientID) {
-   
+    console.log(patientID);
+
+    const timeslotPatient = selectedTimeslot["patient"];
+    console.log("Timeslot Patient:", timeslotPatient);
+
+    if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
+
       const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
       if (confirmCancel) {
-        await cancelTimeslot(timeslotId); 
+        await cancelTimeslot(timeslotId);
       }
     }
     // If the timeslot is unbooked, allow the user to book it
@@ -133,8 +134,8 @@ async function fetchOffices() {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // 
     console.log("OFFICES:", response.data.offices);
-   // console.log ('OfficeAddress', response.data.office.OfficeAddress);
-   // console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+    // console.log ('OfficeAddress', response.data.office.OfficeAddress);
+    // console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
 
   } catch (error) {
     console.error("Error fetching offices:", error);
@@ -147,45 +148,45 @@ function handleOfficeChange() {
     // Fetch timeslots for the selected office
     sessionStorage.setItem('OfficeId', selectedOfficeId.value);
 
-       // Emit WebSocket event to join the selected office's room
-       if (socket.connected) {
-            socket.emit("joinOffice", { officeId : selectedOfficeId.value});
-        }
+    // Emit WebSocket event to join the selected office's room
+    if (socket.connected) {
+      socket.emit("joinOffice", { officeId: selectedOfficeId.value });
+    }
     fetchTimeslots();
-   
+
   }
 }
 
-  // Fetch all timeslots for the office
-  async function fetchTimeslots() {
-    if (!selectedOfficeId.value) {
-      alert("No office selected.");
-      return;
-    }
-
-    try {
-      const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
-      console.log("Fetched timeslots:", response.data);
-
-      // Map the response data to the format expected by DayPilotCalendar
-      events.value = response.data.timeslots.map((timeslot) => ({
-        id: timeslot._id,
-        text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
-        start: timeslot.start,
-        end: timeslot.end,
-        patient: timeslot.patient
-      }));
-
-      // Update the calendar configuration
-      calendarConfig.value.events = events.value;
-    } catch (error) {
-      console.error("Error fetching timeslots:", error);
-      alert("Failed to fetch timeslots. Please try again.");
-    }
+// Fetch all timeslots for the office
+async function fetchTimeslots() {
+  if (!selectedOfficeId.value) {
+    alert("No office selected.");
+    return;
   }
 
-  //Function to book a timeslot
-  async function bookTimeslot(timeslotId) {
+  try {
+    const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
+    console.log("Fetched timeslots:", response.data);
+
+    // Map the response data to the format expected by DayPilotCalendar
+    events.value = response.data.timeslots.map((timeslot) => ({
+      id: timeslot._id,
+      text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
+      start: timeslot.start,
+      end: timeslot.end,
+      patient: timeslot.patient
+    }));
+
+    // Update the calendar configuration
+    calendarConfig.value.events = events.value;
+  } catch (error) {
+    console.error("Error fetching timeslots:", error);
+    alert("Failed to fetch timeslots. Please try again.");
+  }
+}
+
+//Function to book a timeslot
+async function bookTimeslot(timeslotId) {
   try {
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
       isBooked: true,
@@ -207,22 +208,22 @@ function handleOfficeChange() {
       calendarConfig.value.events = [...events.value];
     }
   } catch (error) {
-        console.error("Error booking timeslot:", error);
+    console.error("Error booking timeslot:", error);
 
-        // Check for specific error message from the backend
-        if (error.response && error.response.data.message) {
-            const errorMessage = error.response.data.message;
+    // Check for specific error message from the backend
+    if (error.response) {
+      const { data } = error.response;
 
-            // Check if it's the "already booked 5 timeslots" error
-            if (errorMessage.includes("You have already booked 5 timeslots")) {
-                alert("You cannot book more than 5 timeslots. Please cancel an existing booking to book a new one.");
-            } else {
-                alert(errorMessage);
-            }
-        } else {
-            alert("Failed to book the timeslot. Please try again.");
-        }
+      // Handle the "maximum timeslots" error
+      if (data && data.error === "You have already booked 5 timeslots for this office.") {
+        alert("You cannot book more than 5 timeslots for this office. Please cancel an existing one to book a new timeslot.");
+      } else {
+        alert(data.error || "Failed to book the timeslot. Please try again.");
+      }
+    } else {
+      alert("Failed to book the timeslot. Please try again.");
     }
+  }
 }
 
 // Function to cancel a timeslot
@@ -253,20 +254,20 @@ async function cancelTimeslot(timeslotId) {
   }
 }
 
-  // Navigation methods
-  function prevWeek() {
-    const currentDate = new Date(calendarConfig.value.startDate);
-    currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
-    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-  }
+// Navigation methods
+function prevWeek() {
+  const currentDate = new Date(calendarConfig.value.startDate);
+  currentDate.setDate(currentDate.getDate() - 7); // Move back by 7 days
+  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+}
 
-  function nextWeek() {
-    const currentDate = new Date(calendarConfig.value.startDate);
-    currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
-    calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
-  }
+function nextWeek() {
+  const currentDate = new Date(calendarConfig.value.startDate);
+  currentDate.setDate(currentDate.getDate() + 7); // Move forward by 7 days
+  calendarConfig.value.startDate = currentDate.toISOString().split("T")[0]; // Update startDate
+}
 
-  function loadOfficeAddress() {
+function loadOfficeAddress() {
   const storedAddress = sessionStorage.getItem("OfficeAddress");
   if (storedAddress) {
     officeAddress.value = storedAddress;
@@ -285,60 +286,60 @@ function loadOfficeName() {
   }
 }
 
- // WebSocket connection and event handling
+// WebSocket connection and event handling
 onMounted(() => {
   fetchOffices();
   loadOfficeAddress();
   loadOfficeName();
 
   socket.on("connect", () => {
-        console.log("WebSocket connected:", socket.id);
-    });
+    console.log("WebSocket connected:", socket.id);
+  });
 
-    
-    socket.on("timeslot/create", (newTimeslot) => {
-        console.log("Received timeslot new Timeslot Created", newTimeslot);
-        console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
 
-        if (newTimeslot.office === selectedOfficeId.value) {
-            events.value.push({
-                id: newTimeslot._id,
-                text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
-                start: newTimeslot.start,
-                end: newTimeslot.end,
-            });
-            calendarConfig.value.events = [...events.value];
-            console.log("Updated events after WebSocket create:", events.value);
-        }
-    });
+  socket.on("timeslot/create", (newTimeslot) => {
+    console.log("Received timeslot new Timeslot Created", newTimeslot);
+    console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
 
-      // Listen for timeslot updates
-      socket.on("timeslot/update", (updatedTimeslot) => {
+    if (newTimeslot.office === selectedOfficeId.value) {
+      events.value.push({
+        id: newTimeslot._id,
+        text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
+        start: newTimeslot.start,
+        end: newTimeslot.end,
+      });
+      calendarConfig.value.events = [...events.value];
+      console.log("Updated events after WebSocket create:", events.value);
+    }
+  });
+
+  // Listen for timeslot updates
+  socket.on("timeslot/update", (updatedTimeslot) => {
     console.log("Received timeslot update:", updatedTimeslot);
 
-   
+
 
     // Find the corresponding timeslot in the events array
     const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot._id);
     if (eventIndex !== -1) {
-        // Update the event text to "Booked" or "Unbooked" based on the isBooked status
-        events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
-        // Update the event data
-        events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
-        events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+      // Update the event text to "Booked" or "Unbooked" based on the isBooked status
+      events.value[eventIndex].text = updatedTimeslot.isBooked ? "Booked" : "Unbooked";
+      // Update the event data
+      events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
+      events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
 
-        // Re-render the calendar
-        calendarConfig.value.events = [...events.value];
-        console.log("Updated events after WebSocket update:", events.value);
+      // Re-render the calendar
+      calendarConfig.value.events = [...events.value];
+      console.log("Updated events after WebSocket update:", events.value);
     } else {
-        console.error(`No event found with id ${updatedTimeslot.timeslot_id}`);
+      console.error(`No event found with id ${updatedTimeslot.timeslot_id}`);
     }
-});
+  });
 
 
-    socket.on("disconnect", () => {
-        console.log("WebSocket disconnected");
-    });
+  socket.on("disconnect", () => {
+    console.log("WebSocket disconnected");
+  });
 });
 
 // Cleanup WebSocket connection
