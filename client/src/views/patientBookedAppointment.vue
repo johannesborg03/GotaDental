@@ -6,7 +6,13 @@
             {{ error }}
         </div>
 
-       
+        <h3>Select an Office:</h3>
+        <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
+            <option disabled value="">Select an office</option>
+            <option v-for="office in offices" :key="office._id" :value="office._id">
+                {{ office.office_name }}
+            </option>
+        </select>
 
         <!-- Display Booked Timeslots-->
         <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
@@ -48,7 +54,7 @@ async function fetchOffices() {
     }
 }
 
-/*
+
 function handleOfficeChange() {
     if (selectedOfficeId.value) {
         console.log("Joining office room:", selectedOfficeId.value);
@@ -61,15 +67,15 @@ function handleOfficeChange() {
         fetchBookedTimeslots();
     }
 }
-*/
+
 // Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
-    /*
+    
     if (!selectedOfficeId.value) {
         alert("No office selected.");
         return;
     }
-    */
+    
 
     try {
         const patient = sessionStorage.getItem("userIdentifier");
@@ -81,7 +87,11 @@ async function fetchBookedTimeslots() {
         console.log("Making API request with: ", {
             patient
         });
-        const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`);
+        const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`, {
+            params: { officeId: selectedOfficeId.value }
+        });
+
+
         console.log("Fetched Booked Timeslots:", response.data);
         // Ensure timeslots are returned in the response
         bookedTimeslots.value = response.data.timeslots || [];
@@ -97,8 +107,8 @@ function formatDate(date) {
 }
 
 onMounted(() => {
-    //fetchOffices();
-    fetchBookedTimeslots();
+    fetchOffices();
+    //fetchBookedTimeslots();
 
     socket.on("connect", () => {
         console.log("WebSocket connected:", socket.id);
@@ -130,8 +140,8 @@ onUnmounted(() => {
 <style>
 .booked-timeslots-container {
     display: flex;
-    justify-content: center; /* Centers content horizontally */
     flex-wrap: wrap;
+    justify-content: center; /* Centers content horizontally */
     gap: 20px;
     margin-top: 20px;
 }

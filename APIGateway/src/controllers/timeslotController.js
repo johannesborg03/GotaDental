@@ -188,9 +188,10 @@ exports.updateTimeslot = async (req, res) => {
 
 exports.getBookedTimeslots = async (req, res) => {
     const { patientSSN: patient } = req.params;
+    const { officeId } = req.query; // Getting officeId from query parameters
 
 
-    if (!patient) {
+    if (!patient || !officeId) {
         return res.status(400).json({ message: 'Missing patientSSN' });
     }
 
@@ -201,7 +202,7 @@ exports.getBookedTimeslots = async (req, res) => {
     try {
        ;
         console.log(`Publishing message to RabbitMQ with topic: ${topic}`);
-        const response = await publishMessage(topic, { patient }, correlationId);
+        const response = await publishMessage(topic, { patient, officeId }, correlationId);
 
         // Query the database for timeslots that are booked and linked to the patient
         if (!response.success || !response.timeslots || response.timeslots.length === 0) {
