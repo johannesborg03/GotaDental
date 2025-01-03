@@ -1,59 +1,79 @@
 <template>
-    <div class="container py-4">
-        <div class="mb-4 text-center">
-            <h1 class="text-primary">Book an Appointment</h1>
+    <div class="container-fluid py-5">
+      
+      <div class="mt-5">
+        <BCard border-variant="primary" class="text-center py-9" style="max-width: 80%; margin: 0 auto;">
+          <h2 style="font-family: 'Filson Pro', sans-serif; color: #356bbb; font-size: 25px;">
+            Welcome to Patient Dashboard
+          </h2>
+          <BCardText style="font-size: 14px;">
+            Here you can manage all your schedules, appointments, and locate nearby facilities in one place.
+          </BCardText>
+          <div class="col-md-2 d-flex flex-column align-items-start">
+          <!-- Patient Schedule Card -->
+          <BCard border-variant="primary" header="Patient Schedule" align="center" class="mb-3 card-collapse" style="width: 100%; padding: 10px;">
+            <template #header>
+              <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+                Available Timeslot
+              </div>
+            </template>
+            <BCardText style="font-size: 14px;">
+            Schedule an appointment 
+            </BCardText>
+            <button class="btn btn-primary btn-sm">
+              <router-link to="/PatientSchedule" class="text-white text-decoration-none">
+                View Timeslots
+              </router-link>
+            </button>
+          </BCard>
         </div>
-
-        <button class="btn btn-primary">
-            <router-link to="/patientTimeslot" class="text-white text-decoration-none">
-                Available Timeslots</router-link>
-        </button>
-
-        <button class="btn btn-primary">
-            <router-link to="/PatientSchedule" class="text-white text-decoration-none">
-                Patient Schedule</router-link>
-        </button>
-
-        <button class="btn btn-primary">
-            <router-link to="/Appointment" class="text-white text-decoration-none">
-                Booked appointments</router-link>
-        </button>
+  
+        <div class="col-md-2 d-flex flex-column align-items-start">
+          <BCard border-variant="primary" align="center" style="width: 100%; padding: 10px;" class = "card-collapse">
+            <template #header>
+              <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+                Map
+              </div>
+            </template>
+            <BCardText style="font-size: 14px;">
+              Locate nearby facilities
+            </BCardText>
+            <button class="btn btn-primary btn-sm">
+              <router-link to="/Map" class="text-white text-decoration-none">
+                View Map
+              </router-link>
+            </button>
+          </BCard>
+        </div>
+        </BCard>
+      </div>
     </div>
-</template>
+  </template>
+  
+  <script>
+  export default {
+    name: 'PatientDashboard',
+  };
+  </script>
+  
+  <style scoped>
+  body {
+    font-family: 'Filson Pro', sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  .card {
+    font-family: 'Filson Pro', sans-serif;
+  }
+  
+  .btn {
+    font-family: 'Filson Pro', sans-serif;
+  }
+  
 
-<script>
-import axios from "axios";
-
-export default {
-    data() {
-        return {
-            username: '', // should be change to ssn 
-        };
-    },
-
-    async mounted() {
-        this.username = sessionStorage.getItem('userIdentifier');
-        await this.fetchOffices();
-    },
-    mounted() {
-        this.username = this.$route.params.username || localStorage.getItem('username'); // Prefer route, fallback to storage
-        this.fetchUserData();
-    },
-
-    methods: {
-        async fetchUserData() {
-            try {
-                const response = await fetch(`http://localhost:3005/api/patient/${this.username}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch user data: ${response.status}`);
-                }
-
-                const userData = await response.json();
-                console.log('Fetched user data:', userData);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        },
-    },
-};
-</script>
+  @media (max-width: 1200px) {
+  .card-collapse {
+    display: none;
+  }
+}
+  </style>  

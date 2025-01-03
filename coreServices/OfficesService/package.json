@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "main": "app.js",
     "scripts": {
-        "dev": "node app.js",
+        "dev": "nodemon -e js app.js",
         "start": "node app.js",
         "test": "vitest"
     },
@@ -17,6 +17,7 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.2.1",
+        "nodemon": "^3.1.9",
         "vitest": "^2.1.8"
     }
 }

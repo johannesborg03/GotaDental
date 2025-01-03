@@ -151,7 +151,6 @@ async function fetchTimeslots() {
     calendarConfig.value.events = events.value;
   } catch (error) {
     console.error("Error fetching timeslots:", error);
-    alert("Failed to fetch timeslots. Please try again.");
   }
 }
 
