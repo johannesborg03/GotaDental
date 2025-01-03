@@ -436,9 +436,11 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     }
 
     try {
+        // Fetch Patient ID from User Management Service using RabbitMQ
         const patientCorrelationId = uuidv4();
-        const patientTopic = 'patient/getBySSN';
+        const patientTopic = 'patients/getBySSN';
         const patientMessage = { patient_ssn: patient };
+
         console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
 
         const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
@@ -451,10 +453,11 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
         }
 
         const { patientId } = patientResponse;
+
         console.log(`Resolved Patient ID: ${patientId}`);
 
         const bookedTimeslots = await Timeslot.find({
-            isBooked: true, patient: patientId, office: officeId,
+            isBooked: true, patient: patientId,
         });
 
         if (!bookedTimeslots || bookedTimeslots.length === 0) {

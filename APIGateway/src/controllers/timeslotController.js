@@ -187,7 +187,6 @@ exports.updateTimeslot = async (req, res) => {
 };
 
 exports.getBookedTimeslots = async (req, res) => {
-    console.log("PATIENT REQ PARAMS:", req.params);
     const { patientSSN: patient } = req.params;
 
 
