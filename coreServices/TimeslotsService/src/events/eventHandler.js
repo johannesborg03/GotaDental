@@ -427,10 +427,10 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
 async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, channel) {
     console.log('Received request to retrieve booked timeslots:', message);
 
-    const { patientSSN, officeId } = message;
+    const { patient } = message;
 
-    if (!patientSSN || !officeId) {
-        const errorResponse = { success: false, error: 'Missing patientSSN or officeId' };
+    if (!patient) {
+        const errorResponse = { success: false, error: 'Missing patientSSN' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
         return;
     }
@@ -438,8 +438,8 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     try {
         const patientCorrelationId = uuidv4();
         const patientTopic = 'patient/getBySSN';
-        const patientMessage = { patient_ssn: patientSSN };
-        console.log(`Publishing message to fetch Patient ID for SSN: ${patientSSN}`);
+        const patientMessage = { patient_ssn: patient };
+        console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
 
         const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
 

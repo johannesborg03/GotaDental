@@ -74,18 +74,16 @@ async function fetchBookedTimeslots() {
     }
 
     try {
-        const patientSSN = sessionStorage.getItem("userIdentifier");
-        if (!patientSSN) {
+        const patient = sessionStorage.getItem("userIdentifier");
+        if (!patient) {
             error.value = "User not logged in. Please log in to view your timeslots.";
             return;
         }
 
         console.log("Making API request with: ", {
-            patientSSN,
-            officeId: selectedOfficeId.value,
+            patient
         });
-        const response = await axios.get(`http://localhost:4000/api/patients/${patientSSN}/timeslots`,
-            { params: { officeId: selectedOfficeId.value } });
+        const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`);
         console.log("Fetched Booked Timeslots:", response.data);
         // Ensure timeslots are returned in the response
         bookedTimeslots.value = response.data.timeslots || [];
