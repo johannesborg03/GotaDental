@@ -4,7 +4,7 @@
       <div class="mt-5">
         <BCard border-variant="primary" class="text-center py-9" style="max-width: 80%; margin: 0 auto;">
           <h2 style="font-family: 'Filson Pro', sans-serif; color: #356bbb; font-size: 25px;">
-            Welcome to Your Patient Dashboard
+            Welcome to Patient Dashboard
           </h2>
           <BCardText style="font-size: 14px;">
             Here you can manage all your schedules, appointments, and locate nearby facilities in one place.

@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "main": "app.js",
     "scripts": {
-        "dev": "node app.js",
+        "dev": "nodemon -e js app.js",
         "start": "node app.js",
         "test": "vitest"
     },
@@ -21,6 +21,7 @@
     },
     "devDependencies": {
         "jest": "^29.7.0",
+        "nodemon": "^3.1.9",
         "supertest": "^7.0.0",
         "vitest": "^2.1.8"
     }

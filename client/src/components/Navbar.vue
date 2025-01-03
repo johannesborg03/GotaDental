@@ -42,7 +42,7 @@ export default {
   },
   created() {
     const tokenName = sessionStorage.getItem('Name');
-    this.sessionTokenName = tokenName || "guest";
+    this.sessionTokenName = tokenName; 
   },
 };
 </script>
