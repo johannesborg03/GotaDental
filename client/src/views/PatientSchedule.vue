@@ -125,7 +125,15 @@ const calendarConfig = ref({
       alert("This timeslot is already booked by another user.");
     }
   },
+  onEventRender: (args) => {
+    // Dynamically change the event background color based on booking status
+    const event = args.data;
+    if (event.color) {
+      args.element.style.backgroundColor = event.color; // Apply background color for booked or unbooked
+    }
+  }
 });
+
 
 
 // Fetch all offices for the dropdown
@@ -174,7 +182,8 @@ async function fetchTimeslots() {
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
       start: timeslot.start,
       end: timeslot.end,
-      patient: timeslot.patient
+      patient: timeslot.patient,
+      backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08'
     }));
 
     // Update the calendar configuration

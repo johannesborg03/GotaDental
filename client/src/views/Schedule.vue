@@ -144,7 +144,13 @@ async function fetchTimeslots() {
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
       start: timeslot.start,
       end: timeslot.end,
-      patient: timeslot.patient
+      patient: timeslot.patient,
+      backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08'
+     // backColor: "#ECC200"
+        // Add color based on booking status
+        //style: `background-color: ${timeslot.isBooked ? 'yellow' : 'green'};` // Use CSS for coloring
+
+     // color: timeslot.isBooked ? 'yellow' : 'green' // Use yellow for booked and green for unbooked
     }));
 
     // Update the calendar configuration
