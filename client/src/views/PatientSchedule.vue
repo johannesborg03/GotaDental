@@ -125,7 +125,15 @@ const calendarConfig = ref({
       alert("This timeslot is already booked by another user.");
     }
   },
+  onEventRender: (args) => {
+    // Dynamically change the event background color based on booking status
+    const event = args.data;
+    if (event.color) {
+      args.element.style.backgroundColor = event.color; // Apply background color for booked or unbooked
+    }
+  }
 });
+
 
 
 // Fetch all offices for the dropdown
@@ -157,6 +165,23 @@ function handleOfficeChange() {
   }
 }
 
+async function fetchUserId() {
+
+  try {
+  let patient = sessionStorage.getItem("userIdentifier");
+  const response = await axios.get(`http://localhost:4000/api/patients/${patient}`);
+  const patientId = response;
+  console.log("Response:", response);
+  // Store the patientId in sessionStorage
+  sessionStorage.setItem("patientId", response.data.patient.patientId); 
+  console.log("patient ID:", response.data.patient.patientId);
+
+  } catch (error) {
+    console.error("Error fetching PatientId:", error);
+    alert("Failed to fetch PatientId. Please try again.");
+  }
+}
+
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
   if (!selectedOfficeId.value) {
@@ -168,13 +193,18 @@ async function fetchTimeslots() {
     const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
     console.log("Fetched timeslots:", response.data);
 
+
+
+    fetchUserId();
+    const patientId = sessionStorage.getItem("patientId");
     // Map the response data to the format expected by DayPilotCalendar
     events.value = response.data.timeslots.map((timeslot) => ({
       id: timeslot._id,
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
       start: timeslot.start,
       end: timeslot.end,
-      patient: timeslot.patient
+      patient: timeslot.patient,
+      backColor: timeslot.patient === patientId ? 'yellow' : (timeslot.isBooked ? '#EC1E1E' : '#62FB08')
     }));
 
     // Update the calendar configuration
@@ -205,6 +235,7 @@ async function bookTimeslot(timeslotId) {
     const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
     if (eventIndex !== -1) {
       events.value[eventIndex].text = "Booked";
+      events.value[eventIndex].backColor = 'yellow'; // Set color to yellow for the booked timeslot
       calendarConfig.value.events = [...events.value];
     }
   } catch (error) {
@@ -245,7 +276,8 @@ async function cancelTimeslot(timeslotId) {
     const updatedTimeslot = response.data.timeslot;
     const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
     if (eventIndex !== -1) {
-      events.value[eventIndex].text = "Unbooked"; // Change the status back to "Unbooked"
+      events.value[eventIndex].text = "Unbooked"; //Change the status back to "Unbooked"
+      events.value[eventIndex].backColor = '62FB08';  // Change the status back to "Green Color"
       calendarConfig.value.events = [...events.value]; // Re-render the calendar
     }
   } catch (error) {
@@ -291,6 +323,7 @@ onMounted(() => {
   fetchOffices();
   loadOfficeAddress();
   loadOfficeName();
+  fetchUserId();
 
   socket.on("connect", () => {
     console.log("WebSocket connected:", socket.id);
@@ -300,6 +333,7 @@ onMounted(() => {
   socket.on("timeslot/create", (newTimeslot) => {
     console.log("Received timeslot new Timeslot Created", newTimeslot);
     console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
+    
 
     if (newTimeslot.office === selectedOfficeId.value) {
       events.value.push({
@@ -307,8 +341,10 @@ onMounted(() => {
         text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
         start: newTimeslot.start,
         end: newTimeslot.end,
+        backColor: '#62FB08'
+ 
       });
-      calendarConfig.value.events = [...events.value];
+     calendarConfig.value.events = [...events.value];
       console.log("Updated events after WebSocket create:", events.value);
     }
   });
@@ -317,6 +353,7 @@ onMounted(() => {
   socket.on("timeslot/update", (updatedTimeslot) => {
     console.log("Received timeslot update:", updatedTimeslot);
 
+    const patientId = sessionStorage.getItem("patiendId");
 
 
     // Find the corresponding timeslot in the events array
@@ -327,6 +364,7 @@ onMounted(() => {
       // Update the event data
       events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
       events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+      events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
 
       // Re-render the calendar
       calendarConfig.value.events = [...events.value];

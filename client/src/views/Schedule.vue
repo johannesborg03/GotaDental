@@ -144,7 +144,13 @@ async function fetchTimeslots() {
       text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
       start: timeslot.start,
       end: timeslot.end,
-      patient: timeslot.patient
+      patient: timeslot.patient,
+      backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08'
+     // backColor: "#ECC200"
+        // Add color based on booking status
+        //style: `background-color: ${timeslot.isBooked ? 'yellow' : 'green'};` // Use CSS for coloring
+
+     // color: timeslot.isBooked ? 'yellow' : 'green' // Use yellow for booked and green for unbooked
     }));
 
     // Update the calendar configuration
@@ -206,6 +212,7 @@ onMounted(() => {
                 text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
                 start: newTimeslot.start,
                 end: newTimeslot.end,
+                backColor: '#62FB08'
             });
             calendarConfig.value.events = [...events.value];
             console.log("Updated events after WebSocket create:", events.value);
@@ -226,6 +233,7 @@ onMounted(() => {
         // Update the event data
         events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
         events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+        events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
 
         // Re-render the calendar
         calendarConfig.value.events = [...events.value];

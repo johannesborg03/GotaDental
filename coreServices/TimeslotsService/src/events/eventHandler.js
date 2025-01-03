@@ -8,7 +8,7 @@ const eventEmitter = require('./eventEmitter'); // Import the global event emitt
 
 const adjustToCET = (dateStr) => {
     const date = new Date(dateStr);
-    const offsetInHours = 1; // CET is UTC+1
+    const offsetInHours = 0; // CET is UTC+1
     date.setHours(date.getHours() + offsetInHours);
     return date;
 };
