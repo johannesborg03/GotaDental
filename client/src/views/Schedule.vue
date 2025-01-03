@@ -212,6 +212,7 @@ onMounted(() => {
                 text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
                 start: newTimeslot.start,
                 end: newTimeslot.end,
+                backColor: '#62FB08'
             });
             calendarConfig.value.events = [...events.value];
             console.log("Updated events after WebSocket create:", events.value);
@@ -232,6 +233,7 @@ onMounted(() => {
         // Update the event data
         events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
         events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
+        events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
 
         // Re-render the calendar
         calendarConfig.value.events = [...events.value];
