@@ -4,7 +4,7 @@ const { publishMessage } = require('./publisher');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose'); // Import mongoose
 const eventEmitter = require('./eventEmitter'); // Import the global event emitter
-const { sendEmail } = require('./services/emailService');
+const { sendEmail } = require('../utils/emailService');
 
 
 const adjustToCET = (dateStr) => {
