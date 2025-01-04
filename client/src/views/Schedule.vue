@@ -61,6 +61,29 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(), // Initial week
   weekStarts: 1,
   events: [],
+  eventClickHandling: "Enabled",
+  onEventClick: async (args) => {
+    const timeslotId = args.e.id();
+    const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
+
+    if (!selectedTimeslot) {
+      alert("Invalid timeslot selected.");
+      return;
+    }
+
+      // Check if the timeslot is booked using its text or isBooked property
+  if (selectedTimeslot.text !== "Booked" && !selectedTimeslot.isBooked) {
+    alert("You can only cancel booked timeslots.");
+    return;
+  }
+
+
+    // Confirm cancellation
+    const confirmCancel = confirm(`Do you want to cancel this timeslot? ${args.e.start()} - ${args.e.end()}`);
+    if (confirmCancel) {
+      await cancelTimeslot(timeslotId);
+    }
+  },
   onTimeRangeSelected: (args) => {
     // Callback triggered when a time range is selected
     // Default to "Unbooked" and set the selected timeslot
@@ -73,6 +96,7 @@ const calendarConfig = ref({
       };
     
   },
+
 });
 
 async function saveTimeslot() {
@@ -159,6 +183,8 @@ async function fetchTimeslots() {
     console.error("Error fetching timeslots:", error);
   }
 }
+
+
 
 
 // Navigation methods
