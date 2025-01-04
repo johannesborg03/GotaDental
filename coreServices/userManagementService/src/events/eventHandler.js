@@ -288,8 +288,14 @@ async function handleGetPatientBySSN(message, replyTo, correlationId, channel) {
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+        // Construct the success response, including patientId and email
+        const successResponse = {
+            success: true,
+            patientId: patient._id,
+            email: patient.email,
+            name: patient.name
+        };
 
-        const successResponse = { success: true, patientId: patient._id };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error retrieving patient:', error);
@@ -354,6 +360,42 @@ async function handleUpdateAppointments(message, replyTo, correlationId, channel
     }
 }
 
+async function handleGetPatientById(message, replyTo, correlationId, channel) {
+    const { patientId } = message;
+
+    console.log('Received request to fetch patient by ID:', message);
+
+    try {
+        if (!patientId) {
+            const errorResponse = { success: false, error: 'Missing patientId' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        const patient = await Patient.findById(patientId);
+
+        if (!patient) {
+            const errorResponse = { success: false, error: 'Patient not found' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
+
+        // Construct the success response
+        const successResponse = {
+            success: true,
+            email: patient.email,
+            name: patient.name,
+        };
+
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+        console.log('Patient details retrieved successfully:', successResponse);
+    } catch (error) {
+        console.error('Error retrieving patient by ID:', error);
+        const errorResponse = { success: false, error: 'Failed to retrieve patient' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+    }
+}
+
 
 
 // Initialize all subscriptions
@@ -380,8 +422,12 @@ async function initializeSubscriptions() {
         await subscribeToTopic('patients/getBySSN', handleGetPatientBySSN);
         console.log('Subscribed to patients/getBySSN');
 
+        await subscribeToTopic('patients/getById', handleGetPatientById);
+        console.log('Subscribed to patients/getById');
+
+        
         await subscribeToTopic('patient/updateAppointments', handleUpdateAppointments);
-     
+
 
         //   await subscribeToTopic('appointments/book', handleAppointmentBooking);
         //  console.log('Subscribed to "appointments/book"');

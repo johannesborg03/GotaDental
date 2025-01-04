@@ -49,6 +49,10 @@ services:
       - "3003:3003"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
     networks:
       - mynetwork
     develop:
