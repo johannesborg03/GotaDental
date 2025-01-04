@@ -165,6 +165,7 @@ function handleOfficeChange() {
   }
 }
 
+/*
 async function fetchUserId() {
 
   try {
@@ -175,6 +176,7 @@ async function fetchUserId() {
   // Store the patientId in sessionStorage
   sessionStorage.setItem("patientId", response.data.patient.patientId); 
   console.log("patient ID:", response.data.patient.patientId);
+  
 
   } catch (error) {
     console.error("Error fetching PatientId:", error);
@@ -182,6 +184,7 @@ async function fetchUserId() {
   }
 }
 
+*/
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
   if (!selectedOfficeId.value) {
@@ -195,7 +198,7 @@ async function fetchTimeslots() {
 
 
 
-    fetchUserId();
+   // fetchUserId();
     const patientId = sessionStorage.getItem("patientId");
     // Map the response data to the format expected by DayPilotCalendar
     events.value = response.data.timeslots.map((timeslot) => ({
@@ -323,7 +326,7 @@ onMounted(() => {
   fetchOffices();
   loadOfficeAddress();
   loadOfficeName();
-  fetchUserId();
+  //fetchUserId();
 
   socket.on("connect", () => {
     console.log("WebSocket connected:", socket.id);

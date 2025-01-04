@@ -76,12 +76,10 @@ const calendarConfig = ref({
     alert("You can only cancel booked timeslots.");
     return;
   }
-
-
     // Confirm cancellation
     const confirmCancel = confirm(`Do you want to cancel this timeslot? ${args.e.start()} - ${args.e.end()}`);
     if (confirmCancel) {
-      await cancelTimeslot(timeslotId);
+      await cancelTimeslot(timeslotId, selectedTimeslot.patient);
     }
   },
   onTimeRangeSelected: (args) => {
@@ -98,6 +96,34 @@ const calendarConfig = ref({
   },
 
 });
+
+async function cancelTimeslot(timeslotId, patientId) {
+  const officeId = sessionStorage.getItem("OfficeId");
+
+  try {
+    const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
+      isBooked: false,
+      action: "cancel",
+      officeId: officeId,
+      patient: patientId,
+      dentist: sessionStorage.getItem("userIdentifier"),
+    });
+
+    alert("Timeslot cancelled successfully!");
+
+    // Update the calendar to reflect the cancellation
+    const updatedTimeslot = response.data.timeslot;
+    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+      events.value[eventIndex].text = "Unbooked";
+      events.value[eventIndex].backColor = "#62FB08";
+      calendarConfig.value.events = [...events.value];
+    }
+  } catch (error) {
+    console.error("Error cancelling the timeslot:", error);
+    alert("Failed to cancel the timeslot. Please try again.");
+  }
+}
 
 async function saveTimeslot() {
 
@@ -259,7 +285,7 @@ onMounted(() => {
         // Update the event data
         events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
         events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
-        events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
+        events.value[eventIndex].backColor = updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08';
 
         // Re-render the calendar
         calendarConfig.value.events = [...events.value];

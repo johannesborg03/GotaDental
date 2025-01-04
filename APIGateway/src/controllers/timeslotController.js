@@ -130,7 +130,7 @@ exports.getTimeslot = async (req, res) => {
 exports.updateTimeslot = async (req, res) => {
     console.log("CALLED");
     const { timeslot_id } = req.params;
-    const { isBooked, patient, action, officeId } = req.body;
+    const { isBooked, patient, dentist, action, officeId } = req.body;
 
     // Validate required fields
     if (!timeslot_id) {
@@ -154,36 +154,64 @@ exports.updateTimeslot = async (req, res) => {
         return res.status(400).json({ message: 'Missing OfficeId' });
     }
 
+     // Determine role based on request data
+     const role = patient && dentist ? "dentist" : patient ? "patient" : null;
+
+     if (!role) {
+        return res
+          .status(400)
+          .json({ message: "Missing user identifier. Both 'dentist' and 'patient' are required for dentist actions." });
+      }
+ try {
+    if (action === "cancel") {
+      if (role === "dentist") {
+        console.log("Dentist is canceling the appointment.");
+
+        if (!patient) {
+          return res.status(400).json({ message: "Patient identifier is required for dentist cancelation." });
+        }
+
+        // Dentist-specific logic: clear the patient and mark as unbooked
+        req.body.isBooked = false;
+        req.body.patient = null;
+      } else if (role === "patient") {
+        console.log("Patient is canceling their appointment.");
+
+        // Validate the patient cancelation
+        if (!patient) {
+          return res.status(400).json({ message: "Patient identifier is required to cancel." });
+        }
+      } else {
+        return res.status(403).json({ message: "Unauthorized role for cancellation." });
+      }
+    }
+
     // Generate a unique correlation ID
     const correlationId = uuidv4();
     const topic = `timeslot/update`;
 
-    console.log("TImeslotId:", timeslot_id);
+    const updateData = { timeslot_id, isBooked, patient, dentist, action, officeId };
+    console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
 
-    try {
-        const updateData = { timeslot_id, isBooked, patient, action, officeId }; // Update payload
-        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
+    // Publish the message to RabbitMQ
+    const response = await publishMessage(topic, updateData, correlationId);
 
-        console.log("OFFICE ID FOR THIS:", officeId);
-        // Publish the message to RabbitMQ
-        const response = await publishMessage(topic, updateData, correlationId);
-
-        if (!response.success) {
-            return res.status(500).json({ message: 'Failed to update timeslot', error: response.error });
-        }
-
-        // Respond with success
-        res.status(200).json({
-            message: 'Timeslot updated successfully',
-            timeslot: response.timeslot,
-        });
-    } catch (error) {
-        console.error('Error updating timeslot:', error);
-        res.status(500).json({
-            message: 'Failed to update timeslot',
-            error: error.message,
-        });
+    if (!response.success) {
+      return res.status(500).json({ message: "Failed to update timeslot", error: response.error });
     }
+
+    // Respond with success
+    res.status(200).json({
+      message: "Timeslot updated successfully",
+      timeslot: response.timeslot,
+    });
+  } catch (error) {
+    console.error("Error updating timeslot:", error);
+    res.status(500).json({
+      message: "Failed to update timeslot",
+      error: error.message,
+    });
+  }
 };
 
 exports.getBookedTimeslots = async (req, res) => {
