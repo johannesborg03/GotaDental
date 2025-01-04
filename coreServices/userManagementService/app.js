@@ -21,6 +21,8 @@ const patientDbConnection = connectToPatientDB();
 // Load the Patient model
 const Patient = PatientModel(patientDbConnection);
 
+const healthRoutes = require('./src/apiRoutes/health');
+
 require('dotenv').config();
 
 // Variables
@@ -44,6 +46,7 @@ app.use(cors()); // Enable CORS
 initializeSubscriptions();
 
 app.use(userRoutes);
+app.use('/api', healthRoutes);
 
 //app.use each controller:
  app.use(dentistsController);
