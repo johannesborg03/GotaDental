@@ -61,6 +61,27 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(), // Initial week
   weekStarts: 1,
   events: [],
+  eventClickHandling: "Enabled",
+  onEventClick: async (args) => {
+    const timeslotId = args.e.id();
+    const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
+
+    if (!selectedTimeslot) {
+      alert("Invalid timeslot selected.");
+      return;
+    }
+
+      // Check if the timeslot is booked using its text or isBooked property
+  if (selectedTimeslot.text !== "Booked" && !selectedTimeslot.isBooked) {
+    alert("You can only cancel booked timeslots.");
+    return;
+  }
+    // Confirm cancellation
+    const confirmCancel = confirm(`Do you want to cancel this timeslot? ${args.e.start()} - ${args.e.end()}`);
+    if (confirmCancel) {
+      await cancelTimeslot(timeslotId, selectedTimeslot.patient);
+    }
+  },
   onTimeRangeSelected: (args) => {
     // Callback triggered when a time range is selected
     // Default to "Unbooked" and set the selected timeslot
@@ -73,7 +94,36 @@ const calendarConfig = ref({
       };
     
   },
+
 });
+
+async function cancelTimeslot(timeslotId, patientId) {
+  const officeId = sessionStorage.getItem("OfficeId");
+
+  try {
+    const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
+      isBooked: false,
+      action: "cancel",
+      officeId: officeId,
+      patient: patientId,
+      dentist: sessionStorage.getItem("userIdentifier"),
+    });
+
+    alert("Timeslot cancelled successfully!");
+
+    // Update the calendar to reflect the cancellation
+    const updatedTimeslot = response.data.timeslot;
+    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
+    if (eventIndex !== -1) {
+      events.value[eventIndex].text = "Unbooked";
+      events.value[eventIndex].backColor = "#62FB08";
+      calendarConfig.value.events = [...events.value];
+    }
+  } catch (error) {
+    console.error("Error cancelling the timeslot:", error);
+    alert("Failed to cancel the timeslot. Please try again.");
+  }
+}
 
 async function saveTimeslot() {
 
@@ -161,6 +211,8 @@ async function fetchTimeslots() {
 }
 
 
+
+
 // Navigation methods
 function prevWeek() {
   const currentDate = new Date(calendarConfig.value.startDate);
@@ -233,7 +285,7 @@ onMounted(() => {
         // Update the event data
         events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
         events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
-        events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
+        events.value[eventIndex].backColor = updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08';
 
         // Re-render the calendar
         calendarConfig.value.events = [...events.value];

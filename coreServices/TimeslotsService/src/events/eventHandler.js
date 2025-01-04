@@ -4,6 +4,8 @@ const { publishMessage } = require('./publisher');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose'); // Import mongoose
 const eventEmitter = require('./eventEmitter'); // Import the global event emitter
+const { sendNotificationEmail } = require('../utils/emailService');
+
 
 
 const adjustToCET = (dateStr) => {
@@ -34,23 +36,23 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
         console.log(`Manually adjusted times to CET: Start=${startCET}, End=${endCET}`);
 
-         // Check for overlapping timeslots for the same dentist and office
-         /*
-         const existingTimeslot = await Timeslot.findOne({
-            dentist: dentist,   // Check for the same dentist
-            office: office,     // Check for the same office
-            start: startCET,    // Check for the same start time
-            end: endCET         // Check for the same end time
-        });
-        
+        // Check for overlapping timeslots for the same dentist and office
+        /*
+        const existingTimeslot = await Timeslot.findOne({
+           dentist: dentist,   // Check for the same dentist
+           office: office,     // Check for the same office
+           start: startCET,    // Check for the same start time
+           end: endCET         // Check for the same end time
+       });
+       
 
-        if (existingTimeslot) {
-            const errorResponse = { success: false, error: 'Timeslot overlaps with another one' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
+       if (existingTimeslot) {
+           const errorResponse = { success: false, error: 'Timeslot overlaps with another one' };
+           channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+           return;
+       }
 
-        */
+       */
 
 
         // Fetch Dentist ID from User Management Service using RabbitMQ
@@ -225,53 +227,43 @@ async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, chan
 }
 
 async function patientHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
-    const { timeslot_id, isBooked, patient, action, officeId } = message;
+    const { timeslot_id, isBooked, patient, dentist, action, officeId } = message;
 
     console.log('Received update timeslot message:', message);
 
     try {
         // Validate inputs
-        if (!timeslot_id || !patient || !officeId) {
-            const errorResponse = { success: false, error: 'Missing timeslot_id or patient SSN' };
+        if (!timeslot_id || !officeId) {
+            const errorResponse = { success: false, error: 'Missing timeslot_id or officeId' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        // Fetch Patient ID from User Management Service using RabbitMQ
-        const patientCorrelationId = uuidv4();
-        const patientTopic = 'patients/getBySSN';
-        const patientMessage = { patient_ssn: patient };
+        let resolvedDentistId = null;
 
-        console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
+        // If the request is from a dentist, resolve the dentist ID
+        if (dentist && action === 'cancel') {
+            console.log('Resolving dentist ID from User Management Service for username:', dentist);
 
-        const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
+            const dentistCorrelationId = uuidv4();
+            const dentistTopic = 'dentist/getByUsername';
+            const dentistMessage = { username: dentist };
 
-        if (!patientResponse || !patientResponse.success) {
-            console.error('Failed to fetch Patient ID:', patientResponse);
-            const errorResponse = { success: false, error: 'Patient not found' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
+            // Fetch Dentist ID using RabbitMQ
+            const dentistResponse = await publishMessage(dentistTopic, dentistMessage, dentistCorrelationId);
+
+            if (!dentistResponse || !dentistResponse.success) {
+                console.error('Failed to fetch Dentist ID:', dentistResponse);
+                const errorResponse = { success: false, error: 'Dentist not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            resolvedDentistId = dentistResponse.dentistId;
+            console.log('Resolved Dentist ID:', resolvedDentistId);
         }
 
-        const { patientId } = patientResponse;
-
-        console.log(`Resolved Patient ID: ${patientId}`);
-
-        // Check if patient already has 5 bookings for the same office
-        const existingBookings = await Timeslot.find({
-            isBooked: true,
-            patient: patientId,
-            office: officeId,
-        });
-
-        if (existingBookings.length >= 5) {
-            console.error('Patient has reached the maximum booking limit.');
-            const errorResponse = { success: false, error: 'You have already booked 5 timeslots for this office.' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
-
-        // Check if the timeslot is already booked
+        // Fetch the existing timeslot
         const existingTimeslot = await Timeslot.findById(timeslot_id);
 
         if (!existingTimeslot) {
@@ -284,6 +276,31 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
         if (action === 'cancel') {
             console.log('Processing timeslot cancellation:', message);
 
+            if (resolvedDentistId) {
+                console.log('Cancelation initiated by dentist');
+                console.log("existingTimeslot.dentist:", existingTimeslot.dentist, "resolvedDentistId:", resolvedDentistId);
+
+                // Check if the resolved dentist ID matches the one associated with the timeslot
+                if (!existingTimeslot.dentist.equals(resolvedDentistId)) {
+                    const errorResponse = { success: false, error: 'Unauthorized: Dentist does not match the timeslot' };
+                    channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                    return;
+                }
+            } else if (patient) {
+                console.log('Cancelation initiated by patient');
+
+                // Validate the patient identifier
+                if (!patient || existingTimeslot.patient.equals(patient)) {
+                    const errorResponse = { success: false, error: 'Unauthorized: Patient does not match the timeslot' };
+                    channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                    return;
+                }
+            } else {
+                const errorResponse = { success: false, error: 'Invalid cancelation request: No patient or dentist provided' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
             // Check if the timeslot is not booked
             if (!existingTimeslot.isBooked) {
                 const errorResponse = { success: false, error: 'Timeslot is already unbooked' };
@@ -291,29 +308,67 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
                 return;
             }
 
+            console.log("patient:", patient);
             // Unbook the timeslot
-
-
             const oldTimeslotPatient = existingTimeslot.patient;
 
             existingTimeslot.isBooked = false;
             existingTimeslot.patient = null;
 
-
             await existingTimeslot.save();
 
             console.log('Timeslot unbooked successfully:', existingTimeslot);
 
-            const updatePatientTopic = 'patient/updateAppointments';
-            const updatePatientMessage = {
-                patientId: oldTimeslotPatient, // This will be null after cancellation
-                timeslotId: timeslot_id,             // timeslot ID to identify which appointment to remove
-                action: 'cancel',                    // Action to specify it's a cancellation
-            };
 
-            console.log('Publishing message to update Patient Appointments for Patient ID (now null):', updatePatientMessage);
+            // Send email notification to the patient
+            if (oldTimeslotPatient) {
+                const patientTopic = 'patients/getById';
+                const patientMessage = { patientId: oldTimeslotPatient }; // Ensure patient_ssn is used
+                const patientCorrelationId = uuidv4();
 
-            await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+                const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
+
+                if (patientResponse && patientResponse.success) {
+                    const { email, name } = patientResponse;
+
+                    const emailSubject = 'Your Appointment Has Been Cancelled';
+                    const emailText = `Dear ${name},\n\nWe regret to inform you that your appointment scheduled for ${existingTimeslot.start} has been cancelled by your dentist. Please contact the office to reschedule.\n\nBest regards,\nThe Team`;
+
+                    await sendNotificationEmail(email, emailSubject, emailText);
+                    console.log('Notification email sent to:', email);
+                } else {
+                    console.error('Failed to fetch patient details for email notification:', patientResponse);
+                }
+            }
+
+
+            // Publish message to update Patient Appointments if patient exists
+            if (oldTimeslotPatient) {
+                const updatePatientTopic = 'patient/updateAppointments';
+                const updatePatientMessage = {
+                    patientId: oldTimeslotPatient,
+                    timeslotId: timeslot_id,
+                    action: 'cancel',
+                };
+
+                console.log('Publishing message to update Patient Appointments:', updatePatientMessage);
+
+                await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+            }
+
+            // Publish message to update Dentist Appointments
+            if (resolvedDentistId) {
+                const updateDentistTopic = 'dentists/updateTimeslot';
+                const updateDentistMessage = {
+                    dentistId: resolvedDentistId,
+                    timeslotId: timeslot_id,
+                    action: 'cancel',
+                };
+
+                console.log('Publishing message to update Dentist Timeslots:', updateDentistMessage);
+
+                await publishMessage(updateDentistTopic, updateDentistMessage, uuidv4());
+            }
 
             const successResponse = { success: true, timeslot: existingTimeslot };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
@@ -321,35 +376,74 @@ async function patientHandleUpdateTimeslot(message, replyTo, correlationId, chan
             return;
         }
 
-        if (existingTimeslot.isBooked) {
-            const errorResponse = { success: false, error: 'Timeslot already booked' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
+
+        // Handle booking (existing logic remains unchanged)
+        if (action === 'book') {
+            console.log('Processing timeslot booking:', message);
+
+            if (existingTimeslot.isBooked) {
+                const errorResponse = { success: false, error: 'Timeslot already booked' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            // Fetch Patient ID from User Management Service using RabbitMQ
+            const patientCorrelationId = uuidv4();
+            const patientTopic = 'patients/getBySSN';
+            const patientMessage = { patient_ssn: patient };
+
+            console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
+
+            const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
+
+            if (!patientResponse || !patientResponse.success) {
+                console.error('Failed to fetch Patient ID:', patientResponse);
+                const errorResponse = { success: false, error: 'Patient not found' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            const { patientId } = patientResponse;
+
+            console.log(`Resolved Patient ID: ${patientId}`);
+
+            // Check if patient already has 5 bookings for the same office
+            const existingBookings = await Timeslot.find({
+                isBooked: true,
+                patient: patientId,
+                office: officeId,
+            });
+
+            if (existingBookings.length >= 5) {
+                console.error('Patient has reached the maximum booking limit.');
+                const errorResponse = { success: false, error: 'You have already booked 5 timeslots for this office.' };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+                return;
+            }
+
+            // Update the timeslot
+            existingTimeslot.isBooked = true;
+            existingTimeslot.patient = patientId;
+
+            await existingTimeslot.save();
+
+            console.log('Timeslot updated successfully:', existingTimeslot);
+
+            // Publish a message to update the patient's appointments array
+            const updatePatientTopic = 'patient/updateAppointments';
+            const updatePatientMessage = {
+                patientId,
+                timeslotId: timeslot_id,
+                action: 'book',
+            };
+
+            console.log(`Publishing message to update Patient Appointments for Patient ID: ${patientId}`);
+
+            await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
+
+            const successResponse = { success: true, timeslot: existingTimeslot };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
         }
-
-        // Update the timeslot
-        existingTimeslot.isBooked = true;
-        existingTimeslot.patient = patientId;
-
-        await existingTimeslot.save();
-
-        console.log('Timeslot updated successfully:', existingTimeslot);
-
-        // Publish a message to update the patient's appointments array
-        const updatePatientTopic = 'patient/updateAppointments';
-        const updatePatientMessage = {
-            patientId,
-            timeslotId: timeslot_id,
-            action: 'book',
-        };
-
-        console.log(`Publishing message to update Patient Appointments for Patient ID: ${patientId}`);
-
-        await publishMessage(updatePatientTopic, updatePatientMessage, uuidv4());
-
-
-        const successResponse = { success: true, timeslot: existingTimeslot };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error updating timeslot:', error);
         const errorResponse = { success: false, error: 'Failed to update timeslot' };
@@ -471,7 +565,7 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
-        
+
 
         const successResponse = { success: true, timeslots: bookedTimeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
