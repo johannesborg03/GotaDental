@@ -14,5 +14,9 @@ COPY . .
 # Expose the application's port
 EXPOSE 4000
 
+# Add a Docker health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:4000/api/system-health || exit 1
+    
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]
