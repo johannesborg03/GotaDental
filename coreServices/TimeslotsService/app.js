@@ -8,6 +8,7 @@ const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
 const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
+const healthRoutes = require('./src/apiRoutes/health');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
@@ -48,6 +49,7 @@ initializeSubscriptions();
 //app.use(timeslotsRoutes);
 app.use('/api', timeslotsRoutes);
 
+app.use('/api', healthRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
