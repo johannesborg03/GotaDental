@@ -5,6 +5,7 @@ const officeRoutes = require('./src/apiRoutes/officeRoutes');
 const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 const OfficeModel = require('./src/models/Office'); 
+const healthRoutes = require('./src/apiRoutes/health');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
@@ -31,6 +32,7 @@ app.use(cors()); // Enable CORS
 initializeOfficeSubscriptions();
 
 app.use(officeRoutes);
+app.use('/api', healthRoutes);
 
 // 404 Handler
 app.use('/api/*', (req, res) => {
