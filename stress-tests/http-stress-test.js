@@ -40,3 +40,28 @@ async function deleteTimeslot(officeId, dentistUsername, timeslotId) {
         console.error('Error deleting timeslot:', error.message);
     }
 }
+
+// Run stress test
+(async () => {
+    const tasks = [];
+    for (let i = 0; i < NUM_REQUESTS; i++) {
+        // Alternate between the tests
+        if (i % 3 === 0) {
+            tasks.push(fetchAvailableTimeslots());
+        } else if (i % 3 === 1) {
+            tasks.push(createTimeslot(`dentist_${Math.floor(Math.random() * 100)}`));
+        } else {
+            tasks.push(deleteTimeslot('office_1', 'dentist_1', `timeslot_${i}`));
+        }
+
+        // Limit concurrency
+        if (tasks.length >= CONCURRENCY) {
+            await Promise.all(tasks);
+            tasks.length = 0; // Clear completed tasks
+        }
+    }
+
+    // Wait for any remaining tasks
+    await Promise.all(tasks);
+    console.log('HTTP stress test completed.');
+})();
