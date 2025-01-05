@@ -12,3 +12,19 @@ async function fetchAvailableTimeslots() {
         console.error('Error fetching available timeslots:', error.message);
     }
 }
+
+// Test 2: Create a new timeslot
+async function createTimeslot(dentistUsername) {
+    try {
+        const response = await axios.post(
+            `http://timeslot:3003//api/timeslots/${dentistUsername}/timeslot`,
+            {
+                date_and_time: new Date().toISOString(),
+                timeslot_state: 0
+            }
+        );
+        console.log('Created timeslot:', response.status);
+    } catch (error) {
+        console.error('Error creating timeslot:', error.message);
+    }
+}
