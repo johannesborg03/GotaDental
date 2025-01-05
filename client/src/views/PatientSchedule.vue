@@ -86,7 +86,43 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(),
   weekStarts: 1,
   events: [],
-  timeRangeSelectedHandling: "Disabled",
+  timeRangeSelectedHandling: "Enabled",
+  onTimeRangeSelected: async (args) => {
+    const startTime = args.start.toString();
+    const endTime = args.end.toString();
+
+    const confirmCreation = confirm(`Do you want to create a timeslot from ${startTime} to ${endTime}?`);
+
+    if (confirmCreation) {
+        try {
+            const payload = {
+                start: startTime,
+                end: endTime,
+                patient: sessionStorage.getItem('userIdentifier'),
+                createdBy: 'patient',
+                officeId: sessionStorage.getItem('OfficeId'),
+            };
+
+            const response = await axios.post("http://localhost:4000/api/timeslots", payload);
+            alert("Timeslot created successfully!");
+
+            // Add the created timeslot to the calendar
+            events.value.push({
+                id: response.data.timeslot._id,
+                text: "Requested",
+                start: response.data.timeslot.start,
+                end: response.data.timeslot.end,
+                backColor: "#FFCC00", // Yellow for patient-created timeslots
+            });
+            calendarConfig.value.events = [...events.value];
+        } catch (error) {
+            console.error("Error creating timeslot:", error);
+            alert("Failed to create timeslot. Please try again.");
+        }
+    }
+
+    args.preventDefault();
+},
   onEventRender: (args) => {
     // Dynamically change the event background color based on booking status
     const event = args.data;
