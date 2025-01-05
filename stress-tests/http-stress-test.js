@@ -17,7 +17,7 @@ async function fetchAvailableTimeslots() {
 async function createTimeslot(dentistUsername) {
     try {
         const response = await axios.post(
-            `http://timeslot:3003//api/timeslots/${dentistUsername}/timeslot`,
+            `http://timeslot:3003/api/timeslots/${dentistUsername}/timeslot`,
             {
                 date_and_time: new Date().toISOString(),
                 timeslot_state: 0
@@ -26,5 +26,17 @@ async function createTimeslot(dentistUsername) {
         console.log('Created timeslot:', response.status);
     } catch (error) {
         console.error('Error creating timeslot:', error.message);
+    }
+}
+
+// Test 3: Delete a timeslot
+async function deleteTimeslot(officeId, dentistUsername, timeslotId) {
+    try {
+        const response = await axios.delete(
+            `http://timeslot:3003/api/timeslots/${officeId}/${dentistUsername}/${timeslotId}`
+        );
+        console.log('Deleted timeslot:', response.status);
+    } catch (error) {
+        console.error('Error deleting timeslot:', error.message);
     }
 }
