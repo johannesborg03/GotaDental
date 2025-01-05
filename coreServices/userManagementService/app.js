@@ -6,6 +6,7 @@ const { initializeSubscriptions } = require('./src/events/eventHandler');
 
 const { connectToDentistDB } = require('./src/utils/userDbConnect');
 const { connectToPatientDB } = require('./src/utils/userDbConnect');
+const { startHealthMonitoring } = require('./systemHealth');
 
 
 const DentistModel = require('./src/models/Dentist'); 
@@ -32,6 +33,7 @@ var port = process.env.PORT || 3004; // Use the port defined in .env
 var dentistsController = require('./src/controllers/Dentists');
 var patientsController = require('./src/controllers/Patients')
 
+startHealthMonitoring();
 
 // Create Express app
 var app = express();

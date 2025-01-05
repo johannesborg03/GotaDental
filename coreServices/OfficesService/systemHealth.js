@@ -3,12 +3,12 @@ const amqp = require('amqplib');
 const RABBITMQ_URL = 'amqp://rabbitmq:5672';
 const HEALTH_TOPIC = 'health.check.office';
 
-(async () => {
+async function startHealthMonitoring() {
     try {
         const connection = await amqp.connect(RABBITMQ_URL);
         const channel = await connection.createChannel();
 
-        // Publish health status periodically
+        // Periodically publish health status
         setInterval(async () => {
             const healthStatus = {
                 service: 'Office Service',
@@ -26,4 +26,6 @@ const HEALTH_TOPIC = 'health.check.office';
     } catch (error) {
         console.error('Error in Timeslot Service health monitoring:', error);
     }
-})();
+}
+
+module.exports = { startHealthMonitoring };

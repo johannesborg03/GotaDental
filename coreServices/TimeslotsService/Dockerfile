@@ -19,9 +19,5 @@ ENV PORT=3003
 ENV BOOKING_DB_URI=mongodb://mongodb:27017/booking-database
 ENV RABBITMQ_URI=amqp://rabbitmq:5672
 
-# Add a Docker health check (remove if it cause issues)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3003/api/health || exit 1
-
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]

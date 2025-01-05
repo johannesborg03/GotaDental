@@ -20,9 +20,5 @@ ENV DENTIST_DB_URI=mongodb://mongodb:27017/dentist-database
 ENV PATIENT_DB_URI=mongodb://mongodb:27017/patient-database
 ENV RABBITMQ_URI=amqp://rabbitmq:5672
 
-# Add a Docker health check (remove if it cause issues)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3004/api/health || exit 1
-
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]

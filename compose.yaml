@@ -48,7 +48,8 @@ services:
     ports:
       - "3003:3003"
     environment:
-      - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+      - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database 
+      - RABBITMQ_URI=amqp://rabbitmq:5672
       - EMAIL_USER=dentalgota@gmail.com
       - EMAIL_PASS=oofe rtsd jtrc otrs
       - SMTP_HOST=smtp.gmail.com
@@ -83,6 +84,7 @@ services:
       - "3005:3005"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+      - RABBITMQ_URI=amqp://rabbitmq:5672
     networks:
       - mynetwork
     develop:
@@ -116,6 +118,7 @@ services:
     environment:
       - PATIENT_DB_URI=mongodb://patientdb:27017/patient-database
       - DENTIST_DB_URI=mongodb://dentistdb:27017/dentist-database
+      - RABBITMQ_URI=amqp://rabbitmq:5672
     networks:
       - mynetwork
     develop:
@@ -132,7 +135,6 @@ services:
           action: sync+restart
           ignore:
             - node_modules/
-          
 
   # Client Service
   client:
@@ -150,7 +152,7 @@ services:
           target: /app
           action: rebuild
           ignore:
-          - node_modules
+            - node_modules
         - path: ./client
           target: /app
           action: sync+restart
