@@ -1,57 +1,41 @@
 const axios = require('axios');
 
+const API_GATEWAY_URL = 'http://localhost:4000'; // Replace with your API Gateway URL
 const NUM_REQUESTS = 1000; // Total number of requests
 const CONCURRENCY = 50; // Number of requests to run in parallel
 
-// Test 1: Fetch available timeslots
+// Test 1: Fetch available timeslots via API Gateway
 async function fetchAvailableTimeslots() {
     try {
-        const response = await axios.get(`http://timeslot:3003/api/timeslots/available`);
+        const response = await axios.get(`${API_GATEWAY_URL}/api/timeslots/available`);
         console.log('Available timeslots:', response.status);
     } catch (error) {
         console.error('Error fetching available timeslots:', error.message);
     }
 }
 
-// Test 2: Create a new timeslot
-async function createTimeslot(dentistUsername) {
+// Test 2: Create a new timeslot via API Gateway
+async function createTimeslot() {
     try {
-        const response = await axios.post(
-            `http://timeslot:3003/api/timeslots/${dentistUsername}/timeslot`,
-            {
-                date_and_time: new Date().toISOString(),
-                timeslot_state: 0
-            }
-        );
+        const response = await axios.post(`${API_GATEWAY_URL}/api/timeslots`, {
+            date_and_time: new Date().toISOString(),
+            timeslot_state: 0,
+            dentist: `dentist_${Math.floor(Math.random() * 10)}`,
+        });
         console.log('Created timeslot:', response.status);
     } catch (error) {
         console.error('Error creating timeslot:', error.message);
     }
 }
 
-// Test 3: Delete a timeslot
-async function deleteTimeslot(officeId, dentistUsername, timeslotId) {
-    try {
-        const response = await axios.delete(
-            `http://timeslot:3003/api/timeslots/${officeId}/${dentistUsername}/${timeslotId}`
-        );
-        console.log('Deleted timeslot:', response.status);
-    } catch (error) {
-        console.error('Error deleting timeslot:', error.message);
-    }
-}
-
-// Run stress test
+// Run HTTP stress test
 (async () => {
     const tasks = [];
     for (let i = 0; i < NUM_REQUESTS; i++) {
-        // Alternate between the tests
-        if (i % 3 === 0) {
+        if (i % 2 === 0) {
             tasks.push(fetchAvailableTimeslots());
-        } else if (i % 3 === 1) {
-            tasks.push(createTimeslot(`dentist_${Math.floor(Math.random() * 100)}`));
         } else {
-            tasks.push(deleteTimeslot('office_1', 'dentist_1', `timeslot_${i}`));
+            tasks.push(createTimeslot());
         }
 
         // Limit concurrency
@@ -61,7 +45,6 @@ async function deleteTimeslot(officeId, dentistUsername, timeslotId) {
         }
     }
 
-    // Wait for any remaining tasks
-    await Promise.all(tasks);
+    await Promise.all(tasks); // Wait for remaining tasks
     console.log('HTTP stress test completed.');
 })();
