@@ -49,6 +49,10 @@ services:
       - "3003:3003"
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
+      - EMAIL_USER=dentalgota@gmail.com
+      - EMAIL_PASS=oofe rtsd jtrc otrs
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
     networks:
       - mynetwork
     develop:

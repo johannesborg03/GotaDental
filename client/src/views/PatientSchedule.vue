@@ -87,6 +87,13 @@ const calendarConfig = ref({
   weekStarts: 1,
   events: [],
   timeRangeSelectedHandling: "Disabled",
+  onEventRender: (args) => {
+    // Dynamically change the event background color based on booking status
+    const event = args.data;
+    if (event.color) {
+      args.element.style.backgroundColor = event.color; // Apply background color for booked or unbooked
+    }
+  },
   eventClickHandling: "Enabled", // Enable event clicking
 
   onEventClick: async (args) => {
@@ -125,13 +132,6 @@ const calendarConfig = ref({
       alert("This timeslot is already booked by another user.");
     }
   },
-  onEventRender: (args) => {
-    // Dynamically change the event background color based on booking status
-    const event = args.data;
-    if (event.color) {
-      args.element.style.backgroundColor = event.color; // Apply background color for booked or unbooked
-    }
-  }
 });
 
 
@@ -165,22 +165,25 @@ function handleOfficeChange() {
   }
 }
 
+
 async function fetchUserId() {
 
   try {
-  let patient = sessionStorage.getItem("userIdentifier");
-  const response = await axios.get(`http://localhost:4000/api/patients/${patient}`);
-  const patientId = response;
-  console.log("Response:", response);
-  // Store the patientId in sessionStorage
-  sessionStorage.setItem("patientId", response.data.patient.patientId); 
-  console.log("patient ID:", response.data.patient.patientId);
+    let patient = sessionStorage.getItem("userIdentifier");
+    const response = await axios.get(`http://localhost:4000/api/patients/${patient}`);
+    const patientId = response;
+    console.log("Response:", response);
+    // Store the patientId in sessionStorage
+    sessionStorage.setItem("patientId", response.data.patient.patientId);
+    console.log("patient ID:", response.data.patient.patientId);
+
 
   } catch (error) {
     console.error("Error fetching PatientId:", error);
     alert("Failed to fetch PatientId. Please try again.");
   }
 }
+
 
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
@@ -195,7 +198,7 @@ async function fetchTimeslots() {
 
 
 
-    fetchUserId();
+    // fetchUserId();
     const patientId = sessionStorage.getItem("patientId");
     // Map the response data to the format expected by DayPilotCalendar
     events.value = response.data.timeslots.map((timeslot) => ({
@@ -272,14 +275,7 @@ async function cancelTimeslot(timeslotId) {
 
     alert("Appointment cancelled successfully!");
 
-    // Update the calendar to reflect the cancellation
-    const updatedTimeslot = response.data.timeslot;
-    const eventIndex = events.value.findIndex((event) => event.id === updatedTimeslot._id);
-    if (eventIndex !== -1) {
-      events.value[eventIndex].text = "Unbooked"; //Change the status back to "Unbooked"
-      events.value[eventIndex].backColor = '62FB08';  // Change the status back to "Green Color"
-      calendarConfig.value.events = [...events.value]; // Re-render the calendar
-    }
+  
   } catch (error) {
     console.error("Error cancelling the timeslot:", error);
     alert("Failed to cancel the timeslot. Please try again.");
@@ -333,7 +329,7 @@ onMounted(() => {
   socket.on("timeslot/create", (newTimeslot) => {
     console.log("Received timeslot new Timeslot Created", newTimeslot);
     console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
-    
+
 
     if (newTimeslot.office === selectedOfficeId.value) {
       events.value.push({
@@ -342,9 +338,9 @@ onMounted(() => {
         start: newTimeslot.start,
         end: newTimeslot.end,
         backColor: '#62FB08'
- 
+
       });
-     calendarConfig.value.events = [...events.value];
+      calendarConfig.value.events = [...events.value];
       console.log("Updated events after WebSocket create:", events.value);
     }
   });
@@ -353,7 +349,8 @@ onMounted(() => {
   socket.on("timeslot/update", (updatedTimeslot) => {
     console.log("Received timeslot update:", updatedTimeslot);
 
-    const patientId = sessionStorage.getItem("patiendId");
+    const patientId = sessionStorage.getItem("patientId");
+
 
 
     // Find the corresponding timeslot in the events array
@@ -364,8 +361,17 @@ onMounted(() => {
       // Update the event data
       events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
       events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
-      events.value[eventIndex].backColor = updatedTimeslot.patient === patientId ? 'yellow' : (updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08');
+      
 
+         // Update the color logic
+    events.value[eventIndex].backColor = updatedTimeslot.patient === null
+      ? '#62FB08' // Green for unbooked timeslots
+      : (updatedTimeslot.patient === patientId 
+          ? 'yellow' // Yellow for the patient who booked
+          : '#EC1E1E'); // Red for other patients
+
+          console.log("Updated event color:", events.value[eventIndex].backColor);
+        console.log("patientUpdated Timeslot:", updatedTimeslot.patient, "patientId:", patientId);
       // Re-render the calendar
       calendarConfig.value.events = [...events.value];
       console.log("Updated events after WebSocket update:", events.value);
