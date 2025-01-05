@@ -76,3 +76,9 @@ async function subscribeToMessages() {
         console.error('Error in subscribing to messages:', error);
     }
 }
+
+// Run both publishing and subscribing for stress testing
+(async () => {
+    console.log('Starting MQTT stress test...');
+    await Promise.all([publishMessages(), subscribeToMessages()]);
+})();
