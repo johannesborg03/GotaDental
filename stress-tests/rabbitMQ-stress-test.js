@@ -46,3 +46,33 @@ async function publishMessages() {
         console.error('Error in publishing messages:', error);
     }
 }
+
+// Function to simulate message subscription
+async function subscribeToMessages() {
+    try {
+        const connection = await amqp.connect(RABBITMQ_URL);
+        const channel = await connection.createChannel();
+
+        // Assert exchange (fanout for broadcasting)
+        await channel.assertExchange(TIMESLOT_CREATE_TOPIC, 'fanout', { durable: false });
+
+        // Assert and bind to a temporary queue
+        const { queue } = await channel.assertQueue('', { exclusive: true });
+        await channel.bindQueue(queue, TIMESLOT_CREATE_TOPIC, '');
+
+        console.log(`Subscribed to topic: ${TIMESLOT_CREATE_TOPIC}`);
+
+        channel.consume(
+            queue,
+            (msg) => {
+                const message = JSON.parse(msg.content.toString());
+                console.log('Received message:', message);
+
+                // Here, simulate processing time or validations
+            },
+            { noAck: true }
+        );
+    } catch (error) {
+        console.error('Error in subscribing to messages:', error);
+    }
+}
