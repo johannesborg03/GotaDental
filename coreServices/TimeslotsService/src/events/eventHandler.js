@@ -57,22 +57,34 @@ async function handleCreatePatientTimeslot(message, replyTo, correlationId, chan
 
         console.log(`Resolved Patient ID: ${patientId}`);
 
+        // Validate the resolved Patient ID
+        if (!mongoose.Types.ObjectId.isValid(patientId)) {
+            const errorResponse = { success: false, error: 'Invalid Patient ID' };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
+            return;
+        }
 
-    
-        
-        // Ceck for existing timeslot created by the same patient in the same office
+        // Check for existing timeslot created by the same patient in the same office
         const existingTimeslot = await Timeslot.findOne({
             patient: patientId,
+            office: officeId,
             createdBy: 'patient'
         });
+        console.log("existingTimeslot after query:", existingTimeslot);
+        console.log("officeId:", officeId);
+        console.log("patientId:", patientId);
+        console.log("createdBy:", createdBy);
+        console.log("existingTimeslot:", existingTimeslot);
+
         console.log("existing timeslot:", officeId, patientId, createdBy);
         console.log("existingTimeslot", existingTimeslot);
         if (existingTimeslot) {
             const errorResponse = { success: false, error: 'A timeslot created by this patient already exists in this office.' };
-            console.error('Existing timeslot found:', existingTimeslot);
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
+        
+            return; // This prevents further execution
         }
+
 
 
         // Check for overlapping timeslots
@@ -103,7 +115,7 @@ async function handleCreatePatientTimeslot(message, replyTo, correlationId, chan
         const newTimeslot = new Timeslot({
             start: startCET.toISOString(), // Save as ISO string in UTC
             end: endCET.toISOString(),     // Save the converted CET time
-            patient_ssn: patientId,
+            patient: patientId,
             office: officeId,
             isBooked: false,
             createdBy: 'patient',

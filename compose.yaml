@@ -19,6 +19,8 @@ services:
       - bookingdata:/data/db
     networks:
       - mynetwork
+    ports:
+      - "27018:27017"  # Maps container port 27017 to host port 27018
 
   # MongoDB for Patient DB
   patientdb:
@@ -27,6 +29,8 @@ services:
       - patientdata:/data/db
     networks:
       - mynetwork
+    ports:
+      - "27019:27017"
 
   # MongoDB for Dentist DB
   dentistdb:
@@ -35,6 +39,8 @@ services:
       - dentistdata:/data/db
     networks:
       - mynetwork
+    ports:
+      - "27020:27017" 
 
   # Timeslot Service
   timeslot:

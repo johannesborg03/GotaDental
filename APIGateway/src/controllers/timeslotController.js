@@ -31,6 +31,10 @@ exports.createTimeslot = async (req, res) => {
             // Publish the message to RabbitMQ
             const response = await publishMessage(topic, timeslotData, patientCorrelationId, officeId, patient);
 
+            if (!response.success) {
+                return res.status(400).json({ message: response.error || 'Failed to create timeslot' });
+            }
+            
             // Respond with success
             res.status(201).json({
                 message: 'Timeslot sent to Timeslot Service',

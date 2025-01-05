@@ -104,20 +104,25 @@ const calendarConfig = ref({
             };
 
             const response = await axios.post("http://localhost:4000/api/timeslots", payload);
-            alert("Timeslot created successfully!");
 
-            // Add the created timeslot to the calendar
-            events.value.push({
-                id: response.data.timeslot._id,
-                text: "Requested",
-                start: response.data.timeslot.start,
-                end: response.data.timeslot.end,
-                backColor: "#FFCC00", // Yellow for patient-created timeslots
-            });
-            calendarConfig.value.events = [...events.value];
+            if (response.status === 201) {
+                alert("Timeslot created successfully!");
+
+                // Add the created timeslot to the calendar
+                events.value.push({
+                    id: response.data.timeslot._id,
+                    text: "Requested",
+                    start: response.data.timeslot.start,
+                    end: response.data.timeslot.end,
+                    backColor: "#FFCC00", // Yellow for patient-created timeslots
+                });
+                calendarConfig.value.events = [...events.value];
+            } else {
+                throw new Error(response.data.message);
+            }
         } catch (error) {
             console.error("Error creating timeslot:", error);
-            alert("Failed to create timeslot. Please try again.");
+            alert(error.response?.data?.message || "Failed to create timeslot. Please try again.");
         }
     }
 
