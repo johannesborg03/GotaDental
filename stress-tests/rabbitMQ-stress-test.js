@@ -1,8 +1,8 @@
 const amqp = require('amqplib');
 
-const RABBITMQ_URL = 'amqp://rabbitmq:5672'; // RabbitMQ service from Docker
-const NUM_MESSAGES = 1000; // Total number of messages for stress testing
-const TIMESLOT_CREATE_TOPIC = 'timeslot/create'; // Example topic for timeslot creation
+const RABBITMQ_URL = 'amqp://rabbitmq:5672';
+const NUM_MESSAGES = 1000; // Total messages for stress testing
+const TIMESLOT_TOPIC = 'timeslot/create'; // RabbitMQ topic
 
 // Function to simulate message publishing
 async function publishMessages() {
@@ -10,29 +10,24 @@ async function publishMessages() {
         const connection = await amqp.connect(RABBITMQ_URL);
         const channel = await connection.createChannel();
 
-        // Assert exchange (fanout for broadcasting)
-        await channel.assertExchange(TIMESLOT_CREATE_TOPIC, 'fanout', { durable: false });
+        // Assert the topic exchange
+        await channel.assertExchange(TIMESLOT_TOPIC, 'fanout', { durable: false });
 
         for (let i = 0; i < NUM_MESSAGES; i++) {
             const message = {
                 start: new Date().toISOString(),
-                end: new Date(Date.now() + 3600000).toISOString(), // 1 hour later
-                dentist: `dentist_${i % 10}`, // Simulating 10 dentists
-                office: `office_${i % 5}`, // Simulating 5 offices
-                officeId: `office_${i % 5}`,
+                end: new Date(Date.now() + 3600000).toISOString(),
+                dentist: `dentist_${i % 10}`,
+                office: `office_${i % 5}`,
                 isBooked: false,
-                patient: null,
             };
 
-            // Publish the message to RabbitMQ
+            // Publish message to the topic
             channel.publish(
-                TIMESLOT_CREATE_TOPIC,
+                TIMESLOT_TOPIC,
                 '',
                 Buffer.from(JSON.stringify(message)),
-                {
-                    correlationId: `${i}`,
-                    replyTo: '', // Not expecting a reply here
-                }
+                { correlationId: `${i}` }
             );
 
             console.log(`Published message ${i + 1}/${NUM_MESSAGES}`);
@@ -41,9 +36,9 @@ async function publishMessages() {
         setTimeout(() => {
             connection.close();
             console.log('Publishing completed.');
-        }, 500); // Delay to ensure all messages are processed
+        }, 500);
     } catch (error) {
-        console.error('Error in publishing messages:', error);
+        console.error('Error in publishing messages:', error.message);
     }
 }
 
@@ -53,31 +48,30 @@ async function subscribeToMessages() {
         const connection = await amqp.connect(RABBITMQ_URL);
         const channel = await connection.createChannel();
 
-        // Assert exchange (fanout for broadcasting)
-        await channel.assertExchange(TIMESLOT_CREATE_TOPIC, 'fanout', { durable: false });
+        // Assert the topic exchange
+        await channel.assertExchange(TIMESLOT_TOPIC, 'fanout', { durable: false });
 
         // Assert and bind to a temporary queue
         const { queue } = await channel.assertQueue('', { exclusive: true });
-        await channel.bindQueue(queue, TIMESLOT_CREATE_TOPIC, '');
+        await channel.bindQueue(queue, TIMESLOT_TOPIC, '');
 
-        console.log(`Subscribed to topic: ${TIMESLOT_CREATE_TOPIC}`);
+        console.log(`Subscribed to topic: ${TIMESLOT_TOPIC}`);
 
-        channel.consume(
-            queue,
-            (msg) => {
-                const message = JSON.parse(msg.content.toString());
-                console.log('Received message:', message);
+        channel.consume(queue, (msg) => {
+            const message = JSON.parse(msg.content.toString());
+            console.log('Received message:', message);
 
-                // Here, simulate processing time or validations
-            },
-            { noAck: true }
-        );
+            // Simulate processing delay
+            setTimeout(() => {
+                console.log('Processed message:', message);
+            }, Math.random() * 1000);
+        });
     } catch (error) {
-        console.error('Error in subscribing to messages:', error);
+        console.error('Error in subscribing to messages:', error.message);
     }
 }
 
-// Run both publishing and subscribing for stress testing
+// Run MQTT stress test
 (async () => {
     console.log('Starting MQTT stress test...');
     await Promise.all([publishMessages(), subscribeToMessages()]);
