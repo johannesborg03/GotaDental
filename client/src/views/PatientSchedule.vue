@@ -257,11 +257,21 @@ async function fetchTimeslots() {
       })
       .map((timeslot) => ({
         id: timeslot._id,
-        text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
+        text: timeslot.patient === patientId && timeslot.createdBy === "patient" 
+          ? "Notice" 
+          : timeslot.isBooked 
+          ? "Booked" 
+          : "Free",
         start: timeslot.start,
         end: timeslot.end,
         patient: timeslot.patient,
-        backColor: timeslot.patient === patientId ? 'yellow' : (timeslot.isBooked ? '#EC1E1E' : '#62FB08')
+        backColor: timeslot.patient === patientId && timeslot.createdBy === "patient" 
+          ? '#05D5E6' //For notification slot
+          : timeslot.patient === patientId 
+          ? 'yellow' // Yellow for patient-booked timeslots
+          : timeslot.isBooked 
+          ? '#EC1E1E' // Red for other booked timeslots
+          : '#62FB08' // Green for unbooked timeslots
       }));
 
     // Update the calendar configuration
