@@ -181,6 +181,18 @@ services:
           ignore:
             - node_modules
 
+  # Stress Testing Service
+  stress-tests:
+    build:
+      context: ./stress-tests
+    networks:
+      - mynetwork
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+
 networks:
   mynetwork:
     external: true

@@ -1,50 +1,68 @@
-const axios = require('axios');
+const amqp = require("amqplib");
 
-const API_GATEWAY_URL = 'http://localhost:4000'; // Replace with your API Gateway URL
-const NUM_REQUESTS = 1000; // Total number of requests
-const CONCURRENCY = 50; // Number of requests to run in parallel
+const RABBITMQ_URL = "amqp://rabbitmq:5672";
+const NUM_MESSAGES = 1000; // Total number of requests/messages
+const CONCURRENCY = 50; // Number of concurrent messages
 
-// Test 1: Fetch available timeslots via API Gateway
+// Topics for stress testing
+const FETCH_AVAILABLE_TIMESLOTS_TOPIC = "timeslot/available/retrieve";
+const CREATE_TIMESLOT_TOPIC = "timeslot/create";
+
+async function publishMessage(topic, message) {
+    try {
+        const connection = await amqp.connect(RABBITMQ_URL);
+        const channel = await connection.createChannel();
+        await channel.assertExchange(topic, "fanout", { durable: false });
+
+        channel.publish(topic, "", Buffer.from(JSON.stringify(message)));
+        console.log(`Message published to topic: ${topic}`);
+        await channel.close();
+        await connection.close();
+    } catch (error) {
+        console.error(`Error publishing to topic ${topic}:`, error.message);
+    }
+}
+
+// Stress test for fetching available timeslots
 async function fetchAvailableTimeslots() {
-    try {
-        const response = await axios.get(`${API_GATEWAY_URL}/api/timeslots/available`);
-        console.log('Available timeslots:', response.status);
-    } catch (error) {
-        console.error('Error fetching available timeslots:', error.message);
-    }
+    const message = {
+        action: "fetch",
+        payload: {},
+    };
+    await publishMessage(FETCH_AVAILABLE_TIMESLOTS_TOPIC, message);
 }
 
-// Test 2: Create a new timeslot via API Gateway
+// Stress test for creating a timeslot
 async function createTimeslot() {
-    try {
-        const response = await axios.post(`${API_GATEWAY_URL}/api/timeslots`, {
-            date_and_time: new Date().toISOString(),
-            timeslot_state: 0,
-            dentist: `dentist_${Math.floor(Math.random() * 10)}`,
-        });
-        console.log('Created timeslot:', response.status);
-    } catch (error) {
-        console.error('Error creating timeslot:', error.message);
-    }
+    const message = {
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + 3600000).toISOString(),
+        dentist: `dentist_${Math.floor(Math.random() * 100)}`,
+        office: `office_${Math.floor(Math.random() * 10)}`,
+        isBooked: false,
+    };
+    await publishMessage(CREATE_TIMESLOT_TOPIC, message);
 }
 
-// Run HTTP stress test
+// Run stress tests
 (async () => {
+    console.log("Starting stress tests...");
+
     const tasks = [];
-    for (let i = 0; i < NUM_REQUESTS; i++) {
+    for (let i = 0; i < NUM_MESSAGES; i++) {
         if (i % 2 === 0) {
             tasks.push(fetchAvailableTimeslots());
         } else {
             tasks.push(createTimeslot());
         }
 
-        // Limit concurrency
         if (tasks.length >= CONCURRENCY) {
             await Promise.all(tasks);
             tasks.length = 0; // Clear completed tasks
         }
     }
 
-    await Promise.all(tasks); // Wait for remaining tasks
-    console.log('HTTP stress test completed.');
+    // Process remaining tasks
+    await Promise.all(tasks);
+    console.log("Stress tests completed.");
 })();
