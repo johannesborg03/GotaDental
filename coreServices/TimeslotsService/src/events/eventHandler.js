@@ -149,13 +149,13 @@ async function handleCreatePatientTimeslot(message, replyTo, correlationId, chan
 async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
     // Extract data from the received message
-    const { start, end, dentist, office } = message;
+    const { start, end, dentist, office, createdBy } = message;
 
     console.log("Message:", message);
     try {
         // Validate the input data
         if (!start || !end || !dentist || !office) {
-            const errorResponse = { success: false, error: 'Missing required fields' };
+            const errorResponse = { success: false, error: 'Missing required fields or invalid "createdBy"' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
@@ -166,25 +166,6 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
         const endCET = adjustToCET(end);
 
         console.log(`Manually adjusted times to CET: Start=${startCET}, End=${endCET}`);
-
-        // Check for overlapping timeslots for the same dentist and office
-        /*
-        const existingTimeslot = await Timeslot.findOne({
-           dentist: dentist,   // Check for the same dentist
-           office: office,     // Check for the same office 
-           start: startCET,    // Check for the same start time
-           end: endCET         // Check for the same end time 
-       });
-       
-
-       if (existingTimeslot) {
-           const errorResponse = { success: false, error: 'Timeslot overlaps with another one' };
-           channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-           return;
-       }
-
-       */
-
 
         // Fetch Dentist ID from User Management Service using RabbitMQ
         const dentistCorrelationId = uuidv4(); // Unique ID for this request
@@ -213,6 +194,29 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
+
+
+        console.log(`Creating dentist timeslot: Start=${startCET.toISOString()}, End=${endCET.toISOString()}, Office=${officeId}`);
+
+       // Step 1: Check for overlapping patient-created timeslots
+       const overlappingPatientTimeslots = await Timeslot.find({
+        createdBy: 'patient',
+        office: officeId,
+        $or: [
+            { start: { $lt: endCET.toISOString() }, end: { $gt: startCET.toISOString() } }, 
+            { start: { $gte: startCET.toISOString(), $lt: endCET.toISOString() } },         
+            { end: { $gt: startCET.toISOString(), $lte: endCET.toISOString() } }           
+        ]
+    });
+
+    if (overlappingPatientTimeslots.length > 0) {
+        console.log("Found overlapping patient timeslots:", overlappingPatientTimeslots);
+
+        const patientTimeslotIds = overlappingPatientTimeslots.map((ts) => ts._id);
+        await Timeslot.deleteMany({ _id: { $in: patientTimeslotIds } });
+
+        console.log("Deleted overlapping patient timeslots:", patientTimeslotIds);
+    }
 
 
         // Create the timeslot
