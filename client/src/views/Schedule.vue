@@ -188,20 +188,17 @@ async function fetchTimeslots() {
     const response = await axios.get(`http://localhost:4000/api/offices/${officeId}/timeslots`);
     console.log("Fetched timeslots:", response.data);
 
-    // Map the response data to the format expected by DayPilotCalendar
-    events.value = response.data.timeslots.map((timeslot) => ({
-      id: timeslot._id,
-      text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
-      start: timeslot.start,
-      end: timeslot.end,
-      patient: timeslot.patient,
-      backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08'
-     // backColor: "#ECC200"
-        // Add color based on booking status
-        //style: `background-color: ${timeslot.isBooked ? 'yellow' : 'green'};` // Use CSS for coloring
-
-     // color: timeslot.isBooked ? 'yellow' : 'green' // Use yellow for booked and green for unbooked
-    }));
+       // Filter out timeslots created by patients
+       events.value = response.data.timeslots
+      .filter((timeslot) => timeslot.createdBy !== "patient") // Exclude patient-created timeslots
+      .map((timeslot) => ({
+        id: timeslot._id,
+        text: timeslot.isBooked ? "Booked" : "Unbooked", // Display based on isBooked
+        start: timeslot.start,
+        end: timeslot.end,
+        patient: timeslot.patient,
+        backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08' // Red for booked, green for unbooked
+      }));
 
     // Update the calendar configuration
     calendarConfig.value.events = events.value;
