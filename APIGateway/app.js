@@ -17,7 +17,7 @@ const dentistRoutes = require('./src/routes/dentistRoutes');
 const loginRoutes = require('./src/routes/loginRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const officeRoutes = require('./src/routes/officeRoutes'); 
-
+const { startHealthAggregation } = require('./src/systemHealthAggregator');
 
 
 const app = express();
@@ -44,6 +44,7 @@ app.use('/api', officeRoutes);
 app.use('/api', timeslotRoutes);
 app.use('/api/office', officeRoutes);
 
+startHealthAggregation();
 
 //const mqttClient = mqtt.connect(process.env.MQTT_BROKER_URL);
 //mqttClient = mqtt.connect('mqtt://localhost:1883')

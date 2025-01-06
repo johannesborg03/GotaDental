@@ -8,6 +8,7 @@ const { connectToBookingDB } = require('./src/utils/dbConnect');
 
 const TimeslotModel = require('./src/models/Timeslot'); // Timeslot model loader
 const timeslotsRoutes = require('./src/apiRoutes/timeslotRoutes');
+const { startHealthMonitoring } = require('./systemHealth');
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
@@ -32,6 +33,8 @@ const Timeslot = TimeslotModel(bookingDbConnection);
 
 // Variables
 var port = process.env.PORT || 3003;
+
+startHealthMonitoring();
 
 // Create Express app
 var app = express();

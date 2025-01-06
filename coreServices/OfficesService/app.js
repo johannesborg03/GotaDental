@@ -5,6 +5,7 @@ const officeRoutes = require('./src/apiRoutes/officeRoutes');
 const { initializeOfficeSubscriptions } = require('./src/events/eventHandler');
 const { connectToBookingDB } = require('./src/utils/dbConnect');
 const OfficeModel = require('./src/models/Office'); 
+const { startHealthMonitoring } = require('./systemHealth'); 
 
 // Initialize the database connection
 const bookingDbConnection = connectToBookingDB();
@@ -18,6 +19,8 @@ var port = process.env.PORT || 3005; // Use the port defined in .env
 
 // Controllers:
 var officesController = require('./src/controllers/Offices');
+
+startHealthMonitoring();
 
 // Create Express app
 var app = express();

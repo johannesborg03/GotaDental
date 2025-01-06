@@ -14,5 +14,8 @@ COPY . .
 # Expose the application's port
 EXPOSE 4000
 
+# Add environment variables
+ENV RABBITMQ_URI=amqp://rabbitmq:5672
+
 # Define the default command to run the app
 CMD ["npm", "run", "dev"]
