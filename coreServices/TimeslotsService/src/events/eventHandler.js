@@ -81,7 +81,7 @@ async function handleCreatePatientTimeslot(message, replyTo, correlationId, chan
         if (existingTimeslot) {
             const errorResponse = { success: false, error: 'A timeslot created by this patient already exists in this office.' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-        
+
             return; // This prevents further execution
         }
 
@@ -198,25 +198,54 @@ async function handleCreateTimeslot(message, replyTo, correlationId, channel) {
 
         console.log(`Creating dentist timeslot: Start=${startCET.toISOString()}, End=${endCET.toISOString()}, Office=${officeId}`);
 
-       // Step 1: Check for overlapping patient-created timeslots
-       const overlappingPatientTimeslots = await Timeslot.find({
-        createdBy: 'patient',
-        office: officeId,
-        $or: [
-            { start: { $lt: endCET.toISOString() }, end: { $gt: startCET.toISOString() } }, 
-            { start: { $gte: startCET.toISOString(), $lt: endCET.toISOString() } },         
-            { end: { $gt: startCET.toISOString(), $lte: endCET.toISOString() } }           
-        ]
-    });
+        // Step 1: Check for overlapping patient-created timeslots
+        const overlappingPatientTimeslots = await Timeslot.find({
+            createdBy: 'patient',
+            office: officeId,
+            $or: [
+                { start: { $lt: endCET.toISOString() }, end: { $gt: startCET.toISOString() } },
+                { start: { $gte: startCET.toISOString(), $lt: endCET.toISOString() } },
+                { end: { $gt: startCET.toISOString(), $lte: endCET.toISOString() } }
+            ]
+        });
 
-    if (overlappingPatientTimeslots.length > 0) {
-        console.log("Found overlapping patient timeslots:", overlappingPatientTimeslots);
+        if (overlappingPatientTimeslots.length > 0) {
+            console.log("Found overlapping patient timeslots:", overlappingPatientTimeslots);
 
-        const patientTimeslotIds = overlappingPatientTimeslots.map((ts) => ts._id);
-        await Timeslot.deleteMany({ _id: { $in: patientTimeslotIds } });
+            const patientTimeslotIds = overlappingPatientTimeslots.map((ts) => ts._id);
+            const patientIds = overlappingPatientTimeslots.map((ts) => ts.patient);
 
-        console.log("Deleted overlapping patient timeslots:", patientTimeslotIds);
-    }
+            await Timeslot.deleteMany({ _id: { $in: patientTimeslotIds } });
+
+            console.log("Deleted overlapping patient timeslots:", patientTimeslotIds);
+            // Print each patientId
+            console.log("Patient IDs of overlapping timeslots:");
+            for (const patientId of patientIds) {
+                console.log("Patient ID:", patientId);
+            }
+
+            // Step 2: Notify affected patients via email
+            for (const patientId of patientIds) {
+                const patientTopic = 'patients/getById';
+                const patientMessage = { patientId };
+                const patientCorrelationId = uuidv4();
+
+                const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
+
+                if (patientResponse && patientResponse.success) {
+                    const { email, name } = patientResponse;
+
+                    const emailSubject = 'Requested Timeslot Now Available';
+                    const emailText = `Dear ${name},\n\nThe timeslot you requested has become available. Please check your account to book the timeslot.\n\nBest regards,\nThe Team`;
+
+                    await sendNotificationEmail(email, emailSubject, emailText);
+                    console.log('Notification email sent to:', email);
+                } else {
+                    console.error('Failed to fetch patient details for email notification:', patientResponse);
+                }
+            }
+        }
+
 
 
         // Create the timeslot
@@ -327,7 +356,7 @@ async function handleGetTimeslot(message, replyTo, correlationId, channel) {
     }
 }
 
-// Handle updating a timeslot
+/*
 async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
     console.log('Received update timeslot message:', message);
 
@@ -360,8 +389,9 @@ async function dentistHandleUpdateTimeslot(message, replyTo, correlationId, chan
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
 }
+    */
 
-async function patientHandleUpdateTimeslot(message, replyTo, correlationId, channel) {
+async function handleUpdateTimeslot(message, replyTo, correlationId, channel) {
     const { timeslot_id, isBooked, patient, dentist, action, officeId } = message;
 
     console.log('Received update timeslot message:', message);
@@ -722,7 +752,7 @@ async function initializeSubscriptions() {
         //await subscribeToTopic('timeslot/update', dentistHandleUpdateTimeslot);
         await subscribeToTopic('timeslot/delete', handleDeleteTimeslot);
         await subscribeToTopic('timeslot/retrieveByIds', handleRetrieveTimeslotsByIds);
-        await subscribeToTopic('timeslot/update', patientHandleUpdateTimeslot);
+        await subscribeToTopic('timeslot/update', handleUpdateTimeslot);
         await subscribeToTopic('timeslot/patient/booked/retrieve', handleRetrieveBookedTimeslots);
         await subscribeToTopic('timeslot/patient/create', handleCreatePatientTimeslot);
 
@@ -742,5 +772,5 @@ module.exports = {
     handleDeleteTimeslot,
     handleCreatePatientTimeslot,
     handleRetrieveTimeslotsByIds,
-    patientHandleUpdateTimeslot,
+    handleUpdateTimeslot,
 };
