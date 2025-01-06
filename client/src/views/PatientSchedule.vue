@@ -114,7 +114,7 @@ const calendarConfig = ref({
             text: "Requested",
             start: response.data.timeslot.start,
             end: response.data.timeslot.end,
-            backColor: "#FFCC00", // Yellow for patient-created timeslots
+            backColor: "#05D5E6", // Yellow for patient-created timeslots
           });
           calendarConfig.value.events = [...events.value];
         } else {
@@ -258,15 +258,15 @@ async function fetchTimeslots() {
       .map((timeslot) => ({
         id: timeslot._id,
         text: timeslot.patient === patientId && timeslot.createdBy === "patient" 
-          ? "Notice" 
+          ? "Requested" 
           : timeslot.isBooked 
           ? "Booked" 
-          : "Free",
+          : "Unbooked",
         start: timeslot.start,
         end: timeslot.end,
         patient: timeslot.patient,
         backColor: timeslot.patient === patientId && timeslot.createdBy === "patient" 
-          ? '#05D5E6' //For notification slot
+          ? '#05D5E6' //Blue-ish For notification slot
           : timeslot.patient === patientId 
           ? 'yellow' // Yellow for patient-booked timeslots
           : timeslot.isBooked 
@@ -391,23 +391,40 @@ onMounted(() => {
 
 
   socket.on("timeslot/create", (newTimeslot) => {
-    console.log("Received timeslot new Timeslot Created", newTimeslot);
-    console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
+  console.log("Received new timeslot:", newTimeslot);
 
+  // Check if the new timeslot belongs to the current office
+  if (newTimeslot.office === selectedOfficeId.value) {
+    const patientId = sessionStorage.getItem("patientId");
 
-    if (newTimeslot.office === selectedOfficeId.value) {
-      events.value.push({
-        id: newTimeslot._id,
-        text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
-        start: newTimeslot.start,
-        end: newTimeslot.end,
-        backColor: '#62FB08'
+    // Find if there's a "notice" timeslot created by this patient with overlapping time
+    const overlappingNoticeIndex = events.value.findIndex(
+      (event) =>
+        event.patient === patientId &&
+        event.text === "Requested" &&
+        event.start < newTimeslot.end && // Overlap condition
+        event.end > newTimeslot.start
+    );
 
-      });
-      calendarConfig.value.events = [...events.value];
-      console.log("Updated events after WebSocket create:", events.value);
+    if (overlappingNoticeIndex !== -1) {
+      console.log("Removing overlapping notice timeslot:", events.value[overlappingNoticeIndex]);
+      events.value.splice(overlappingNoticeIndex, 1); // Remove the overlapping notice timeslot
     }
-  });
+
+    // Add the new timeslot to the events array
+    events.value.push({
+      id: newTimeslot._id,
+      text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Dynamically set text
+      start: newTimeslot.start,
+      end: newTimeslot.end,
+      backColor: '#62FB08', // Green for new unbooked timeslot
+    });
+
+    // Update the calendar events
+    calendarConfig.value.events = [...events.value];
+    console.log("Updated events after WebSocket create:", events.value);
+  }
+});
 
   // Listen for timeslot updates
   socket.on("timeslot/update", (updatedTimeslot) => {
