@@ -121,7 +121,7 @@ const calendarConfig = ref({
           throw new Error(response.data.message);
         }
       } catch (error) {
-        console.error("Error creating timeslot:", error);
+      //  console.error("Error creating timeslot:", error);
 
         const errorMessage = error.response?.data?.message || "Failed to create timeslot. Please try again.";
 
@@ -247,15 +247,22 @@ async function fetchTimeslots() {
 
     // fetchUserId();
     const patientId = sessionStorage.getItem("patientId");
-    // Map the response data to the format expected by DayPilotCalendar
-    events.value = response.data.timeslots.map((timeslot) => ({
-      id: timeslot._id,
-      text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
-      start: timeslot.start,
-      end: timeslot.end,
-      patient: timeslot.patient,
-      backColor: timeslot.patient === patientId ? 'yellow' : (timeslot.isBooked ? '#EC1E1E' : '#62FB08')
-    }));
+     // Filter and map the response data
+     events.value = response.data.timeslots
+      .filter((timeslot) => {
+        // Only display:
+        // - Timeslots created by the dentist
+        // - Timeslots created by the patient themselves
+        return timeslot.createdBy === "dentist" || timeslot.patient === patientId;
+      })
+      .map((timeslot) => ({
+        id: timeslot._id,
+        text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
+        start: timeslot.start,
+        end: timeslot.end,
+        patient: timeslot.patient,
+        backColor: timeslot.patient === patientId ? 'yellow' : (timeslot.isBooked ? '#EC1E1E' : '#62FB08')
+      }));
 
     // Update the calendar configuration
     calendarConfig.value.events = events.value;
