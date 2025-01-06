@@ -106,7 +106,7 @@ const calendarConfig = ref({
         const response = await axios.post("http://localhost:4000/api/timeslots", payload);
 
         if (response.status === 201) {
-          alert("Timeslot created successfully!");
+          alert("You will be notified by email if this slot gets available.");
 
           // Add the created timeslot to the calendar
           events.value.push({
