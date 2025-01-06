@@ -105,6 +105,7 @@ const calendarConfig = ref({
 
         const response = await axios.post("http://localhost:4000/api/timeslots", payload);
 
+        const patientId = sessionStorage.getItem('patientId');
         if (response.status === 201) {
           alert("You will be notified by email if this slot gets available.");
 
@@ -112,6 +113,7 @@ const calendarConfig = ref({
           events.value.push({
             id: response.data.timeslot._id,
             text: "Requested",
+            patient: patientId,
             start: response.data.timeslot.start,
             end: response.data.timeslot.end,
             backColor: "#05D5E6", // Yellow for patient-created timeslots
@@ -397,27 +399,47 @@ onMounted(() => {
   if (newTimeslot.office === selectedOfficeId.value) {
     const patientId = sessionStorage.getItem("patientId");
 
-    // Find if there's a "notice" timeslot created by this patient with overlapping time
-    const overlappingNoticeIndex = events.value.findIndex(
-      (event) =>
-        event.patient === patientId &&
-        event.text === "Requested" &&
-        event.start < newTimeslot.end && // Overlap condition
-        event.end > newTimeslot.start
-    );
+    
+    // Find if there's a "Requested" timeslot created by this patient with overlapping time
+    const overlappingNoticeIndex = events.value.findIndex((event) => {
+  // Adjust event start and end times by adding one hour
+  const adjustedStart = new Date(event.start);
+  const adjustedEnd = new Date(event.end);
+
+  adjustedStart.setHours(adjustedStart.getHours() + 1); // Add 1 hour to start
+  adjustedEnd.setHours(adjustedEnd.getHours() + 1);     // Add 1 hour to end
+
+  console.log("Checking event with adjustments:");
+  console.log("Event Patient ID:", event.patient, "Patient ID:", patientId);
+  console.log("Event Text:", event.text);
+  console.log("Adjusted Event Start:", adjustedStart, "New Timeslot End:", new Date(newTimeslot.end));
+  console.log("Adjusted Event End:", adjustedEnd, "New Timeslot Start:", new Date(newTimeslot.start));
+
+  return (
+    event.patient === patientId && // Match patient ID
+    event.text === "Requested" && // Match "Requested" timeslot
+    adjustedStart < new Date(newTimeslot.end) && // Overlap condition with adjusted start
+    adjustedEnd > new Date(newTimeslot.start)   // Overlap condition with adjusted end
+  );
+});
+
+console.log("overlap", overlappingNoticeIndex);
 
     if (overlappingNoticeIndex !== -1) {
-      console.log("Removing overlapping notice timeslot:", events.value[overlappingNoticeIndex]);
+      console.log(
+        "Removing overlapping notice timeslot:",
+        events.value[overlappingNoticeIndex]
+      );
       events.value.splice(overlappingNoticeIndex, 1); // Remove the overlapping notice timeslot
     }
 
-    // Add the new timeslot to the events array
+    // Add the new dentist timeslot to the events array
     events.value.push({
       id: newTimeslot._id,
       text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Dynamically set text
       start: newTimeslot.start,
       end: newTimeslot.end,
-      backColor: '#62FB08', // Green for new unbooked timeslot
+      backColor: "#62FB08", // Green for unbooked timeslot
     });
 
     // Update the calendar events
