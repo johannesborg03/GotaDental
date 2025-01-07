@@ -4,38 +4,84 @@ const { v4: uuidv4 } = require('uuid');
 // Controller to create a new timeslot
 exports.createTimeslot = async (req, res) => {
 
-    const { start, end, dentist, office, officeId, patient } = req.body;
+    console.log("CALLEEDDDD#");
+    const { start, end, dentist, office, officeId, patient, createdBy } = req.body;
 
-    // Validate required fields
-    if (!start || !end || !dentist || !office || !officeId) {
-        return res.status(400).json({ message: 'Missing required fields' });
-    }
+   
 
+   
 
-    // Generate a unique correlation ID
+    if (createdBy == 'patient') {
+
+        // Validate required fields
+        if (!start || !end || !patient || !officeId) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        try {
+
+             // Generate a unique correlation ID
+    const patientCorrelationId = uuidv4();
+    const topic = 'timeslot/patient/create';
+
+            console.log("PATIENT CALLING");
+            const timeslotData = { start, end, officeId, isBooked: false, patient, createdBy }; // Fixed variable name
+            console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${patientCorrelationId}`);
+
+            // Publish the message to RabbitMQ
+            const response = await publishMessage(topic, timeslotData, patientCorrelationId, officeId, patient);
+
+            if (!response.success) {
+                return res.status(400).json({ message: response.error || 'Failed to create timeslot' });
+            }
+            
+            // Respond with success
+            res.status(201).json({
+                message: 'Timeslot sent to Timeslot Service',
+                timeslot: timeslotData,
+                patientCorrelationId,
+            });
+        } catch (error) {
+            console.error('Error publishing timeslot to Timeslot Service:', error);
+            res.status(500).json({
+                message: 'Failed to create timeslot',
+                error: error.message,
+            });
+        }
+    } else {
+        // Validate required fields
+        if (!start || !end || !dentist || !office || !officeId) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        try {
+             // Generate a unique correlation ID
     const correlationId = uuidv4();
     const topic = 'timeslot/create';
 
 
-    try {
-        const timeslotData = { start, end, dentist, office, officeId, isBooked: false, patient }; // Fixed variable name
-        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
 
-        // Publish the message to RabbitMQ
-        const response = await publishMessage(topic, timeslotData, correlationId, officeId, patient);
 
-        // Respond with success
-        res.status(201).json({
-            message: 'Timeslot sent to Timeslot Service',
-            timeslot: timeslotData,
-            correlationId,
-        });
-    } catch (error) {
-        console.error('Error publishing timeslot to Timeslot Service:', error);
-        res.status(500).json({
-            message: 'Failed to create timeslot',
-            error: error.message,
-        });
+            const timeslotData = { start, end, dentist, office, officeId, isBooked: false, patient }; // Fixed variable name
+            console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(timeslotData)}, Correlation ID: ${correlationId}`);
+
+            // Publish the message to RabbitMQ
+            const response = await publishMessage(topic, timeslotData, correlationId, officeId, patient);
+
+            // Respond with success
+            res.status(201).json({
+                message: 'Timeslot sent to Timeslot Service',
+                timeslot: timeslotData,
+                correlationId,
+            });
+        } catch (error) {
+            console.error('Error publishing timeslot to Timeslot Service:', error);
+            res.status(500).json({
+                message: 'Failed to create timeslot',
+                error: error.message,
+            });
+        }
+
     }
 };
 
@@ -154,64 +200,64 @@ exports.updateTimeslot = async (req, res) => {
         return res.status(400).json({ message: 'Missing OfficeId' });
     }
 
-     // Determine role based on request data
-     const role = patient && dentist ? "dentist" : patient ? "patient" : null;
+    // Determine role based on request data
+    const role = patient && dentist ? "dentist" : patient ? "patient" : null;
 
-     if (!role) {
+    if (!role) {
         return res
-          .status(400)
-          .json({ message: "Missing user identifier. Both 'dentist' and 'patient' are required for dentist actions." });
-      }
- try {
-    if (action === "cancel") {
-      if (role === "dentist") {
-        console.log("Dentist is canceling the appointment.");
+            .status(400)
+            .json({ message: "Missing user identifier. Both 'dentist' and 'patient' are required for dentist actions." });
+    }
+    try {
+        if (action === "cancel") {
+            if (role === "dentist") {
+                console.log("Dentist is canceling the appointment.");
 
-        if (!patient) {
-          return res.status(400).json({ message: "Patient identifier is required for dentist cancelation." });
+                if (!patient) {
+                    return res.status(400).json({ message: "Patient identifier is required for dentist cancelation." });
+                }
+
+                // Dentist-specific logic: clear the patient and mark as unbooked
+                req.body.isBooked = false;
+                req.body.patient = null;
+            } else if (role === "patient") {
+                console.log("Patient is canceling their appointment.");
+
+                // Validate the patient cancelation
+                if (!patient) {
+                    return res.status(400).json({ message: "Patient identifier is required to cancel." });
+                }
+            } else {
+                return res.status(403).json({ message: "Unauthorized role for cancellation." });
+            }
         }
 
-        // Dentist-specific logic: clear the patient and mark as unbooked
-        req.body.isBooked = false;
-        req.body.patient = null;
-      } else if (role === "patient") {
-        console.log("Patient is canceling their appointment.");
+        // Generate a unique correlation ID
+        const correlationId = uuidv4();
+        const topic = `timeslot/update`;
 
-        // Validate the patient cancelation
-        if (!patient) {
-          return res.status(400).json({ message: "Patient identifier is required to cancel." });
+        const updateData = { timeslot_id, isBooked, patient, dentist, action, officeId };
+        console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
+
+        // Publish the message to RabbitMQ
+        const response = await publishMessage(topic, updateData, correlationId);
+
+        if (!response.success) {
+            return res.status(500).json({ message: "Failed to update timeslot", error: response.error });
         }
-      } else {
-        return res.status(403).json({ message: "Unauthorized role for cancellation." });
-      }
+
+        // Respond with success
+        res.status(200).json({
+            message: "Timeslot updated successfully",
+            timeslot: response.timeslot,
+        });
+    } catch (error) {
+        console.error("Error updating timeslot:", error);
+        res.status(500).json({
+            message: "Failed to update timeslot",
+            error: error.message,
+        });
     }
-
-    // Generate a unique correlation ID
-    const correlationId = uuidv4();
-    const topic = `timeslot/update`;
-
-    const updateData = { timeslot_id, isBooked, patient, dentist, action, officeId };
-    console.log(`Publishing to topic: ${topic}, Data: ${JSON.stringify(updateData)}, Correlation ID: ${correlationId}`);
-
-    // Publish the message to RabbitMQ
-    const response = await publishMessage(topic, updateData, correlationId);
-
-    if (!response.success) {
-      return res.status(500).json({ message: "Failed to update timeslot", error: response.error });
-    }
-
-    // Respond with success
-    res.status(200).json({
-      message: "Timeslot updated successfully",
-      timeslot: response.timeslot,
-    });
-  } catch (error) {
-    console.error("Error updating timeslot:", error);
-    res.status(500).json({
-      message: "Failed to update timeslot",
-      error: error.message,
-    });
-  }
 };
 
 exports.getBookedTimeslots = async (req, res) => {
@@ -228,7 +274,7 @@ exports.getBookedTimeslots = async (req, res) => {
     const topic = 'timeslot/patient/booked/retrieve';
 
     try {
-       ;
+        ;
         console.log(`Publishing message to RabbitMQ with topic: ${topic}`);
         const response = await publishMessage(topic, { patient, officeId }, correlationId);
 

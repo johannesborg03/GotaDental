@@ -43,6 +43,30 @@
       </b-col>
     </b-row>
   </b-container>
+
+  <b-modal
+  id="confirmation-modal"
+  v-model="isModalVisible"
+  title="Notification"
+  centered
+  static
+  no-close-on-backdrop
+>
+<template v-if="modalMessage.text">
+    <p class="text-center mb-0">{{ modalMessage.text }}</p>
+  </template>
+  <template v-else>
+    <h5 class="text-center">{{ modalMessage.title }}</h5>
+    <ul class="list-unstyled text-center">
+      <li v-for="detail in modalMessage.details" :key="detail">{{ detail }}</li>
+    </ul>
+  </template>
+  <template #footer>
+    <b-button variant="primary" @click="confirmAction">OK</b-button>
+    <b-button v-if="showCancelButton" variant="secondary" @click="cancelAction">Cancel</b-button>
+  </template>
+</b-modal>
+  
 </template>
 
 <script setup>
@@ -51,7 +75,48 @@ import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
 
+const isModalVisible = ref(false); // Controls modal visibility
+const modalMessage = ref(""); // Dynamic modal message
+const modalResolve = ref(null); // Resolver for modal confirmation
+const showCancelButton = ref(true); // Controls the visibility of the Cancel button
 
+
+// Function to show modal and wait for user confirmation
+// Function to show modal and wait for confirmation
+function waitForConfirmation() {
+  return new Promise((resolve) => {
+    showCancelButton.value = true; // Ensure Cancel button is visible for confirmations
+    modalResolve.value = resolve;
+  });
+}
+
+// Function to handle "OK" button click in modal
+function confirmAction() {
+  if (modalResolve.value) {
+    modalResolve.value(true); // Resolve with true
+    modalResolve.value = null; // Clear the resolver
+  }
+  isModalVisible.value = false; // Hide the modal
+}
+
+// Function to handle "Cancel" button click in modal
+function cancelAction() {
+  if (modalResolve.value) {
+    modalResolve.value(false); // Resolve with false
+    modalResolve.value = null;
+    isModalVisible.value = false;
+  }
+}
+
+function showModal(message, showCancel = true) {
+  modalMessage.value = typeof message === "string" ? { text: message } : message;
+  showCancelButton.value = showCancel; // Set whether the Cancel button should be visible
+  isModalVisible.value = true;
+
+  return new Promise((resolve) => {
+    modalResolve.value = resolve; // Set the resolver
+  });
+}
 
 
 // Function to calculate the start of the current week (Monday)
@@ -86,7 +151,67 @@ const calendarConfig = ref({
   startDate: getCurrentWeekStart(),
   weekStarts: 1,
   events: [],
-  timeRangeSelectedHandling: "Disabled",
+  timeRangeSelectedHandling: "Enabled",
+  onTimeRangeSelected: async (args) => {
+    const startTime = args.start.toString();
+    const endTime = args.end.toString();
+
+   
+    modalMessage.value = {
+  title: "Do you want to be notified when this timeslot is available?",
+  details: [`Start: ${startTime}`, `End: ${endTime}`],
+};
+isModalVisible.value = true;
+     // Wait for user interaction
+  const confirmed = await waitForConfirmation();
+
+    if (confirmed) {
+      try {
+        const payload = {
+          start: startTime,
+          end: endTime,
+          patient: sessionStorage.getItem('userIdentifier'),
+          createdBy: 'patient',
+          officeId: sessionStorage.getItem('OfficeId'),
+        };
+
+        const response = await axios.post("http://localhost:4000/api/timeslots", payload);
+
+        const patientId = sessionStorage.getItem('patientId');
+        if (response.status === 201) {
+          showModal("You will be notified by email if this slot gets available.", false); // Hide Cancel button
+          // Add the created timeslot to the calendar
+          events.value.push({
+            id: response.data.timeslot._id,
+            text: "Requested",
+            patient: patientId,
+            start: response.data.timeslot.start,
+            end: response.data.timeslot.end,
+            backColor: "#05D5E6", // Yellow for patient-created timeslots
+          });
+          calendarConfig.value.events = [...events.value];
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create timeslot. Please try again.";
+
+      if (
+        errorMessage ===
+        "A timeslot created by this patient already exists in this office."
+      ) {
+        showModal(
+          "You already have a timeslot you want to be notified of in this office.", false
+        ); // Use modal instead of alert
+      } else {
+        showModal(errorMessage); // Use modal instead of alert
+      }
+    }
+  }
+  args.preventDefault();
+},
   onEventRender: (args) => {
     // Dynamically change the event background color based on booking status
     const event = args.data;
@@ -115,23 +240,35 @@ const calendarConfig = ref({
     const timeslotPatient = selectedTimeslot["patient"];
     console.log("Timeslot Patient:", timeslotPatient);
 
-    if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
-
-      const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
-      if (confirmCancel) {
-        await cancelTimeslot(timeslotId);
-      }
+     // If the timeslot is booked and belongs to the user, allow cancellation
+  if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
+    const confirmCancel = await showModal({
+      title: "Do you want to cancel this timeslot?",
+      details: [`Start: ${args.e.start()}`, `End: ${args.e.end()}`],
+    });
+    if (confirmCancel) {
+      await cancelTimeslot(timeslotId);
     }
+  }
+
+  else if (selectedTimeslot.text === "Requested" && timeslotPatient === patientID) {
+    await showModal(`This is a timeslot you want to be notified of when its available.`, false);
+  }
     // If the timeslot is unbooked, allow the user to book it
-    else if (selectedTimeslot.text === "Unbooked") {
-      const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
+   else if (selectedTimeslot.text === "Unbooked") {
+    const confirmBooking =await showModal({
+      title: "Do you want to book this timeslot?",
+      details: [`Start: ${args.e.start()}`, `End: ${args.e.end()}`],
+    });
       if (confirmBooking) {
         await bookTimeslot(timeslotId); // Call book function
       }
-    } else {
-      alert("This timeslot is already booked by another user.");
-    }
-  },
+    }   // If the timeslot is booked and does not belong to the user, notify them
+  else {
+    
+    await showModal("This timeslot is already booked by another user.", false);
+  }
+},
 });
 
 
@@ -200,15 +337,32 @@ async function fetchTimeslots() {
 
     // fetchUserId();
     const patientId = sessionStorage.getItem("patientId");
-    // Map the response data to the format expected by DayPilotCalendar
-    events.value = response.data.timeslots.map((timeslot) => ({
-      id: timeslot._id,
-      text: timeslot.isBooked ? "Booked" : "Unbooked", // Set text dynamically
-      start: timeslot.start,
-      end: timeslot.end,
-      patient: timeslot.patient,
-      backColor: timeslot.patient === patientId ? 'yellow' : (timeslot.isBooked ? '#EC1E1E' : '#62FB08')
-    }));
+     // Filter and map the response data
+     events.value = response.data.timeslots
+      .filter((timeslot) => {
+        // Only display:
+        // - Timeslots created by the dentist
+        // - Timeslots created by the patient themselves
+        return timeslot.createdBy === "dentist" || timeslot.patient === patientId;
+      })
+      .map((timeslot) => ({
+        id: timeslot._id,
+        text: timeslot.patient === patientId && timeslot.createdBy === "patient" 
+          ? "Requested" 
+          : timeslot.isBooked 
+          ? "Booked" 
+          : "Unbooked",
+        start: timeslot.start,
+        end: timeslot.end,
+        patient: timeslot.patient,
+        backColor: timeslot.patient === patientId && timeslot.createdBy === "patient" 
+          ? '#05D5E6' //Blue-ish For notification slot
+          : timeslot.patient === patientId 
+          ? 'yellow' // Yellow for patient-booked timeslots
+          : timeslot.isBooked 
+          ? '#EC1E1E' // Red for other booked timeslots
+          : '#62FB08' // Green for unbooked timeslots
+      }));
 
     // Update the calendar configuration
     calendarConfig.value.events = events.value;
@@ -229,8 +383,7 @@ async function bookTimeslot(timeslotId) {
 
     });
 
-    alert("Timeslot booked successfully!");
-
+    showModal("Timeslot booked successfully!", false); // Replaced alert with modal
     console.log(response);
 
     // Update the calendar
@@ -244,18 +397,15 @@ async function bookTimeslot(timeslotId) {
   } catch (error) {
     console.error("Error booking timeslot:", error);
 
-    // Check for specific error message from the backend
     if (error.response) {
       const { data } = error.response;
-
-      // Handle the "maximum timeslots" error
       if (data && data.error === "You have already booked 5 timeslots for this office.") {
-        alert("You cannot book more than 5 timeslots for this office. Please cancel an existing one to book a new timeslot.");
+        showModal("You cannot book more than 5 timeslots for this office. Please cancel an existing one to book a new timeslot."); // Replaced alert with modal
       } else {
-        alert(data.error || "Failed to book the timeslot. Please try again.");
+        showModal(data.error || "Failed to book the timeslot. Please try again."); // Replaced alert with modal
       }
     } else {
-      alert("Failed to book the timeslot. Please try again.");
+      showModal("Failed to book the timeslot. Please try again."); // Replaced alert with modal
     }
   }
 }
@@ -273,12 +423,14 @@ async function cancelTimeslot(timeslotId) {
 
     });
 
-    alert("Appointment cancelled successfully!");
-
-  
+     // Use modal to display success message
+     await showModal("Appointment cancelled successfully!", false); // Hide Cancel button
   } catch (error) {
     console.error("Error cancelling the timeslot:", error);
-    alert("Failed to cancel the timeslot. Please try again.");
+
+    // Use modal to display error message
+    const errorMessage = error.response?.data?.message || "Failed to cancel the timeslot. Please try again.";
+    await showModal(errorMessage, false); // Hide Cancel button
   }
 }
 
@@ -327,23 +479,60 @@ onMounted(() => {
 
 
   socket.on("timeslot/create", (newTimeslot) => {
-    console.log("Received timeslot new Timeslot Created", newTimeslot);
-    console.log("Current selectedOfficeId:", selectedOfficeId.value, "NewTimeslot OfficeId:", newTimeslot);
+  console.log("Received new timeslot:", newTimeslot);
 
+  // Check if the new timeslot belongs to the current office
+  if (newTimeslot.office === selectedOfficeId.value) {
+    const patientId = sessionStorage.getItem("patientId");
 
-    if (newTimeslot.office === selectedOfficeId.value) {
-      events.value.push({
-        id: newTimeslot._id,
-        text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
-        start: newTimeslot.start,
-        end: newTimeslot.end,
-        backColor: '#62FB08'
+    
+    // Find if there's a "Requested" timeslot created by this patient with overlapping time
+    const overlappingNoticeIndex = events.value.findIndex((event) => {
+  // Adjust event start and end times by adding one hour
+  const adjustedStart = new Date(event.start);
+  const adjustedEnd = new Date(event.end);
 
-      });
-      calendarConfig.value.events = [...events.value];
-      console.log("Updated events after WebSocket create:", events.value);
+  adjustedStart.setHours(adjustedStart.getHours() + 1); // Add 1 hour to start
+  adjustedEnd.setHours(adjustedEnd.getHours() + 1);     // Add 1 hour to end
+
+  console.log("Checking event with adjustments:");
+  console.log("Event Patient ID:", event.patient, "Patient ID:", patientId);
+  console.log("Event Text:", event.text);
+  console.log("Adjusted Event Start:", adjustedStart, "New Timeslot End:", new Date(newTimeslot.end));
+  console.log("Adjusted Event End:", adjustedEnd, "New Timeslot Start:", new Date(newTimeslot.start));
+
+  return (
+    event.patient === patientId && // Match patient ID
+    event.text === "Requested" && // Match "Requested" timeslot
+    adjustedStart < new Date(newTimeslot.end) && // Overlap condition with adjusted start
+    adjustedEnd > new Date(newTimeslot.start)   // Overlap condition with adjusted end
+  );
+});
+
+console.log("overlap", overlappingNoticeIndex);
+
+    if (overlappingNoticeIndex !== -1) {
+      console.log(
+        "Removing overlapping notice timeslot:",
+        events.value[overlappingNoticeIndex]
+      );
+      events.value.splice(overlappingNoticeIndex, 1); // Remove the overlapping notice timeslot
     }
-  });
+
+    // Add the new dentist timeslot to the events array
+    events.value.push({
+      id: newTimeslot._id,
+      text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Dynamically set text
+      start: newTimeslot.start,
+      end: newTimeslot.end,
+      backColor: "#62FB08", // Green for unbooked timeslot
+    });
+
+    // Update the calendar events
+    calendarConfig.value.events = [...events.value];
+    console.log("Updated events after WebSocket create:", events.value);
+  }
+});
 
   // Listen for timeslot updates
   socket.on("timeslot/update", (updatedTimeslot) => {
@@ -361,17 +550,17 @@ onMounted(() => {
       // Update the event data
       events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
       events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
-      
 
-         // Update the color logic
-    events.value[eventIndex].backColor = updatedTimeslot.patient === null
-      ? '#62FB08' // Green for unbooked timeslots
-      : (updatedTimeslot.patient === patientId 
+
+      // Update the color logic
+      events.value[eventIndex].backColor = updatedTimeslot.patient === null
+        ? '#62FB08' // Green for unbooked timeslots
+        : (updatedTimeslot.patient === patientId
           ? 'yellow' // Yellow for the patient who booked
           : '#EC1E1E'); // Red for other patients
 
-          console.log("Updated event color:", events.value[eventIndex].backColor);
-        console.log("patientUpdated Timeslot:", updatedTimeslot.patient, "patientId:", patientId);
+      console.log("Updated event color:", events.value[eventIndex].backColor);
+      console.log("patientUpdated Timeslot:", updatedTimeslot.patient, "patientId:", patientId);
       // Re-render the calendar
       calendarConfig.value.events = [...events.value];
       console.log("Updated events after WebSocket update:", events.value);

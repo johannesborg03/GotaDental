@@ -21,7 +21,7 @@ var timeslotSchema = new mongoose.Schema({
       dentist: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Dentist", // Reference to Dentist model
-        required: true, // Each time slot must belong to a dentist
+        required: false, // Changed to false to let patient save a empty timeslot for notification
       },
       office: {
         type: mongoose.Schema.Types.ObjectId,
@@ -40,6 +40,11 @@ var timeslotSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Patient", // Reference to the Patient who booked the slot
         default: null
+      },
+      createdBy: { 
+        type: String, 
+        enum: ['patient', 'dentist'], 
+        default: 'dentist'
       },
       
     });

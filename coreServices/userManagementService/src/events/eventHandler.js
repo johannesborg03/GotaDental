@@ -361,6 +361,7 @@ async function handleUpdateAppointments(message, replyTo, correlationId, channel
 }
 
 async function handleGetPatientById(message, replyTo, correlationId, channel) {
+    console.log('Received request to fetch patient by ID:', message);
     const { patientId } = message;
 
     console.log('Received request to fetch patient by ID:', message);
