@@ -43,6 +43,22 @@
       </b-col>
     </b-row>
   </b-container>
+
+  <b-modal
+  id="confirmation-modal"
+  v-model="isModalVisible"
+  title="Notification"
+  centered
+  static
+  no-close-on-backdrop
+>
+  <p class="text-center mb-0">{{ modalMessage }}</p>
+  <template #footer>
+    <b-button variant="primary" @click="confirmAction">OK</b-button>
+    <b-button v-if="showCancelButton" variant="secondary" @click="cancelAction">Cancel</b-button>
+  </template>
+</b-modal>
+  
 </template>
 
 <script setup>
@@ -51,7 +67,48 @@ import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
 
+const isModalVisible = ref(false); // Controls modal visibility
+const modalMessage = ref(""); // Dynamic modal message
+const modalResolve = ref(null); // Resolver for modal confirmation
+const showCancelButton = ref(true); // Controls the visibility of the Cancel button
 
+
+// Function to show modal and wait for user confirmation
+// Function to show modal and wait for confirmation
+function waitForConfirmation() {
+  return new Promise((resolve) => {
+    showCancelButton.value = true; // Ensure Cancel button is visible for confirmations
+    modalResolve.value = resolve;
+  });
+}
+
+// Function to handle "OK" button click in modal
+function confirmAction() {
+  if (modalResolve.value) {
+    modalResolve.value(true); // Resolve with true
+    modalResolve.value = null; // Clear the resolver
+  }
+  isModalVisible.value = false; // Hide the modal
+}
+
+// Function to handle "Cancel" button click in modal
+function cancelAction() {
+  if (modalResolve.value) {
+    modalResolve.value(false); // Resolve with false
+    modalResolve.value = null;
+    isModalVisible.value = false;
+  }
+}
+
+function showModal(message, showCancel = true) {
+  modalMessage.value = message;
+  showCancelButton.value = showCancel; // Set whether the Cancel button should be visible
+  isModalVisible.value = true;
+
+  return new Promise((resolve) => {
+    modalResolve.value = resolve; // Set the resolver
+  });
+}
 
 
 // Function to calculate the start of the current week (Monday)
@@ -91,9 +148,12 @@ const calendarConfig = ref({
     const startTime = args.start.toString();
     const endTime = args.end.toString();
 
-    const confirmCreation = confirm(`Do you want to be notified when this timeslot becomes available? ${startTime} to ${endTime}?`);
+    modalMessage.value = `Do you want to be notified when this timeslot becomes available? ${startTime} to ${endTime}?`;
+    isModalVisible.value = true;
+     // Wait for user interaction
+  const confirmed = await waitForConfirmation();
 
-    if (confirmCreation) {
+    if (confirmed) {
       try {
         const payload = {
           start: startTime,
@@ -107,8 +167,7 @@ const calendarConfig = ref({
 
         const patientId = sessionStorage.getItem('patientId');
         if (response.status === 201) {
-          alert("You will be notified by email if this slot gets available.");
-
+          showModal("You will be notified by email if this slot gets available.", false); // Hide Cancel button
           // Add the created timeslot to the calendar
           events.value.push({
             id: response.data.timeslot._id,
@@ -123,19 +182,24 @@ const calendarConfig = ref({
           throw new Error(response.data.message);
         }
       } catch (error) {
-      //  console.error("Error creating timeslot:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create timeslot. Please try again.";
 
-        const errorMessage = error.response?.data?.message || "Failed to create timeslot. Please try again.";
-
-        if (errorMessage === "A timeslot created by this patient already exists in this office.") {
-          alert("You already have a timeslot you want to be notified of in this office.");
-        } else {
-          alert(errorMessage);
-        }
+      if (
+        errorMessage ===
+        "A timeslot created by this patient already exists in this office."
+      ) {
+        showModal(
+          "You already have a timeslot you want to be notified of in this office."
+        ); // Use modal instead of alert
+      } else {
+        showModal(errorMessage); // Use modal instead of alert
       }
     }
-    args.preventDefault();
-  },
+  }
+  args.preventDefault();
+},
   onEventRender: (args) => {
     // Dynamically change the event background color based on booking status
     const event = args.data;
@@ -295,8 +359,7 @@ async function bookTimeslot(timeslotId) {
 
     });
 
-    alert("Timeslot booked successfully!");
-
+    showModal("Timeslot booked successfully!"); // Replaced alert with modal
     console.log(response);
 
     // Update the calendar
@@ -310,18 +373,15 @@ async function bookTimeslot(timeslotId) {
   } catch (error) {
     console.error("Error booking timeslot:", error);
 
-    // Check for specific error message from the backend
     if (error.response) {
       const { data } = error.response;
-
-      // Handle the "maximum timeslots" error
       if (data && data.error === "You have already booked 5 timeslots for this office.") {
-        alert("You cannot book more than 5 timeslots for this office. Please cancel an existing one to book a new timeslot.");
+        showModal("You cannot book more than 5 timeslots for this office. Please cancel an existing one to book a new timeslot."); // Replaced alert with modal
       } else {
-        alert(data.error || "Failed to book the timeslot. Please try again.");
+        showModal(data.error || "Failed to book the timeslot. Please try again."); // Replaced alert with modal
       }
     } else {
-      alert("Failed to book the timeslot. Please try again.");
+      showModal("Failed to book the timeslot. Please try again."); // Replaced alert with modal
     }
   }
 }
