@@ -52,7 +52,15 @@
   static
   no-close-on-backdrop
 >
-  <p class="text-center mb-0">{{ modalMessage }}</p>
+<template v-if="modalMessage.text">
+    <p class="text-center mb-0">{{ modalMessage.text }}</p>
+  </template>
+  <template v-else>
+    <h5 class="text-center">{{ modalMessage.title }}</h5>
+    <ul class="list-unstyled text-center">
+      <li v-for="detail in modalMessage.details" :key="detail">{{ detail }}</li>
+    </ul>
+  </template>
   <template #footer>
     <b-button variant="primary" @click="confirmAction">OK</b-button>
     <b-button v-if="showCancelButton" variant="secondary" @click="cancelAction">Cancel</b-button>
@@ -101,7 +109,7 @@ function cancelAction() {
 }
 
 function showModal(message, showCancel = true) {
-  modalMessage.value = message;
+  modalMessage.value = typeof message === "string" ? { text: message } : message;
   showCancelButton.value = showCancel; // Set whether the Cancel button should be visible
   isModalVisible.value = true;
 
@@ -148,8 +156,12 @@ const calendarConfig = ref({
     const startTime = args.start.toString();
     const endTime = args.end.toString();
 
-    modalMessage.value = `Do you want to be notified when this timeslot becomes available? ${startTime} to ${endTime}?`;
-    isModalVisible.value = true;
+   
+    modalMessage.value = {
+  title: "Notify for Timeslot",
+  details: [`Start: ${startTime}`, `End: ${endTime}`],
+};
+isModalVisible.value = true;
      // Wait for user interaction
   const confirmed = await waitForConfirmation();
 
@@ -230,29 +242,30 @@ const calendarConfig = ref({
 
      // If the timeslot is booked and belongs to the user, allow cancellation
   if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
-    const confirmCancel = await showModal(
-      `Do you want to cancel this appointment? 
-      ${args.e.start()} - ${args.e.end()}?`
-    );
-
+    const confirmCancel = await showModal({
+      title: "Do you want to cancel this timeslot?",
+      details: [`Start: ${args.e.start()}`, `End: ${args.e.end()}`],
+    });
     if (confirmCancel) {
       await cancelTimeslot(timeslotId);
     }
   }
 
-  if (selectedTimeslot.text === "Requested" && timeslotPatient === patientID) {
+  else if (selectedTimeslot.text === "Requested" && timeslotPatient === patientID) {
     await showModal(`This is a timeslot you want to be notified of when its available.`, false);
   }
     // If the timeslot is unbooked, allow the user to book it
-    if (selectedTimeslot.text === "Unbooked") {
-    const confirmBooking = await showModal(
-      `Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`
-    );
+   else if (selectedTimeslot.text === "Unbooked") {
+    const confirmBooking =await showModal({
+      title: "Do you want to book this timeslot?",
+      details: [`Start: ${args.e.start()}`, `End: ${args.e.end()}`],
+    });
       if (confirmBooking) {
         await bookTimeslot(timeslotId); // Call book function
       }
     }   // If the timeslot is booked and does not belong to the user, notify them
   else {
+    
     await showModal("This timeslot is already booked by another user.", false);
   }
 },

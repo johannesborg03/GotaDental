@@ -219,11 +219,17 @@ async function saveTimeslot() {
     return;
   }
 
-  showModal("Creating Timeslot...", false, false);
+  
   try {
     isSaving.value = true; // Prevent interactions
-    modalMessage.value = "Saving Timeslot, please wait...";
+
+    modalMessage.value = {
+  title: "Saving timeslot, please wait"
+};
+showOkButton.value = true; // Explicitly set the OK button visibility
+    showCancelButton.value = false;
     isModalVisible.value = true; // Show modal
+
 
     const payload = {
       start: selectedTimeslot.value.start, // Send as is without conversion
