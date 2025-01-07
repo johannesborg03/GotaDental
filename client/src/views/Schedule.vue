@@ -26,11 +26,20 @@
   centered
   static
   no-close-on-backdrop
-  ok-only
-  cancel-hidden
-
 >
-  <p class="text-center mb-0">{{ modalMessage }}</p>
+  <template v-if="modalMessage.text">
+    <p class="text-center mb-0">{{ modalMessage.text }}</p>
+  </template>
+  <template v-else>
+    <h5 class="text-center">{{ modalMessage.title }}</h5>
+    <ul class="list-unstyled text-center">
+      <li v-for="detail in modalMessage.details" :key="detail">{{ detail }}</li>
+    </ul>
+  </template>
+  <template #footer>
+  <b-button v-if="showOkButton" variant="primary" @click="confirmAction">OK</b-button>
+  <b-button v-if="showCancelButton" variant="secondary" @click="cancelAction">Cancel</b-button>
+</template>
 </b-modal>
 </template>
 
@@ -39,7 +48,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { DayPilotCalendar } from "@daypilot/daypilot-lite-vue";
 import axios from "axios";
 import { io } from "socket.io-client";
-
+import { nextTick } from "vue";
 import { BModal } from "bootstrap-vue-next";
 
 const officeName = ref("");
@@ -47,10 +56,53 @@ const officeName = ref("");
 const isModalVisible = ref(false); // Modal visibility state
 const modalMessage = ref(""); // Dynamic modal message
 const isSaving = ref(false); // State to prevent interactions
+const showCancelButton = ref(true); // Controls visibility of the Cancel button
+const showOkButton = ref(true); // Controls the visibility of the OK button
+const modalResolve = ref(null); // Resolver for modal confirmation
 
 // WebSocket setup
 const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 const officeAddress = ref("");
+
+function resetModal() {
+  modalMessage.value = "";
+  showOkButton.value = true;
+  showCancelButton.value = true;
+}
+
+
+function showModal(message, showOk = true, showCancel = true) {
+  return new Promise((resolve) => {
+    modalMessage.value = typeof message === "string" ? { text: message } : message;
+    showOkButton.value = showOk; // Explicitly set the OK button visibility
+    showCancelButton.value = showCancel; // Explicitly set the Cancel button visibility
+    modalResolve.value = resolve; // Set the promise resolver
+    isModalVisible.value = true; // Show the modal
+  });
+}
+
+function showModalNoPromise(message, showOk = true, showCancel = true) {
+  resetModal();
+  modalMessage.value = typeof message === "string" ? { text: message } : message;
+  showOkButton.value = showOk; // Hide the OK button
+  showCancelButton.value = showCancel; // Hide the Cancel button
+  isModalVisible.value = true; // Show the modal
+}
+function confirmAction() {
+  if (modalResolve.value) {
+    modalResolve.value(true);
+    modalResolve.value = null;
+    isModalVisible.value = false;
+  }
+}
+
+function cancelAction() {
+  if (modalResolve.value) {
+    modalResolve.value(false);
+    modalResolve.value = null;
+    isModalVisible.value = false;
+  }
+}
 
 // Function to fetch the office name from session storage
 function loadOfficeName() {
@@ -89,18 +141,24 @@ const calendarConfig = ref({
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     if (!selectedTimeslot) {
-      alert("Invalid timeslot selected.");
+      await showModal("Invalid timeslot selected.", false);
       return;
     }
 
     // Check if the timeslot is booked using its text or isBooked property
     if (selectedTimeslot.text !== "Booked" && !selectedTimeslot.isBooked) {
-      alert("You can only cancel booked timeslots.");
+      await showModal("You can only cancel booked timeslots.", true, false);
       return;
     }
-    // Confirm cancellation
-    const confirmCancel = confirm(`Do you want to cancel this timeslot? ${args.e.start()} - ${args.e.end()}`);
+    const confirmCancel = await showModal({
+      title: "Cancel Timeslot",
+      details: [`Start: ${args.e.start()}`, `End: ${args.e.end()}`],
+    });
+    
+
     if (confirmCancel) {
+      resetModal();
+      showModalNoPromise("Cancelling...", true, false);
       await cancelTimeslot(timeslotId, selectedTimeslot.patient);
     }
   },
@@ -121,8 +179,10 @@ const calendarConfig = ref({
 
 async function cancelTimeslot(timeslotId, patientId) {
   const officeId = sessionStorage.getItem("OfficeId");
+// Show "Cancelling..." modal
 
   try {
+    
     const response = await axios.patch(`http://localhost:4000/api/timeslots/${timeslotId}`, {
       isBooked: false,
       action: "cancel",
@@ -131,7 +191,11 @@ async function cancelTimeslot(timeslotId, patientId) {
       dentist: sessionStorage.getItem("userIdentifier"),
     });
 
-    alert("Timeslot cancelled successfully!");
+    // Close "Cancelling..." modal
+    isModalVisible.value = false;
+
+     // Update modal with success message
+     await showModal("Timeslot cancelled successfully!", true, false);
 
     // Update the calendar to reflect the cancellation
     const updatedTimeslot = response.data.timeslot;
@@ -143,7 +207,8 @@ async function cancelTimeslot(timeslotId, patientId) {
     }
   } catch (error) {
     console.error("Error cancelling the timeslot:", error);
-    alert("Failed to cancel the timeslot. Please try again.");
+     // Update modal with error message
+     await showModal("Failed to cancel the timeslot. Please try again.", true);
   }
 }
 
@@ -154,6 +219,7 @@ async function saveTimeslot() {
     return;
   }
 
+  showModal("Creating Timeslot...", false, false);
   try {
     isSaving.value = true; // Prevent interactions
     modalMessage.value = "Saving Timeslot, please wait...";
@@ -171,9 +237,10 @@ async function saveTimeslot() {
 
     console.log("Sending payload", payload);
     const response = await axios.post("http://localhost:4000/api/timeslots", payload);
-    modalMessage.value = "Timeslot saved successfully!";
+   // modalMessage.value = "Timeslot saved successfully!";
     console.log("Saved timeslot:", response.data);
 
+    await showModal("Timeslot created successfully!", true, false);
     // Clear selected timeslot
     selectedTimeslot.value = null;
       // Allow the modal to display success for a short period before closing
