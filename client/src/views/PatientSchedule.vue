@@ -158,7 +158,7 @@ const calendarConfig = ref({
 
    
     modalMessage.value = {
-  title: "Notify for Timeslot",
+  title: "Do you want to be notified when this timeslot is available?",
   details: [`Start: ${startTime}`, `End: ${endTime}`],
 };
 isModalVisible.value = true;

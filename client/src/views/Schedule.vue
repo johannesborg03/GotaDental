@@ -8,16 +8,30 @@
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
     <DayPilotCalendar :config="calendarConfig" />
-    <div v-if="selectedTimeslot" class="mt-3">
-      <p>Selected Timeslot:</p>
-      <p>Status: {{ selectedTimeslot.isBooked ? "Booked" : "Unbooked" }}</p>
-      <p>Start: {{ selectedTimeslot.start }}</p>
-      <p>End: {{ selectedTimeslot.end }}</p>
-      <button @click="saveTimeslot" class="btn btn-primary" :disabled="isSaving">
-  Save Timeslot
-</button>
-    </div>
+  
   </div>
+
+   <!-- Modal for saving timeslot -->
+   <b-modal
+    id="save-timeslot-modal"
+    v-model="isModalVisible"
+    title="Save Timeslot"
+    centered
+    static
+    no-close-on-backdrop
+  >
+    <template v-if="modalMessage.title">
+      <h5 class="text-center">{{ modalMessage.title }}</h5>
+      <ul class="list-unstyled text-center" v-if="modalMessage.details">
+        <li v-for="detail in modalMessage.details" :key="detail">{{ detail }}</li>
+      </ul>
+    </template>
+    <p class="text-center" v-else>{{ modalMessage.text }}</p>
+    <template #footer>
+      <b-button v-if="showOkButton" variant="primary" @click="confirmAction">Save</b-button>
+      <b-button v-if="showCancelButton" variant="secondary" @click="cancelAction">Cancel</b-button>
+    </template>
+  </b-modal>
 
   <b-modal
   id="notification-modal"
@@ -162,7 +176,7 @@ const calendarConfig = ref({
       await cancelTimeslot(timeslotId, selectedTimeslot.patient);
     }
   },
-  onTimeRangeSelected: (args) => {
+  onTimeRangeSelected: async (args) => {
     // Callback triggered when a time range is selected
     // Default to "Unbooked" and set the selected timeslot
     selectedTimeslot.value = {
@@ -172,8 +186,24 @@ const calendarConfig = ref({
       isBooked: false, // Default state
       patient: ""
     };
+    
+  // Show confirmation modal with timeslot details
+  const confirmSave = await showModal({
+    title: "Confirm Save",
+    details: [
+      `Start: ${selectedTimeslot.value.start}`,
+      `End: ${selectedTimeslot.value.end}`,
+    ],
+  });
 
-  },
+  // If user confirms, call saveTimeslot
+  if (confirmSave) {
+    saveTimeslot();
+  } else {
+    // Optionally, clear the selected timeslot if the user cancels
+    selectedTimeslot.value = null;
+  }
+},
 
 });
 
@@ -215,11 +245,11 @@ async function cancelTimeslot(timeslotId, patientId) {
 async function saveTimeslot() {
 
   if (!selectedTimeslot.value) {
-    alert("No timeslot selected.");
+    await showModal("No timeslot selected.", true, false);
     return;
   }
 
-  
+
   try {
     isSaving.value = true; // Prevent interactions
 
