@@ -228,23 +228,29 @@ const calendarConfig = ref({
     const timeslotPatient = selectedTimeslot["patient"];
     console.log("Timeslot Patient:", timeslotPatient);
 
-    if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
+     // If the timeslot is booked and belongs to the user, allow cancellation
+  if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
+    const confirmCancel = await showModal(
+      `Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}?`
+    );
 
-      const confirmCancel = confirm(`Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}`);
-      if (confirmCancel) {
-        await cancelTimeslot(timeslotId);
-      }
+    if (confirmCancel) {
+      await cancelTimeslot(timeslotId);
     }
+  }
     // If the timeslot is unbooked, allow the user to book it
     else if (selectedTimeslot.text === "Unbooked") {
-      const confirmBooking = confirm(`Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`);
+    const confirmBooking = await showModal(
+      `Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`
+    );
       if (confirmBooking) {
         await bookTimeslot(timeslotId); // Call book function
       }
-    } else {
-      alert("This timeslot is already booked by another user.");
-    }
-  },
+    }   // If the timeslot is booked and does not belong to the user, notify them
+  else {
+    await showModal("This timeslot is already booked by another user.", false);
+  }
+},
 });
 
 
@@ -399,12 +405,14 @@ async function cancelTimeslot(timeslotId) {
 
     });
 
-    alert("Appointment cancelled successfully!");
-
-
+     // Use modal to display success message
+     await showModal("Appointment cancelled successfully!", false); // Hide Cancel button
   } catch (error) {
     console.error("Error cancelling the timeslot:", error);
-    alert("Failed to cancel the timeslot. Please try again.");
+
+    // Use modal to display error message
+    const errorMessage = error.response?.data?.message || "Failed to cancel the timeslot. Please try again.";
+    await showModal(errorMessage, false); // Hide Cancel button
   }
 }
 
