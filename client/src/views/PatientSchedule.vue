@@ -191,7 +191,7 @@ const calendarConfig = ref({
         "A timeslot created by this patient already exists in this office."
       ) {
         showModal(
-          "You already have a timeslot you want to be notified of in this office."
+          "You already have a timeslot you want to be notified of in this office.", false
         ); // Use modal instead of alert
       } else {
         showModal(errorMessage); // Use modal instead of alert
@@ -231,15 +231,20 @@ const calendarConfig = ref({
      // If the timeslot is booked and belongs to the user, allow cancellation
   if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
     const confirmCancel = await showModal(
-      `Do you want to cancel this appointment? ${args.e.start()} - ${args.e.end()}?`
+      `Do you want to cancel this appointment? 
+      ${args.e.start()} - ${args.e.end()}?`
     );
 
     if (confirmCancel) {
       await cancelTimeslot(timeslotId);
     }
   }
+
+  if (selectedTimeslot.text === "Requested" && timeslotPatient === patientID) {
+    await showModal(`This is a timeslot you want to be notified of when its available.`, false);
+  }
     // If the timeslot is unbooked, allow the user to book it
-    else if (selectedTimeslot.text === "Unbooked") {
+    if (selectedTimeslot.text === "Unbooked") {
     const confirmBooking = await showModal(
       `Do you want to book this timeslot: ${args.e.start()} - ${args.e.end()}?`
     );
@@ -365,7 +370,7 @@ async function bookTimeslot(timeslotId) {
 
     });
 
-    showModal("Timeslot booked successfully!"); // Replaced alert with modal
+    showModal("Timeslot booked successfully!", false); // Replaced alert with modal
     console.log(response);
 
     // Update the calendar
