@@ -20,9 +20,13 @@
         <b-card>
             <h5>{{ selectedOffice.office_name }}</h5>
             <p>{{ selectedOffice.office_address }}</p>
-            <b-button @click="selectOffice" variant="primary">
-                Go to Timeslot Schedule
-            </b-button>
+            <b-button
+            v-if="showTimeslotButton"
+            @click="selectOffice"
+            variant="primary"
+          >
+            Go to Timeslot Schedule
+          </b-button>
         </b-card>
     </b-col>
 </b-row>
@@ -46,9 +50,23 @@ export default {
             offices: [], // Array to store office data
             map: null, //Reference to leaflet map instance
             selectedOffice: null, // Store the selected office data
+            userId: "", // Store user identifier (dentist or patient)
         };
     },
+    computed: {
+    showTimeslotButton() {
+      // If the user is not a dentist, always show the button
+      if (!/^\d{12}$/.test(this.userId)) {
+        return this.selectedOffice && this.selectedOffice._id === this.userOfficeId;
+      }
+      // For dentists, show the button only if the selected office matches their office ID
+      return true;
+    },
+  },
     async mounted() {
+      this.userId = sessionStorage.getItem("userIdentifier") || "Guest";
+    this.userOfficeId = sessionStorage.getItem("OfficeId"); // Store dentist's office ID
+ 
    //   this.initMap();
       try {
       // Fetch office data
@@ -113,9 +131,12 @@ methods: {
     selectOffice() {
       // Store the selected office ID and redirect to the patient schedule
       sessionStorage.setItem("selectedOfficeId", this.selectedOffice._id);
-      
+
       // Using Vue Router to navigate to the patient schedule page
-      this.$router.push({ name: "PatientSchedule", params: { officeId: this.selectedOffice._id } });
+      this.$router.push({
+        name: "PatientSchedule",
+        params: { officeId: this.selectedOffice._id },
+      });
     },
   },
 };
