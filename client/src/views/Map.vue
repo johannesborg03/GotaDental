@@ -62,6 +62,13 @@ export default {
       // For dentists, show the button only if the selected office matches their office ID
       return true;
     },
+    isSSN() {
+      // Check if sessionTokenName is a 12-digit SSN
+      return /^\d{12}$/.test(this.sessionTokenName);
+    },
+    schedulePage() {
+      return this.isSSN ? '/PatientSchedule' : '/schedule';
+    },
   },
     async mounted() {
       this.userId = sessionStorage.getItem("userIdentifier") || "Guest";
@@ -129,12 +136,14 @@ methods: {
 
     
     selectOffice() {
-      // Store the selected office ID and redirect to the patient schedule
+      // Store the selected office ID
       sessionStorage.setItem("selectedOfficeId", this.selectedOffice._id);
 
-      // Using Vue Router to navigate to the patient schedule page
+      // Redirect based on user role
+      const routeName = this.isSSN ? "PatientSchedule" : "schedule";
+
       this.$router.push({
-        name: "PatientSchedule",
+        name: routeName,
         params: { officeId: this.selectedOffice._id },
       });
     },
