@@ -28,14 +28,21 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: response.error });
         }
 
-        // If login is successful, return the user token and type
-        res.status(200).json({
+          // If login is successful, return the user token and type
+          const result = {
             message: 'Login successful',
             token: response.token,
             userType: isSSN ? 'patient' : 'dentist',
             office: response.office,
-            officeId: response.officeId
-        });
+            officeId: response.officeId,
+        };
+
+        // Add dentistId only if the userType is dentist
+        if (!isSSN) {
+            result.dentistId = response.dentistId;
+        }
+
+        res.status(200).json(result);
     } catch (error) {
         console.error('Error handling login request:', error);
         res.status(500).json({ message: 'Server error during login' });

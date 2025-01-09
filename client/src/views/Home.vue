@@ -73,6 +73,7 @@ export default {
                 sessionStorage.setItem('Office', response.data.office);
                 sessionStorage.setItem('OfficeId', response.data.officeId);
                 sessionStorage.setItem('OfficeAddress', response.data.officeAddress);
+                sessionStorage.setItem('dentistId', response.data.dentistId);
         
                 console.log('Office in response:', response.data.office);
                 console.log('OfficeId in response:', response.data.officeId);

@@ -19,14 +19,39 @@
             Welcome to our office! Here you can manage your schedule.
           </p>
           <p>
-            Address: {{ officeAddress }}<br />
-            Contact: (123) 456-7890<br />
-            Email: info@office.com
+            Contact: (+46)76-305-55-31<br />
+            Email: dentalgota@gmail.com
           </p>
         </div>
+
+        <div v-if="showLegend" class="color-legend mb-4">
+      <div class="legend-item">
+        <span class="legend-box blue"></span>
+        <span class="legend-text">Your requested timeslot</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box yellow"></span>
+        <span class="legend-text">Your booked timeslot</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box red"></span>
+        <span class="legend-text">Booked Timeslot</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-box green"></span>
+        <span class="legend-text">Unbooked Timeslot</span>
+      </div>
+    </div>
       </b-col>
 
-      <!-- Right Side: Calendar -->
+          <!-- Color Legend -->
+    
+
+
+
+
+
+
       <b-col md="8" class="text-right">
         <div class="mb-3" style="text-align: right; margin-top: 10px;">
           <b-button @click="prevWeek" variant="secondary" class="mr-2">Previous Week</b-button>
@@ -130,6 +155,7 @@ function getCurrentWeekStart() {
 
 // State for selected timeslot
 const selectedTimeslot = ref(null);
+const showLegend = ref(true);
 
 
 // WebSocket setup
@@ -270,7 +296,9 @@ isModalVisible.value = true;
   }
 },
 });
-
+function updateLegendVisibility() {
+  showLegend.value = window.innerWidth >= 768;
+}
 
 
 // Fetch all offices for the dropdown
@@ -379,7 +407,7 @@ async function bookTimeslot(timeslotId) {
       isBooked: true,
       patient: sessionStorage.getItem("userIdentifier"),
       action: "book",
-      officeId: sessionStorage.getItem("OfficeId")
+      officeId: sessionStorage.getItem("OfficeId"),
 
     });
 
@@ -472,6 +500,9 @@ onMounted(() => {
   loadOfficeAddress();
   loadOfficeName();
   fetchUserId();
+
+  updateLegendVisibility();
+  window.addEventListener("resize", updateLegendVisibility);
 
   socket.on("connect", () => {
     console.log("WebSocket connected:", socket.id);
@@ -578,12 +609,55 @@ console.log("overlap", overlappingNoticeIndex);
 // Cleanup WebSocket connection
 onUnmounted(() => {
   socket.disconnect();
+  window.removeEventListener("resize", updateLegendVisibility);
 });
 
 
 </script>
 
 <style>
+
+.color-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Adjust spacing between legend items */
+  margin-bottom: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.legend-box.blue {
+  background-color: #05D5E6;
+}
+
+.legend-box.yellow {
+  background-color: yellow;
+}
+
+.legend-box.red {
+  background-color: #EC1E1E;
+}
+
+.legend-box.green {
+  background-color: #62FB08;
+}
+
+.legend-text {
+  font-size: 14px;
+  font-family: 'Arial', sans-serif;
+}
+
+
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;

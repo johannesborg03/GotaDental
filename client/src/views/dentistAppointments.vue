@@ -6,14 +6,6 @@
             {{ error }}
         </div>
 
-        <h3>Select an Office:</h3>
-        <select v-model="selectedOfficeId" @change="handleOfficeChange" class="form-select mb-3">
-            <option disabled value="">Select an office</option>
-            <option v-for="office in offices" :key="office._id" :value="office._id">
-                {{ office.office_name }}
-            </option>
-        </select>
-
         <!-- Display Booked Timeslots-->
         <div v-if="bookedTimeslots.length > 0" class="booked-timeslots-container">
             <div v-for="(timeslot, index) in bookedTimeslots" :key="timeslot._id" class="timeslot-box">
@@ -37,9 +29,11 @@ import axios from "axios";
 const socket = io("http://localhost:4000"); // API Gateway WebSocket server URL
 
 const offices = ref([]);
-const selectedOfficeId = ref("");
+
+const OfficeId = sessionStorage.getItem("OfficeId");
 const bookedTimeslots = ref([]);
 const error = ref(null);
+
 
 // Fetch available offices
 async function fetchOffices() {
@@ -47,7 +41,7 @@ async function fetchOffices() {
         const response = await axios.get("http://localhost:4000/api/offices");
         offices.value = response.data.offices;
         console.log("OFFICES:", response.data.offices);
-        console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+        
     } catch (err) {
         console.error("Error fetching offices:", err);
         error.value = "Failed to load offices. Please try again.";
@@ -56,60 +50,51 @@ async function fetchOffices() {
 
 
 function handleOfficeChange() {
-    if (selectedOfficeId.value) {
-        console.log("Joining office room:", selectedOfficeId.value);
+
+        console.log("Joining office room:", OfficeId);
         // Fetch timeslots for the selected office
 
          // Clear the currently displayed timeslots
          bookedTimeslots.value = [];
         // Emit WebSocket event to join the selected office's room
         if (socket.connected) {
-            socket.emit("joinOffice", { officeId: selectedOfficeId.value });
+            socket.emit("joinOffice", { officeId: OfficeId });
         }
         fetchBookedTimeslots();
     }
-}
+
 
 // Fetch booked timeslots for the selected office
 async function fetchBookedTimeslots() {
-    if (!selectedOfficeId.value) {
-        alert("No office selected.");
+    
+    if (OfficeId == null) {
+        alert("No officeId");
         return;
     }
-
+    const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
     try {
-        const patient = sessionStorage.getItem("userIdentifier");
-        if (!patient) {
-            error.value = "User not logged in. Please log in to view your timeslots.";
-            return;
-        }
-
-        console.log("Making API request with: ", {
-            patient
-        });
-
-        const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`, {
-            params: { officeId: selectedOfficeId.value }
-        });
-
+        const response = await axios.get(`http://localhost:4000/api/offices/${OfficeId}/timeslots`);
         console.log("Fetched Booked Timeslots:", response.data);
 
-        // Ensure timeslots are returned in the response and adjust times
-        bookedTimeslots.value = (response.data.timeslots || []).map(timeslot => {
-            const adjustedStart = new Date(timeslot.start);
-            const adjustedEnd = new Date(timeslot.end);
+        // Filter and adjust timeslots
+        bookedTimeslots.value = (response.data.timeslots || [])
+            .filter(timeslot => timeslot.isBooked && timeslot.dentist === dentistId)
+            .map(timeslot => {
+                // Adjust start and end times by subtracting one hour
+                const adjustedStart = new Date(timeslot.start);
+                const adjustedEnd = new Date(timeslot.end);
 
-            adjustedStart.setHours(adjustedStart.getHours() - 1); // Subtract 1 hour from start
-            adjustedEnd.setHours(adjustedEnd.getHours() - 1);     // Subtract 1 hour from end
+                adjustedStart.setHours(adjustedStart.getHours() - 1); // Subtract 1 hour from start
+                adjustedEnd.setHours(adjustedEnd.getHours() - 1);     // Subtract 1 hour from end
 
-            return {
-                ...timeslot,
-                start: adjustedStart.toISOString(),
-                end: adjustedEnd.toISOString()
-            };
-        });
+                return {
+                    ...timeslot,
+                    start: adjustedStart.toISOString(),
+                    end: adjustedEnd.toISOString()
+                };
+            });
 
-        console.log("Adjusted Booked Timeslots:", bookedTimeslots.value);
+    console.log("Filtered Booked Timeslots:", bookedTimeslots.value);
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
@@ -119,6 +104,7 @@ async function fetchBookedTimeslots() {
 function formatDate(date) {
     return new Date(date).toLocaleString();
 }
+
 function joinOfficeRoom() {
   const officeId = sessionStorage.getItem("OfficeId");
   console.log("Attempting to join room. OfficeId:", officeId, "Socket connected:", socket.connected);
@@ -132,7 +118,9 @@ function joinOfficeRoom() {
   }
 }
 
+
 onMounted(() => {
+    handleOfficeChange();
     fetchOffices();
     //fetchBookedTimeslots();
 
@@ -143,35 +131,40 @@ onMounted(() => {
     socket.on("timeslot/update", (updatedTimeslot) => {
     console.log("Received timeslot update:", updatedTimeslot);
 
-    const patientSSN = sessionStorage.getItem("userIdentifier");
-    const officeId = selectedOfficeId.value;
+    const officeId = sessionStorage.getItem("OfficeId"); // Get current office ID
 
     // Ensure the updated timeslot belongs to the current office
     if (updatedTimeslot.office === officeId) {
         const existingIndex = bookedTimeslots.value.findIndex(
-            (slot) => slot._id === updatedTimeslot._id // Match by correct field (_id)
+            (slot) => slot._id === updatedTimeslot.timeslot_id
         );
 
-        if (updatedTimeslot.isBooked && updatedTimeslot.patient === patientSSN) {
-            // If the timeslot is booked and belongs to the patient
+              // Adjust start and end times by subtracting one hour
+              const adjustedStart = new Date(updatedTimeslot.start);
+        const adjustedEnd = new Date(updatedTimeslot.end);
+
+        adjustedStart.setHours(adjustedStart.getHours() - 1); // Subtract 1 hour from start
+        adjustedEnd.setHours(adjustedEnd.getHours() - 1);     // Subtract 1 hour from end
+
+        updatedTimeslot.start = adjustedStart.toISOString();
+        updatedTimeslot.end = adjustedEnd.toISOString();
+
+        if (updatedTimeslot.isBooked) {
+            // If the timeslot is booked
             if (existingIndex !== -1) {
                 // Update the existing timeslot
-                bookedTimeslots.value[existingIndex] = {
-                    ...bookedTimeslots.value[existingIndex],
-                    ...updatedTimeslot,
-                };
+                bookedTimeslots.value[existingIndex] = updatedTimeslot;
+                
             } else {
                 // Add the new timeslot
                 bookedTimeslots.value.push(updatedTimeslot);
             }
             console.log("Updated bookedTimeslots:", bookedTimeslots.value);
-        } else if (!updatedTimeslot.isBooked) {
+        } else {
             // If the timeslot is unbooked (canceled), remove it
-            if (existingIndex !== -1) {
+            if (updatedTimeslot.isBooked == false) {
                 bookedTimeslots.value.splice(existingIndex, 1);
                 console.log("Removed canceled timeslot:", updatedTimeslot);
-            } else {
-                console.error("Unable to find timeslot to remove:", updatedTimeslot);
             }
         }
     } else {

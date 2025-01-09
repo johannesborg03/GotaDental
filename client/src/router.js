@@ -5,7 +5,7 @@ import patient from './views/patient.vue';
 import registerDentist from './views/registerDentist.vue';
 import Home from './views/Home.vue';
 import Map from './views/Map.vue';
-import DentistTimeslot from './views/dentistTimeslot.vue';
+import dentistAppointments from './views/dentistAppointments.vue';
 import schedule from './views/Schedule.vue';
 import PatientSchedule from './views/PatientSchedule.vue';
 import PatientBookedAppointment from './views/patientBookedAppointment.vue';
@@ -16,7 +16,7 @@ const routes = [
 
     { path: '/registerPatient', name: 'RegisterPatient', component: registerPatient, meta: { hideNavbar: true }},
 
-    { path: '/dentist', name: 'Dentist', component: dentist, meta: { dentistNavbar: true, hideNavbar: true } },
+    { path: '/dentist', name: 'Dentist', component: dentist },
     
     { path: '/patient', name: 'Patient', component: patient},
 
@@ -24,7 +24,7 @@ const routes = [
 
     { path: '/Map', name: 'Map',component: Map},
 
-    { path: '/dentistTimeslot', name: 'DentistTimeslot',component: DentistTimeslot},
+    { path: '/dentistAppointments', name: 'dentistAppointments',component: dentistAppointments},
 
     { path: '/schedule', name: 'schedule',component: schedule},
 
