@@ -51,6 +51,7 @@ export default {
             map: null, //Reference to leaflet map instance
             selectedOffice: null, // Store the selected office data
             userId: "", // Store user identifier (dentist or patient)
+            userOfficeId: "", // Store the logged-in dentist's office ID
         };
     },
     computed: {
@@ -63,8 +64,8 @@ export default {
       return true;
     },
     isSSN() {
-      // Check if sessionTokenName is a 12-digit SSN
-      return /^\d{12}$/.test(this.sessionTokenName);
+        // Check if userId is a 12-digit SSN
+        return /^\d{12}$/.test(this.userId);
     },
     schedulePage() {
       return this.isSSN ? '/PatientSchedule' : '/schedule';
