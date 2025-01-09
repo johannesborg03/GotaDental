@@ -34,6 +34,26 @@
         </button>
       </BCard>
 
+      <BCard
+        border-variant="primary"
+        class="text-center card-collapse"
+        style="width: 18rem; padding: 10px;"
+      >
+        <template #header>
+          <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+            Bookings
+          </div>
+        </template>
+        <BCardText style="font-size: 14px;">
+          Display all your bookings
+        </BCardText>
+        <button class="btn btn-primary btn-sm">
+          <router-link to="/PatientBookedAppointment" class="text-white text-decoration-none">
+            View Bookings
+          </router-link>
+        </button>
+      </BCard>
+
       <!-- Map Card -->
       <BCard
         border-variant="primary"
@@ -56,25 +76,7 @@
       </BCard>
 
       <!-- Bookings Card -->
-      <BCard
-        border-variant="primary"
-        class="text-center card-collapse"
-        style="width: 18rem; padding: 10px;"
-      >
-        <template #header>
-          <div class="text-primary" style="color: #356bbb; font-size: 14px;">
-            Bookings
-          </div>
-        </template>
-        <BCardText style="font-size: 14px;">
-          Display all your bookings
-        </BCardText>
-        <button class="btn btn-primary btn-sm">
-          <router-link to="/PatientSchedule" class="text-white text-decoration-none">
-            View Bookings
-          </router-link>
-        </button>
-      </BCard>
+      
     </div>
   </BCard>
 </div>
