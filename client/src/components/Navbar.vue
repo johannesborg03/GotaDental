@@ -78,7 +78,7 @@ export default {
       return this.isSSN ? '/PatientSchedule' : '/schedule';
     },
     bookingsPage() {
-      return this.isSSN ? '/PatientBookedAppointment' : '/DentistBookedAppointments';
+      return this.isSSN ? '/PatientBookedAppointment' : '/dentistAppointments';
     },
     mapPage() {
       return this.isSSN ? '/Map' : '/Map';
