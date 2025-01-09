@@ -407,7 +407,7 @@ async function bookTimeslot(timeslotId) {
       isBooked: true,
       patient: sessionStorage.getItem("userIdentifier"),
       action: "book",
-      officeId: sessionStorage.getItem("OfficeId")
+      officeId: sessionStorage.getItem("OfficeId"),
 
     });
 

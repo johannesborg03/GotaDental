@@ -49,7 +49,7 @@
           Review patient bookings
         </BCardText>
         <button class="btn btn-primary btn-sm">
-          <router-link to="/appointments" class="text-white text-decoration-none">
+          <router-link to="/dentistAppointments" class="text-white text-decoration-none">
             View Appointments
           </router-link>
         </button>
