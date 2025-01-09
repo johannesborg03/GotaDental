@@ -1,9 +1,12 @@
 <template>
   
 
+  <div class="container mt-5">
+  <h1 class="text-primary text-center">Find available offices on the map:</h1>
+
 <b-card class="map-card">
   <b-row class="justify-content-center text-center title">
-  <b-col>MAP</b-col>
+ 
 </b-row>
   <b-container class="map-container">   
     <b-row class="justify-content-center">
@@ -32,7 +35,7 @@
 </b-row>
 </b-card>
 
-
+</div>
 </template>
 
 <script>
@@ -163,9 +166,13 @@ methods: {
   background-color: #356bbb !important;
   color: #356bbb;
   padding: 0%;
-  margin-top: 5%;
+  margin-top: 2.5%;
   margin-left: 20%;
   margin-right: 20%;
+}
+
+.container {
+  margin-top: 1%;
 }
 
 /* Ensure the map container has a height, or the map will not be visible */
