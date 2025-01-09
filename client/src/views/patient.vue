@@ -1,54 +1,86 @@
 <template>
-    <div class="container-fluid py-5">
+  <div class="container-fluid py-5">
+    <div class="text-center mb-5">
+      <BCard border-variant="primary" class="text-center py-4" style="max-width: 80%; margin: 0 auto;">
+        <h2 style="font-family: 'Filson Pro', sans-serif; color: #356bbb; font-size: 25px;">
+          Welcome to Patient Dashboard
+        </h2>
+        <BCardText style="font-size: 14px;">
+          Here you can manage all your schedules, appointments, and locate nearby facilities in one place.
+        </BCardText>
       
-      <div class="mt-5">
-        <BCard border-variant="primary" class="text-center py-9" style="max-width: 80%; margin: 0 auto;">
-          <h2 style="font-family: 'Filson Pro', sans-serif; color: #356bbb; font-size: 25px;">
-            Welcome to Patient Dashboard
-          </h2>
-          <BCardText style="font-size: 14px;">
-            Here you can manage all your schedules, appointments, and locate nearby facilities in one place.
-          </BCardText>
-          <div class="col-md-2 d-flex flex-column align-items-start">
-          <!-- Patient Schedule Card -->
-          <BCard border-variant="primary" header="Patient Schedule" align="center" class="mb-3 card-collapse" style="width: 100%; padding: 10px;">
-            <template #header>
-              <div class="text-primary" style="color: #356bbb; font-size: 14px;">
-                Available Timeslot
-              </div>
-            </template>
-            <BCardText style="font-size: 14px;">
-            Schedule an appointment 
-            </BCardText>
-            <button class="btn btn-primary btn-sm">
-              <router-link to="/PatientSchedule" class="text-white text-decoration-none">
-                View Timeslots
-              </router-link>
-            </button>
-          </BCard>
-        </div>
-  
-        <div class="col-md-2 d-flex flex-column align-items-start">
-          <BCard border-variant="primary" align="center" style="width: 100%; padding: 10px;" class = "card-collapse">
-            <template #header>
-              <div class="text-primary" style="color: #356bbb; font-size: 14px;">
-                Map
-              </div>
-            </template>
-            <BCardText style="font-size: 14px;">
-              Locate nearby facilities
-            </BCardText>
-            <button class="btn btn-primary btn-sm">
-              <router-link to="/Map" class="text-white text-decoration-none">
-                View Map
-              </router-link>
-            </button>
-          </BCard>
-        </div>
-        </BCard>
-      </div>
+    
+
+    <!-- Cards Row -->
+    <div class="d-flex justify-content-center flex-wrap gap-4">
+      <!-- Patient Schedule Card -->
+      <BCard
+        border-variant="primary"
+        class="text-center card-collapse"
+        style="width: 18rem; padding: 10px;"
+      >
+        <template #header>
+          <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+            Available Timeslot
+          </div>
+        </template>
+        <BCardText style="font-size: 14px;">
+          Schedule an appointment
+        </BCardText>
+        <button class="btn btn-primary btn-sm">
+          <router-link to="/PatientSchedule" class="text-white text-decoration-none">
+            View Timeslots
+          </router-link>
+        </button>
+      </BCard>
+
+      <!-- Map Card -->
+      <BCard
+        border-variant="primary"
+        class="text-center card-collapse"
+        style="width: 18rem; padding: 10px;"
+      >
+        <template #header>
+          <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+            Map
+          </div>
+        </template>
+        <BCardText style="font-size: 14px;">
+          Locate nearby facilities
+        </BCardText>
+        <button class="btn btn-primary btn-sm">
+          <router-link to="/Map" class="text-white text-decoration-none">
+            View Map
+          </router-link>
+        </button>
+      </BCard>
+
+      <!-- Bookings Card -->
+      <BCard
+        border-variant="primary"
+        class="text-center card-collapse"
+        style="width: 18rem; padding: 10px;"
+      >
+        <template #header>
+          <div class="text-primary" style="color: #356bbb; font-size: 14px;">
+            Bookings
+          </div>
+        </template>
+        <BCardText style="font-size: 14px;">
+          Display all your bookings
+        </BCardText>
+        <button class="btn btn-primary btn-sm">
+          <router-link to="/PatientSchedule" class="text-white text-decoration-none">
+            View Bookings
+          </router-link>
+        </button>
+      </BCard>
     </div>
-  </template>
+  </BCard>
+</div>
+
+  </div>
+</template>
   
   <script>
   export default {
@@ -70,10 +102,22 @@
     font-family: 'Filson Pro', sans-serif;
   }
   
-
-  @media (max-width: 1200px) {
-  .card-collapse {
-    display: none;
+  .d-flex {
+    gap: 1rem; /* Adds spacing between the cards */
   }
-}
-  </style>  
+  
+  .card-collapse {
+    transition: transform 0.3s;
+  }
+  
+  .card-collapse:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .card-collapse {
+      width: 100%;
+    }
+  }
+  </style>
