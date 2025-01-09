@@ -11,16 +11,16 @@
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
         <BNavItem> 
-          <router-link to="/patient" class="nav-link">Home</router-link>
+          <router-link :to="homePage" class="nav-link">Home</router-link>
         </BNavItem>
         <BNavItem> 
-          <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link>
+          <router-link :to="schedulePage" class="nav-link">Book Appointment</router-link>
         </BNavItem>
         <BNavItem>  
-          <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>
+          <router-link :to="bookingsPage" class="nav-link">Bookings</router-link>
         </BNavItem>
         <BNavItem> 
-          <router-link to="/Map" class="nav-link">Map</router-link>
+          <router-link :to="mapPage" class="nav-link">Map</router-link>
         </BNavItem>
       </BNavbarNav>
 
@@ -65,6 +65,24 @@ export default {
     return {
       sessionTokenName: '', // To store the token name
     };
+  },
+  computed: {
+    isSSN() {
+      // Check if sessionTokenName is a 12-digit SSN
+      return /^\d{12}$/.test(this.sessionTokenName);
+    },
+    homePage() {
+      return this.isSSN ? '/patient' : '/dentist';
+    },
+    schedulePage() {
+      return this.isSSN ? '/PatientSchedule' : '/schedule';
+    },
+    bookingsPage() {
+      return this.isSSN ? '/PatientBookedAppointment' : '/DentistBookedAppointments';
+    },
+    mapPage() {
+      return this.isSSN ? '/Map' : '/Map';
+    },
   },
   mounted() {
     this.sessionTokenName = sessionStorage.getItem("userIdentifier") || "Guest";
