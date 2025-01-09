@@ -4,6 +4,27 @@
       {{ officeName || "OFFICE NAME" }}
     </h1>
   </div>
+
+  <div v-if="showLegend" class="color-legend mb-4">
+    <div class="legend-item">
+      <span class="legend-box blue"></span>
+      <span class="legend-text">Booked Timeslot (Created by You)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-box yellow"></span>
+      <span class="legend-text">Unbooked Timeslot (Created by You)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-box red"></span>
+      <span class="legend-text">Booked Timeslot (Created by Others)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-box green"></span>
+      <span class="legend-text">Unbooked Timeslot</span>
+    </div>
+  </div>
+
+
   <div>
     <button @click="prevWeek">Previous Week</button>
     <button @click="nextWeek">Next Week</button>
@@ -66,6 +87,7 @@ import { nextTick } from "vue";
 import { BModal } from "bootstrap-vue-next";
 
 const officeName = ref("");
+const showLegend = ref(true);
 
 const isModalVisible = ref(false); // Modal visibility state
 const modalMessage = ref(""); // Dynamic modal message
@@ -82,6 +104,11 @@ function resetModal() {
   modalMessage.value = "";
   showOkButton.value = true;
   showCancelButton.value = true;
+}
+
+// Function to check screen width and update `showLegend`
+function updateLegendVisibility() {
+  showLegend.value = window.innerWidth >= 768;
 }
 
 
@@ -372,6 +399,8 @@ onMounted(() => {
   fetchTimeslots();
   loadOfficeName();
 
+  updateLegendVisibility();
+  window.addEventListener("resize", updateLegendVisibility);
 
   socket.on("connect", () => {
     console.log("WebSocket connected:", socket.id);
@@ -449,10 +478,57 @@ onMounted(() => {
 // Cleanup WebSocket connection
 onUnmounted(() => {
   socket.disconnect();
+  window.removeEventListener("resize", updateLegendVisibility);
 });
 </script>
 
 <style>
+
+
+.color-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Adjust spacing between legend items */
+  margin-bottom: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.legend-box.blue {
+  background-color: #05D5E6;
+}
+
+.legend-box.yellow {
+  background-color: yellow;
+}
+
+.legend-box.red {
+  background-color: #EC1E1E;
+}
+
+.legend-box.green {
+  background-color: #62FB08;
+}
+
+.legend-text {
+  font-size: 14px;
+  font-family: 'Arial', sans-serif;
+}
+
+
+
+
+
 /* Default styling for the full date */
 .calendar_default_colheader_inner {
   display: block;
