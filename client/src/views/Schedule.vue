@@ -302,6 +302,8 @@ showOkButton.value = true; // Explicitly set the OK button visibility
 // Fetch all timeslots for the office
 async function fetchTimeslots() {
   const officeId = sessionStorage.getItem("OfficeId");
+  const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
+
   if (!officeId) {
     alert("No office found in session storage.");
     return;
@@ -320,9 +322,14 @@ async function fetchTimeslots() {
         start: timeslot.start,
         end: timeslot.end,
         patient: timeslot.patient,
-        backColor: timeslot.isBooked ? '#EC1E1E' : '#62FB08' // Red for booked, green for unbooked
-      }));
-
+        backColor: timeslot.dentist === dentistId && timeslot.isBooked
+        ? "#05D5E6" // Blue for booked timeslots created by the logged-in dentist
+        : timeslot.dentist === dentistId
+        ? "yellow" // Yellow for unbooked timeslots created by the logged-in dentist
+        : timeslot.isBooked
+        ? "#EC1E1E" // Red for booked timeslots
+        : "#62FB08", // Green for unbooked timeslots
+    }));
     // Update the calendar configuration
     calendarConfig.value.events = events.value;
   } catch (error) {
@@ -376,6 +383,7 @@ onMounted(() => {
   socket.on("timeslot/create", (newTimeslot) => {
     console.log("Received timeslot new Timeslot Created", newTimeslot);
 
+    const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
     console.log("New Timeslot officeID:", newTimeslot.office,)
 
     if (newTimeslot.office === officeId) {
@@ -384,8 +392,14 @@ onMounted(() => {
         text: newTimeslot.isBooked ? "Booked" : "Unbooked", // Update dynamically
         start: newTimeslot.start,
         end: newTimeslot.end,
-        backColor: '#62FB08'
-      });
+        backColor: newTimeslot.dentist === dentistId && newTimeslot.isBooked
+        ? "blue" // Blue for booked timeslots created by the logged-in dentist
+        : newTimeslot.dentist === dentistId
+        ? "yellow" // Yellow for unbooked timeslots created by the logged-in dentist
+        : newTimeslot.isBooked
+        ? "#EC1E1E" // Red for booked timeslots
+        : "#62FB08", // Green for unbooked timeslots
+    });
       calendarConfig.value.events = [...events.value];
       console.log("Updated events after WebSocket create:", events.value);
     }
@@ -397,6 +411,7 @@ onMounted(() => {
 
 
 
+    const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
     // Find the corresponding timeslot in the events array
     const eventIndex = events.value.findIndex(event => event.id === updatedTimeslot._id);
     if (eventIndex !== -1) {
@@ -405,7 +420,14 @@ onMounted(() => {
       // Update the event data
       events.value[eventIndex].isBooked = updatedTimeslot.isBooked; // Update isBooked status
       events.value[eventIndex].patient = updatedTimeslot.patient; // Optionally update patient
-      events.value[eventIndex].backColor = updatedTimeslot.isBooked ? '#EC1E1E' : '#62FB08';
+      events.value[eventIndex].backColor = updatedTimeslot.dentist === dentistId && updatedTimeslot.isBooked
+      ? "#05D5E6" // Blue for booked timeslots created by the logged-in dentist
+      : updatedTimeslot.dentist === dentistId
+      ? "yellow" // Yellow for unbooked timeslots created by the logged-in dentist
+      : updatedTimeslot.isBooked
+      ? "#EC1E1E" // Red for booked timeslots
+      : "#62FB08"; // Green for unbooked timeslots
+
 
       // Re-render the calendar
       calendarConfig.value.events = [...events.value];
