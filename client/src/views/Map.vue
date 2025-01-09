@@ -160,8 +160,8 @@ methods: {
 <style>
 
 .map-card{
-  background-color: #003C47 !important;
-  color: #003C47;
+  background-color: #356bbb !important;
+  color: #356bbb;
   padding: 0%;
   margin-top: 5%;
   margin-left: 20%;
