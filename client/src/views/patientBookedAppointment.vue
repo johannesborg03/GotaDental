@@ -60,6 +60,8 @@ function handleOfficeChange() {
         console.log("Joining office room:", selectedOfficeId.value);
         // Fetch timeslots for the selected office
 
+         // Clear the currently displayed timeslots
+         bookedTimeslots.value = [];
         // Emit WebSocket event to join the selected office's room
         if (socket.connected) {
             socket.emit("joinOffice", { officeId: selectedOfficeId.value });
