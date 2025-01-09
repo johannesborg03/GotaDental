@@ -14,10 +14,10 @@
           <router-link :to="homePage" class="nav-link">Home</router-link>
         </BNavItem>
         <BNavItem> 
-          <router-link :to="schedulePage" class="nav-link">Book Appointment</router-link>
+          <router-link :to="schedulePage" class="nav-link">{{ scheduleText }}</router-link>
         </BNavItem>
         <BNavItem>  
-          <router-link :to="bookingsPage" class="nav-link">Bookings</router-link>
+          <router-link :to="bookingsPage" class="nav-link">{{ bookingsText }}</router-link>
         </BNavItem>
         <BNavItem> 
           <router-link :to="mapPage" class="nav-link">Map</router-link>
@@ -82,6 +82,12 @@ export default {
     },
     mapPage() {
       return this.isSSN ? '/Map' : '/Map';
+    },
+    scheduleText() {
+      return this.isSSN ? 'Book Appointment' : 'Timeslots';
+    },
+    bookingsText() {
+      return this.isSSN ? 'Bookings' : 'Appointments';
     },
   },
   mounted() {
