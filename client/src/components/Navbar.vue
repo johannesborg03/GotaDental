@@ -44,7 +44,7 @@
 
       <!-- Right-Side Section with Token Name and Avatar -->
       <BNavbarNav class="ms-auto d-flex align-items-center">
-        <span class="text-white me-3" style="font-family: 'Filson Pro', sans-serif;">
+        <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
           {{ sessionTokenName }}
         </span>
         <NavAvatar />
@@ -140,6 +140,10 @@ export default {
 .text-white {
   color: white !important;
 }
+
+.sessionTokenName {
+  display: none;
+} 
 }
 
 </style>
