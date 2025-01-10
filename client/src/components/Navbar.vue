@@ -10,16 +10,16 @@
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="homePage" class="nav-link">Home</router-link>
         </BNavItem>
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="schedulePage" class="nav-link">{{ scheduleText }}</router-link>
         </BNavItem>
-        <BNavItem>  
+        <BNavItem>
           <router-link :to="bookingsPage" class="nav-link">{{ bookingsText }}</router-link>
         </BNavItem>
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="mapPage" class="nav-link">Map</router-link>
         </BNavItem>
       </BNavbarNav>
@@ -30,22 +30,23 @@
         <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
           {{ sessionTokenName }}
         </span>
-        
+
         <!-- Dropdown Menu (Visible only on small screens) -->
         <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white ms-3 d-block d-md-none">
           <BDropdownItem>
-            <router-link to="/patient" class="nav-link">Home</router-link>
+            <router-link :to="homePage" class="nav-link">Home</router-link>
           </BDropdownItem>
           <BDropdownItem>
-            <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link>
+            <router-link :to="schedulePage" class="nav-link">{{ scheduleText }}</router-link>
           </BDropdownItem>
           <BDropdownItem>
-            <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>
+            <router-link :to="bookingsPage" class="nav-link">{{ bookingsText }}</router-link>
           </BDropdownItem>
           <BDropdownItem>
-            <router-link to="/Map" class="nav-link">Map</router-link>
+            <router-link :to="mapPage" class="nav-link">Map</router-link>
           </BDropdownItem>
         </BNavItemDropdown>
+
 
         <!-- Avatar -->
         <NavAvatar />
@@ -136,7 +137,7 @@ export default {
   }
 
   .sessionTokenName {
-    display: none; 
+    display: none;
   }
 
   .ms-auto {
@@ -149,6 +150,11 @@ export default {
 
   .d-block.d-md-none {
     order: -1; /* Reorder the menu to appear first on the left */
+  }
+
+  /* Remove padding on dropdown menu */
+  .navbar-nav .dropdown-menu {
+    padding: 0;
   }
 }
 </style>
