@@ -10,43 +10,45 @@
     <!-- Navbar Collapse -->
     <BCollapse id="main-navbar-nav" is-nav>
       <BNavbarNav class="navbuttons">
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="homePage" class="nav-link">Home</router-link>
         </BNavItem>
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="schedulePage" class="nav-link">{{ scheduleText }}</router-link>
         </BNavItem>
-        <BNavItem>  
+        <BNavItem>
           <router-link :to="bookingsPage" class="nav-link">{{ bookingsText }}</router-link>
         </BNavItem>
-        <BNavItem> 
+        <BNavItem>
           <router-link :to="mapPage" class="nav-link">Map</router-link>
         </BNavItem>
       </BNavbarNav>
 
-       <!-- Dropdown Button for Mobile (Visible only on small screens) -->
-      <BNavbarNav class="ms-auto d-block d-md-none">
-        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white">
-          <BDropdownItem>
-            <router-link to="/patient" class="nav-link">Home</router-link>
-          </BDropdownItem>
-          <BDropdownItem>
-            <router-link to="/PatientSchedule" class="nav-link">Book Appointment</router-link>
-          </BDropdownItem>
-          <BDropdownItem>
-            <router-link to="/PatientBookedAppointment" class="nav-link">Bookings</router-link>
-          </BDropdownItem>
-          <BDropdownItem>
-            <router-link to="/Map" class="nav-link">Map</router-link>
-          </BDropdownItem>
-        </BNavItemDropdown>
-      </BNavbarNav>
-
-      <!-- Right-Side Section with Token Name and Avatar -->
-      <BNavbarNav class="ms-auto d-flex align-items-center">
-        <span class="text-white me-3" style="font-family: 'Filson Pro', sans-serif;">
+      <!-- Right-Side Section for Mobile and Desktop -->
+      <BNavbarNav class="ms-auto d-flex align-items-center avatarNav">
+        <!-- Session Token Name (Hidden on small screens) -->
+        <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
           {{ sessionTokenName }}
         </span>
+
+        <!-- Dropdown Menu (Visible only on small screens) -->
+        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white ms-3 d-block d-md-none">
+          <BDropdownItem>
+            <router-link :to="homePage" class="nav-link">Home</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link :to="schedulePage" class="nav-link">{{ scheduleText }}</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link :to="bookingsPage" class="nav-link">{{ bookingsText }}</router-link>
+          </BDropdownItem>
+          <BDropdownItem>
+            <router-link :to="mapPage" class="nav-link">Map</router-link>
+          </BDropdownItem>
+        </BNavItemDropdown>
+
+
+        <!-- Avatar -->
         <NavAvatar />
       </BNavbarNav>
     </BCollapse>
@@ -93,13 +95,11 @@ export default {
   mounted() {
     this.sessionTokenName = sessionStorage.getItem("userIdentifier") || "Guest";
     console.log('Token Name:', this.sessionTokenName);  // Check what value is fetched from sessionStorage
-   
   }
 };
 </script>
 
 <style scoped>
-
 .bg-custom {
   background-color: #356bbb !important;
 }
@@ -116,7 +116,6 @@ export default {
   text-decoration: none !important;
 }
 
-/* Make the Menu text white */
 .text-white {
   color: white !important;
 }
@@ -130,16 +129,32 @@ export default {
     display: block;
   }
 
+  /* Ensure everything is aligned in a row on small screens */
+  .avatarNav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .sessionTokenName {
+    display: none;
+  }
+
   .ms-auto {
     display: block;
   }
+
   .d-block.d-md-none {
     display: block;
   }
-  /* Make the Menu text white */
-.text-white {
-  color: white !important;
-}
-}
 
+  .d-block.d-md-none {
+    order: -1; /* Reorder the menu to appear first on the left */
+  }
+
+  /* Remove padding on dropdown menu */
+  .navbar-nav .dropdown-menu {
+    padding: 0;
+  }
+}
 </style>
