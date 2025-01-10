@@ -24,9 +24,15 @@
         </BNavItem>
       </BNavbarNav>
 
-       <!-- Dropdown Button for Mobile (Visible only on small screens) -->
-      <BNavbarNav class="ms-auto d-block d-md-none">
-        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white">
+      <!-- Right-Side Section for Mobile and Desktop -->
+      <BNavbarNav class="ms-auto d-flex align-items-center avatarNav">
+        <!-- Session Token Name (Hidden on small screens) -->
+        <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
+          {{ sessionTokenName }}
+        </span>
+        
+        <!-- Dropdown Menu (Visible only on small screens) -->
+        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white ms-3 d-block d-md-none">
           <BDropdownItem>
             <router-link to="/patient" class="nav-link">Home</router-link>
           </BDropdownItem>
@@ -40,13 +46,8 @@
             <router-link to="/Map" class="nav-link">Map</router-link>
           </BDropdownItem>
         </BNavItemDropdown>
-      </BNavbarNav>
 
-      <!-- Right-Side Section with Token Name and Avatar -->
-      <BNavbarNav class="ms-auto d-flex align-items-center">
-        <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
-          {{ sessionTokenName }}
-        </span>
+        <!-- Avatar -->
         <NavAvatar />
       </BNavbarNav>
     </BCollapse>
@@ -93,13 +94,11 @@ export default {
   mounted() {
     this.sessionTokenName = sessionStorage.getItem("userIdentifier") || "Guest";
     console.log('Token Name:', this.sessionTokenName);  // Check what value is fetched from sessionStorage
-   
   }
 };
 </script>
 
 <style scoped>
-
 .bg-custom {
   background-color: #356bbb !important;
 }
@@ -116,7 +115,6 @@ export default {
   text-decoration: none !important;
 }
 
-/* Make the Menu text white */
 .text-white {
   color: white !important;
 }
@@ -130,20 +128,27 @@ export default {
     display: block;
   }
 
+  /* Ensure everything is aligned in a row on small screens */
+  .avatarNav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .sessionTokenName {
+    display: none; 
+  }
+
   .ms-auto {
     display: block;
   }
+
   .d-block.d-md-none {
     display: block;
   }
-  /* Make the Menu text white */
-.text-white {
-  color: white !important;
-}
 
-.sessionTokenName {
-  display: none;
-} 
+  .d-block.d-md-none {
+    order: -1; /* Reorder the menu to appear first on the left */
+  }
 }
-
 </style>
