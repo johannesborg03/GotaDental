@@ -28,7 +28,7 @@
       <BNavbarNav class="ms-auto d-flex align-items-center avatarNav">
         <!-- Session Token Name (Hidden on small screens) -->
         <span class="text-white me-3 sessionTokenName" style="font-family: 'Filson Pro', sans-serif;">
-          {{ sessionTokenName }}
+          {{ sessionName }}
         </span>
 
         <!-- Dropdown Menu (Visible only on small screens) -->
@@ -65,7 +65,8 @@ export default {
   },
   data() {
     return {
-      sessionTokenName: '', // To store the token name
+      sessionTokenName: '',
+      sessionName: sessionStorage.getItem('Name'), // To store the token name
     };
   },
   computed: {
