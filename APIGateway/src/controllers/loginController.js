@@ -35,6 +35,8 @@ exports.login = async (req, res) => {
             userType: isSSN ? 'patient' : 'dentist',
             office: response.office,
             officeId: response.officeId,
+            name: response.name,
+            email: response.email,
         };
 
         // Add dentistId only if the userType is dentist
