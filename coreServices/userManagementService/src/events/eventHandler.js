@@ -19,7 +19,13 @@ async function handlePatientLogin(message, replyTo, correlationId, channel) {
             return;
         }
 
-        const successResponse = { success: true, token: 'jwt-token-for-patient', userType: 'patient' };
+        const successResponse = { 
+            success: true, 
+            token: 'jwt-token-for-patient', 
+            userType: 'patient',
+            name: patient.name,
+            email: patient.email
+         };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error during patient login:', error);
@@ -68,7 +74,9 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             userType: 'dentist',
             office: officeResponse.office_name || "No office assigned",
             officeId: dentist.office,
-            dentistId: dentist._id
+            dentistId: dentist._id,
+            name: dentist.name,
+            email: dentist.email
         };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
