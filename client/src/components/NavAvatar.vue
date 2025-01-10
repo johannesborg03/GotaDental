@@ -13,7 +13,7 @@
       <!-- Dropdown Menu -->
       <BDropdownItem class="px-3 d-flex flex-column align-items-start" v-b-color-mode="'dark'"
         style="color: #356bbb; font-family: 'Filson Pro', sans-serif; padding: 0px;">
-        <p class="fs-6" style="color: white; font-size: 12px; margin-bottom: 2px;">{{ sessionName }}</p>
+        <p class="text-muted fs-7" style="font-size: 13px; margin-bottom: 4px;">{{ sessionName }}</p>
         <p class="text-muted fs-7" style="font-size: 15px; margin-top: 0; margin-bottom: 4px">{{ sessionEmail }}</p>
       </BDropdownItem>
   
