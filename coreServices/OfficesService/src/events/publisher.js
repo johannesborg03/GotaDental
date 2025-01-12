@@ -10,7 +10,12 @@ async function connectRabbitMQ() {
 
     async function attemptReconnect() {
         try {
-            connection = await amqp.connect('amqp://rabbitmq:5672?heartbeat=60');
+            const connection = await amqp.connect({
+                protocol: 'amqp',
+                hostname: 'rabbitmq',
+                port: 5672,
+                heartbeat: 10, // Heartbeat to keep connection alive
+            });
             connection.on('error', (err) => {console.error('Connection error:', err);
             });
             connection.on('close', () => {
