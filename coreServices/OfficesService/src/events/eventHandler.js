@@ -2,7 +2,7 @@ const { subscribeToTopic } = require('./subscriber');
 const Office = require('../models/Office');
 const { publishMessage } = require('./publisher');
 const { v4: uuidv4 } = require('uuid');
-
+const redisClient = require('../utils/redisClient');
 
 async function handleRetrieveAllOffices(message, replyTo, correlationId, channel) {
     console.log('Received retrieve all offices message:', message);
@@ -163,8 +163,24 @@ async function handleGetOfficeTimeslots(message, replyTo, correlationId, channel
 
     const { office_id } = message;
 
+    const CACHE_EXPIRATION = 96 * 60 * 60; // 96 hours
+
     try {
-        // Step 1: Fetch the timeslots array from the Office model
+        const cacheKey = `office:${office_id}:timeslots`;
+
+        // Step 1: Check if the timeslots are already cached
+        const cachedTimeslots = await redisClient.get(cacheKey);
+
+        if (cachedTimeslots) {
+            console.log('Cache hit for office timeslots:', cacheKey);
+            const successResponse = { success: true, timeslots: JSON.parse(cachedTimeslots) };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+            return;
+        }
+
+        console.log('Cache miss for office timeslots:', cacheKey);
+
+        // Step 2: Fetch office details from database
         const office = await Office.findById(office_id, 'timeslots');
         if (!office) {
             const errorResponse = { success: false, error: 'Office not found' };
@@ -181,25 +197,31 @@ async function handleGetOfficeTimeslots(message, replyTo, correlationId, channel
             return;
         }
 
-        // Step 2: Send a topic request to the Timeslot Service
+        // Step 3: Fetch timeslot details from another service (e.g., via broker)
         const timeslotTopic = 'timeslot/retrieveByIds';
-        const timeslotCorrelationId = uuidv4(); // Unique ID for this request
+        const timeslotCorrelationId = uuidv4(); 
         const timeslotMessage = { timeslot_ids: timeslotIds };
-
-        console.log('Publishing message to fetch timeslot details:', timeslotMessage);
         const timeslotResponse = await publishMessage(timeslotTopic, timeslotMessage, timeslotCorrelationId);
 
         if (!timeslotResponse || !timeslotResponse.success) {
-            console.error('Failed to fetch timeslot details:', timeslotResponse);
             const errorResponse = { success: false, error: 'Failed to fetch timeslot details' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        // Step 3: Respond with the retrieved timeslot details
+        // Step 4: Cache the timeslot details in Redis for 96 hours
+        await redisClient.setEx(cacheKey, CACHE_EXPIRATION, JSON.stringify(timeslotResponse.timeslots));
+
+        // Step 5: Cache the office details if needed (optional)
+        const officeCacheKey = `office:${office_id}:details`;
+        await redisClient.setEx(officeCacheKey, CACHE_EXPIRATION, JSON.stringify(office));
+
+        // Respond with the fetched timeslot details
         const successResponse = { success: true, timeslots: timeslotResponse.timeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
-        console.log('Successfully fetched timeslot details:', successResponse.timeslots);
+
+        console.log('Successfully fetched and cached timeslot details:', successResponse.timeslots);
+
     } catch (error) {
         console.error('Error fetching timeslots for office:', error);
         const errorResponse = { success: false, error: 'Internal server error' };

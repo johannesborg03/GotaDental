@@ -6,6 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 const Patient = require('../models/Patient');
 const Dentist = require('../models/Dentist');
 
+const redisClient = require('../utils/redisClient');
+
 // Handle patient login
 async function handlePatientLogin(message, replyTo, correlationId, channel) {
     console.log('Received login message:', message);
@@ -38,9 +40,19 @@ async function handlePatientLogin(message, replyTo, correlationId, channel) {
 async function handleDentistLogin(message, replyTo, correlationId, channel) {
     console.log('Received dentist login message:', message);
     const { identifier, password } = message;
+    const sessionKey = `dentist:${identifier}`;
 
-    const officeCorrelationId = uuidv4(); // Unique ID for this request
     try {
+        // Check if session exists in Redis
+        const cachedSession = await redisClient.get(sessionKey);
+        if (cachedSession) {
+            console.log('Dentist session found in cache.');
+            const sessionData = JSON.parse(cachedSession);
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(sessionData)), { correlationId });
+            return;
+        }
+
+        // I session is not found in Redis, proceed to check the database
         const dentist = await Dentist.findOne({ dentist_username: identifier });
         if (!dentist || dentist.password !== password) {
             const errorResponse = { success: false, error: 'Invalid username or password' };
@@ -48,29 +60,20 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             return;
         }
 
-        // Publish a request to OfficeService to fetch office details
-        const officeTopic = 'offices/retrieve'; // Topic to fetch office data
-        console.log(`Sending request to OfficeService for office ID: ${dentist.office}`);
+        // Fetch office details
+        const officeCorrelationId = uuidv4();
+        const officeResponse = await publishMessage('offices/retrieve', { office_id: dentist.office }, officeCorrelationId);
 
-        console.log(`Waiting for response with Correlation ID: ${correlationId}`);
-
-        const officeResponse = await publishMessage(officeTopic, { office_id: dentist.office }, officeCorrelationId);
-
-        // Check the response from OfficeService
         if (!officeResponse || officeResponse.success === false) {
             const errorResponse = { success: false, error: 'Failed to retrieve office details.' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
-        console.log(`Office details retrieved successfully: ${officeResponse.office_name}`);
-
-
-
-
+        // Successful login response
         const successResponse = {
             success: true,
-            token: 'jwt-token-for-dentist',
+            token: 'jwt-token-for-dentist', // Replace with actual JWT generation
             userType: 'dentist',
             office: officeResponse.office_name || "No office assigned",
             officeId: dentist.office,
@@ -78,6 +81,11 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
             name: dentist.name,
             email: dentist.email
         };
+
+        // Cache the successful login in Redis for 96 hours
+        await redisClient.setEx(sessionKey, 96 * 60 * 60, JSON.stringify(successResponse));
+
+        console.log('Dentist login cached in Redis.');
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
         console.error('Error during dentist login:', error);
@@ -85,9 +93,6 @@ async function handleDentistLogin(message, replyTo, correlationId, channel) {
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
 }
-
-
-
 
 async function handlePatientRegistration(message, replyTo, correlationId, channel) {
 
