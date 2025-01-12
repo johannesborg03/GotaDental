@@ -78,7 +78,7 @@ console.log(`Message:`, message);
 console.log(`Correlation ID: ${correlationId}`);
         const timeout = setTimeout(() => {
             reject(new Error(`Timeout waiting for response on correlationId: ${correlationId}`));
-        }, 10000); // 10-second timeout for the response
+        }, 20000); // 10-second timeout for the response
 
         try {
             // Create a temporary reply queue

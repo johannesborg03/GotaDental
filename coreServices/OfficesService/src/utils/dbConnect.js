@@ -8,6 +8,7 @@ let bookingDbConnection = null;
 const connectToBookingDB = () => {
     if (!bookingDbConnection) {
         bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
+            serverSelectionTimeoutMS: 3000, // 3 seconds timeout
         });
 
         bookingDbConnection.on('connected', () => {
@@ -16,7 +17,11 @@ const connectToBookingDB = () => {
 
         bookingDbConnection.on('error', (err) => {
             console.error(`Office Service Failed to connect to Booking Database: ${err.message}`);
-            process.exit(1);
+        });
+
+        // Handle disconnection
+        bookingDbConnection.on('disconnected', () => {
+            console.warn('Office Service Disconnected from Booking Database');
         });
     }
     return bookingDbConnection;
