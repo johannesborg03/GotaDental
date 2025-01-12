@@ -97,6 +97,7 @@ services:
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
       - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REDIS_URI=redis://redis-server:6379
     networks:
       - mynetwork
     develop:

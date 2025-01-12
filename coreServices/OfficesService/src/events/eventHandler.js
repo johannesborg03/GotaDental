@@ -162,13 +162,59 @@ async function handleGetOfficeTimeslots(message, replyTo, correlationId, channel
     console.log('Received request to fetch timeslots for office:', message);
 
     const { office_id } = message;
-
     const CACHE_EXPIRATION = 96 * 60 * 60; // 96 hours
 
     try {
-        const cacheKey = `office:${office_id}:timeslots`;
+        // Step 1: Attempt to fetch timeslots from the database
+        let office = null;
+        try {
+            // Try to fetch the office from the database
+            office = await Office.findById(office_id, 'timeslots');
+        } catch (dbError) {
+            // Handle specific DNS resolution error for the database
+            if (dbError.code === 'ENOTFOUND') {
+                console.warn(`Database not reachable (DNS issue): ${dbError.message}`);
+            } else {
+                console.warn('Database fetch failed:', dbError.message);
+            }
+        }
 
-        // Step 1: Check if the timeslots are already cached
+        if (office) {
+            const timeslotIds = office.timeslots; // Array of ObjectIds for timeslots
+            console.log('Fetched timeslot IDs from database:', timeslotIds);
+
+            if (!timeslotIds || timeslotIds.length === 0) {
+                const successResponse = { success: true, timeslots: [] };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+                return;
+            }
+
+            // Step 2: Fetch timeslot details from another service
+            const timeslotTopic = 'timeslot/retrieveByIds';
+            const timeslotCorrelationId = uuidv4();
+            const timeslotMessage = { timeslot_ids: timeslotIds };
+
+            console.log('Publishing message to fetch timeslot details:', timeslotMessage);
+            const timeslotResponse = await publishMessage(timeslotTopic, timeslotMessage, timeslotCorrelationId);
+
+            if (timeslotResponse && timeslotResponse.success) {
+                // Cache the fetched timeslot details
+                const cacheKey = `office:${office_id}:timeslots`;
+                await redisClient.setEx(cacheKey, CACHE_EXPIRATION, JSON.stringify(timeslotResponse.timeslots));
+
+                const successResponse = { success: true, timeslots: timeslotResponse.timeslots };
+                channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+                console.log('Successfully fetched and cached timeslot details:', successResponse.timeslots);
+                return;
+            } else {
+                console.error('Failed to fetch timeslot details from service:', timeslotResponse);
+            }
+        } else {
+            console.warn('Office not found in database. Falling back to cache.');
+        }
+
+        // Step 3: Fallback to cache if database fetch fails or no office data
+        const cacheKey = `office:${office_id}:timeslots`;
         const cachedTimeslots = await redisClient.get(cacheKey);
 
         if (cachedTimeslots) {
@@ -178,52 +224,13 @@ async function handleGetOfficeTimeslots(message, replyTo, correlationId, channel
             return;
         }
 
-        console.log('Cache miss for office timeslots:', cacheKey);
-
-        // Step 2: Fetch office details from database
-        const office = await Office.findById(office_id, 'timeslots');
-        if (!office) {
-            const errorResponse = { success: false, error: 'Office not found' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
-
-        const timeslotIds = office.timeslots; // Array of ObjectIds for timeslots
-        console.log('Fetched timeslot IDs from office:', timeslotIds);
-
-        if (!timeslotIds || timeslotIds.length === 0) {
-            const successResponse = { success: true, timeslots: [] };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
-            return;
-        }
-
-        // Step 3: Fetch timeslot details from another service (e.g., via broker)
-        const timeslotTopic = 'timeslot/retrieveByIds';
-        const timeslotCorrelationId = uuidv4(); 
-        const timeslotMessage = { timeslot_ids: timeslotIds };
-        const timeslotResponse = await publishMessage(timeslotTopic, timeslotMessage, timeslotCorrelationId);
-
-        if (!timeslotResponse || !timeslotResponse.success) {
-            const errorResponse = { success: false, error: 'Failed to fetch timeslot details' };
-            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
-            return;
-        }
-
-        // Step 4: Cache the timeslot details in Redis for 96 hours
-        await redisClient.setEx(cacheKey, CACHE_EXPIRATION, JSON.stringify(timeslotResponse.timeslots));
-
-        // Step 5: Cache the office details if needed (optional)
-        const officeCacheKey = `office:${office_id}:details`;
-        await redisClient.setEx(officeCacheKey, CACHE_EXPIRATION, JSON.stringify(office));
-
-        // Respond with the fetched timeslot details
-        const successResponse = { success: true, timeslots: timeslotResponse.timeslots };
-        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
-
-        console.log('Successfully fetched and cached timeslot details:', successResponse.timeslots);
+        // Step 4: Return error if both database and cache fail
+        console.error('No data available from database or cache.');
+        const errorResponse = { success: false, error: 'Failed to fetch timeslot details' };
+        channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
 
     } catch (error) {
-        console.error('Error fetching timeslots for office:', error);
+        console.error('Error in handleGetOfficeTimeslots:', error);
         const errorResponse = { success: false, error: 'Internal server error' };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
     }
