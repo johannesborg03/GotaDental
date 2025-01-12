@@ -11,6 +11,7 @@ const connectToBookingDB = () => {
 
     if (!bookingDbConnection) {
         bookingDbConnection = mongoose.createConnection(process.env.BOOKING_DB_URI, {
+            serverSelectionTimeoutMS: 3000, // 3 seconds timeout
         });
 
         // Event handlers for the connection

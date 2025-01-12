@@ -1,4 +1,16 @@
 services:
+  # Redis Service
+  redis:
+    image: "redis:latest"
+    container_name: redis-server
+    restart: always
+    ports:
+      - "6379:6379"  # Expose Redis port
+    networks:
+      - mynetwork
+    volumes:
+      - redisdata:/data  # Persistent storage
+
   # RabbitMQ Service with Health Check
   rabbitmq:
     image: "rabbitmq:3"
@@ -85,6 +97,7 @@ services:
     environment:
       - BOOKING_DB_URI=mongodb://bookingdb:27017/booking-database
       - RABBITMQ_URI=amqp://rabbitmq:5672
+      - REDIS_URI=redis://redis-server:6379
     networks:
       - mynetwork
     develop:
@@ -203,3 +216,4 @@ volumes:
   patientdata:
   dentistdata:
   bookingdata:
+  redisdata:

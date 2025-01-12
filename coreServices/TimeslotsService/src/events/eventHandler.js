@@ -6,7 +6,7 @@ const mongoose = require('mongoose'); // Import mongoose
 const eventEmitter = require('./eventEmitter'); // Import the global event emitter
 const { sendNotificationEmail } = require('../utils/emailService');
 // const { create } = require('rabbitmq-stream-js-client/dist/connection');
-
+const redisClient = require('../utils/redisClient');
 
 
 const adjustToCET = (dateStr) => {
@@ -670,13 +670,35 @@ async function handleRetrieveTimeslotsByIds(message, replyTo, correlationId, cha
     console.log('Received request to fetch timeslots by IDs:', message);
 
     const { timeslot_ids } = message;
+    
+    // Cache expiration time (inside the method)
+    const CACHE_EXPIRATION = 96 * 60 * 60; // 96 hours
 
     try {
+        // Generate cache key based on timeslot_ids
+        const cacheKey = `timeslots:${timeslot_ids.join(':')}`;
+
+        // Check if timeslots are already cached
+        const cachedTimeslots = await redisClient.get(cacheKey);
+
+        if (cachedTimeslots) {
+            console.log('Cache hit for timeslots:', cacheKey);
+            const successResponse = { success: true, timeslots: JSON.parse(cachedTimeslots) };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+            return;
+        }
+
+        // Cache miss: Fetch the timeslots from the database
         const timeslots = await Timeslot.find({ _id: { $in: timeslot_ids } });
         console.log('Fetched timeslots:', timeslots);
 
+        // Cache the fetched timeslots for future requests
+        await redisClient.setEx(cacheKey, CACHE_EXPIRATION, JSON.stringify(timeslots));
+
+        // Respond with the fetched timeslots
         const successResponse = { success: true, timeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+
     } catch (error) {
         console.error('Error fetching timeslots by IDs:', error);
         const errorResponse = { success: false, error: 'Failed to fetch timeslots' };
@@ -688,6 +710,8 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     console.log('Received request to retrieve booked timeslots:', message);
 
     const { patient, officeId } = message;
+    const CACHE_EXPIRATION = 96 * 60 * 60; // 96 hours
+    const cacheKey = `bookedTimeslots:${patient}:${officeId}`;
 
     if (!patient) {
         const errorResponse = { success: false, error: 'Missing patientSSN' };
@@ -702,13 +726,25 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
     }
 
     try {
-        // Fetch Patient ID from User Management Service using RabbitMQ
+        // Step 1: Attempt to fetch from cache
+        console.log(`Attempting to fetch from cache with key: ${cacheKey}`);
+        const cachedTimeslots = await redisClient.get(cacheKey);
+
+        if (cachedTimeslots) {
+            console.log('Cache hit for booked timeslots:', cacheKey);
+            const successResponse = { success: true, timeslots: JSON.parse(cachedTimeslots) };
+            channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
+            return;
+        }
+
+        console.log('Cache miss. Proceeding to fetch from services.');
+
+        // Step 2: Fetch Patient ID from User Management Service using RabbitMQ
         const patientCorrelationId = uuidv4();
         const patientTopic = 'patients/getBySSN';
         const patientMessage = { patient_ssn: patient };
 
         console.log(`Publishing message to fetch Patient ID for SSN: ${patient}`);
-
         const patientResponse = await publishMessage(patientTopic, patientMessage, patientCorrelationId);
 
         if (!patientResponse || !patientResponse.success) {
@@ -719,20 +755,26 @@ async function handleRetrieveBookedTimeslots(message, replyTo, correlationId, ch
         }
 
         const { patientId } = patientResponse;
-
         console.log(`Resolved Patient ID: ${patientId}`);
 
+        // Step 3: Fetch booked timeslots from database
         const bookedTimeslots = await Timeslot.find({
             isBooked: true, patient: patientId, office: officeId,
         });
 
         if (!bookedTimeslots || bookedTimeslots.length === 0) {
+            console.log('No booked timeslots found for patient and office.');
             const errorResponse = { success: false, error: 'No booked timeslots found' };
             channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(errorResponse)), { correlationId });
             return;
         }
 
+        console.log('Fetched booked timeslots from database:', bookedTimeslots);
 
+        // Step 4: Cache the fetched timeslots
+        await redisClient.setEx(cacheKey, CACHE_EXPIRATION, JSON.stringify(bookedTimeslots));
+
+        // Step 5: Respond with the fetched timeslots
         const successResponse = { success: true, timeslots: bookedTimeslots };
         channel.sendToQueue(replyTo, Buffer.from(JSON.stringify(successResponse)), { correlationId });
     } catch (error) {
