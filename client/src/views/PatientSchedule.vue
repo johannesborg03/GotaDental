@@ -249,11 +249,11 @@ isModalVisible.value = true;
 
   onEventClick: async (args) => {
     const timeslotId = args.e.id();
-    console.log("Timeslot ID:", timeslotId); // Add a log to verify
+  
     const selectedTimeslot = events.value.find((event) => event.id === timeslotId);
 
     const sessionID = sessionStorage.getItem("userIdentifier")
-    console.log("log id " + sessionID);
+  
 
     const response = await axios.get(`http://localhost:4000/api/patients/${sessionID}`);
 
@@ -261,10 +261,10 @@ isModalVisible.value = true;
 
     const patient = response.data.patient;
     const patientID = patient.patientId;
-    console.log(patientID);
+    
 
     const timeslotPatient = selectedTimeslot["patient"];
-    console.log("Timeslot Patient:", timeslotPatient);
+
 
      // If the timeslot is booked and belongs to the user, allow cancellation
   if (selectedTimeslot.text === "Booked" && timeslotPatient === patientID) {
@@ -306,9 +306,7 @@ async function fetchOffices() {
   try {
     const response = await axios.get("http://localhost:4000/api/offices");
     offices.value = response.data.offices; // 
-    console.log("OFFICES:", response.data.offices);
-    // console.log ('OfficeAddress', response.data.office.OfficeAddress);
-    // console.log('OfficeId in response:', response.data.offices.selectedOfficeId);
+   
 
   } catch (error) {
     console.error("Error fetching offices:", error);
@@ -317,7 +315,7 @@ async function fetchOffices() {
 
 function handleOfficeChange() {
   if (selectedOfficeId.value) {
-    console.log("Joining office room:", selectedOfficeId.value);
+
     // Fetch timeslots for the selected office
     sessionStorage.setItem('OfficeId', selectedOfficeId.value);
 
@@ -337,10 +335,10 @@ async function fetchUserId() {
     let patient = sessionStorage.getItem("userIdentifier");
     const response = await axios.get(`http://localhost:4000/api/patients/${patient}`);
     const patientId = response;
-    console.log("Response:", response);
+  
     // Store the patientId in sessionStorage
     sessionStorage.setItem("patientId", response.data.patient.patientId);
-    console.log("patient ID:", response.data.patient.patientId);
+    
 
 
   } catch (error) {
@@ -359,7 +357,7 @@ async function fetchTimeslots() {
 
   try {
     const response = await axios.get(`http://localhost:4000/api/offices/${selectedOfficeId.value}/timeslots`);
-    console.log("Fetched timeslots:", response.data);
+
 
 
 
@@ -412,7 +410,7 @@ async function bookTimeslot(timeslotId) {
     });
 
     showModal("Timeslot booked successfully!", false); // Replaced alert with modal
-    console.log(response);
+   
 
     // Update the calendar
     const updatedTimeslot = response.data.timeslot;
@@ -526,11 +524,7 @@ onMounted(() => {
   adjustedStart.setHours(adjustedStart.getHours() + 1); // Add 1 hour to start
   adjustedEnd.setHours(adjustedEnd.getHours() + 1);     // Add 1 hour to end
 
-  console.log("Checking event with adjustments:");
-  console.log("Event Patient ID:", event.patient, "Patient ID:", patientId);
-  console.log("Event Text:", event.text);
-  console.log("Adjusted Event Start:", adjustedStart, "New Timeslot End:", new Date(newTimeslot.end));
-  console.log("Adjusted Event End:", adjustedEnd, "New Timeslot Start:", new Date(newTimeslot.start));
+ 
 
   return (
     event.patient === patientId && // Match patient ID
@@ -540,13 +534,10 @@ onMounted(() => {
   );
 });
 
-console.log("overlap", overlappingNoticeIndex);
+
 
     if (overlappingNoticeIndex !== -1) {
-      console.log(
-        "Removing overlapping notice timeslot:",
-        events.value[overlappingNoticeIndex]
-      );
+   
       events.value.splice(overlappingNoticeIndex, 1); // Remove the overlapping notice timeslot
     }
 
@@ -561,13 +552,13 @@ console.log("overlap", overlappingNoticeIndex);
 
     // Update the calendar events
     calendarConfig.value.events = [...events.value];
-    console.log("Updated events after WebSocket create:", events.value);
+   
   }
 });
 
   // Listen for timeslot updates
   socket.on("timeslot/update", (updatedTimeslot) => {
-    console.log("Received timeslot update:", updatedTimeslot);
+    
 
     const patientId = sessionStorage.getItem("patientId");
 
@@ -590,11 +581,10 @@ console.log("overlap", overlappingNoticeIndex);
           ? 'yellow' // Yellow for the patient who booked
           : '#EC1E1E'); // Red for other patients
 
-      console.log("Updated event color:", events.value[eventIndex].backColor);
-      console.log("patientUpdated Timeslot:", updatedTimeslot.patient, "patientId:", patientId);
+      
       // Re-render the calendar
       calendarConfig.value.events = [...events.value];
-      console.log("Updated events after WebSocket update:", events.value);
+
     } else {
       console.error(`No event found with id ${updatedTimeslot.timeslot_id}`);
     }
