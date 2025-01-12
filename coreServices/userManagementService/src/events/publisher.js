@@ -8,45 +8,30 @@ let channel;
 
 // Connect to RabbitMQ and create the channel
 async function connectRabbitMQ() {
-    let retryCount = 0;
-    const maxRetries = 5;
-    const retryDelay = 5000; // Retry every 5 seconds
+    try {
+        const connection = await amqp.connect({
+            protocol: 'amqp',
+            hostname: 'rabbitmq',
+            port: 5672,
+            heartbeat: 10,
+        });
 
-    async function attemptReconnect() {
-        try {
-            connection = await amqp.connect('amqp://rabbitmq:5672');
-            connection.on('error', (err) => {
-                console.error('Connection error:', err);
-            });
-            connection.on('close', () => {
-                console.log('RabbitMQ connection closed');
-                if (retryCount < maxRetries) {
-                    console.log(`Reconnecting in ${retryDelay / 1000}s...`);
-                    setTimeout(attemptReconnect, retryDelay);
-                    retryCount++;
-                } else {
-                    console.log('Max retries reached. Exiting...');
-                    process.exit(1);
-                }
-            });
+        connection.on('error', (err) => {
+            console.error('RabbitMQ connection error:', err);
+        });
 
-            channel = await connection.createChannel();
-            console.log('RabbitMQ Publisher connected');
-            await channel.assertExchange('default_exchange', 'fanout', { durable: false });
-        } catch (error) {
-            console.error('Failed to connect to RabbitMQ:', error);
-            if (retryCount < maxRetries) {
-                console.log(`Retrying in ${retryDelay / 1000}s...`);
-                setTimeout(attemptReconnect, retryDelay);
-                retryCount++;
-            } else {
-                console.log('Max retries reached. Exiting...');
-                process.exit(1);
-            }
-        }
+        connection.on('close', () => {
+            console.log('RabbitMQ connection closed. Reconnecting...');
+            setTimeout(connectRabbitMQ, 5000); // Retry after 5 seconds
+        });
+
+        channel = await connection.createChannel();
+        console.log('RabbitMQ Publisher connected');
+        await channel.assertExchange('default_exchange', 'fanout', { durable: false });
+    } catch (error) {
+        console.error('Failed to connect to RabbitMQ:', error);
+        setTimeout(connectRabbitMQ, 5000); // Retry after 5 seconds
     }
-
-    attemptReconnect(); // Start the connection attempt
 }
 
 //Publish messages 
@@ -58,8 +43,8 @@ async function publishMessage(topic, message, correlationId) {
 
     return new Promise(async (resolve, reject) => {
         console.log(`Publishing to topic: ${topic}`);
-console.log(`Message:`, message);
-console.log(`Correlation ID: ${correlationId}`);
+        console.log(`Message:`, message);
+        console.log(`Correlation ID: ${correlationId}`);
         const timeout = setTimeout(() => {
             reject(new Error(`Timeout waiting for response on correlationId: ${correlationId}`));
         }, 10000); // 10-second timeout for the response

@@ -1,1 +1,0 @@
-// Publishes events to RabbitMQ

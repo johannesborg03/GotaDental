@@ -75,7 +75,7 @@
         </button>
       </BCard>
 
-      <!-- Bookings Card -->
+      
       
     </div>
   </BCard>

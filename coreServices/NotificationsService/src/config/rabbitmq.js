@@ -1,1 +1,0 @@
-// RabbitMQ connection logic

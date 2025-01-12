@@ -81,14 +81,11 @@ async function fetchBookedTimeslots() {
             error.value = "User not logged in. Please log in to view your timeslots.";
             return;
         }
-
-        
-
         const response = await axios.get(`http://localhost:4000/api/patients/${patient}/timeslots`, {
             params: { officeId: selectedOfficeId.value }
         });
 
-       
+        
 
         // Ensure timeslots are returned in the response and adjust times
         bookedTimeslots.value = (response.data.timeslots || []).map(timeslot => {
@@ -106,9 +103,17 @@ async function fetchBookedTimeslots() {
         });
 
       
-    } catch (error) {
-        console.error("Error fetching appointments:", error);
-        error.value = error.response?.data?.message || "Failed to load booked timeslots.";
+    } catch (err) {
+        // Handle 404 specifically
+        if (err.response && err.response.status === 404) {
+         //   console.error("No timeslots found:", err.response.data.message);
+            error.value = "No timeslots found for the selected office.";
+            bookedTimeslots.value = []; // Clear any existing timeslots
+        } else {
+            // Handle other errors
+           // console.error("Error fetching appointments:", err);
+            error.value = err.response?.data?.message || "Failed to load booked timeslots.";
+        }
     }
 }
 
