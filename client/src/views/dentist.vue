@@ -102,9 +102,9 @@ body {
 }
 
 
-@media (max-width: 1200px) {
-.card-collapse {
-  display: none;
-}
+@media (max-width: 768px) {
+    .card-collapse {
+      width: 100%;
+    }
 }
 </style>  

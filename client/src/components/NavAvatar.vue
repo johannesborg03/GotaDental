@@ -40,9 +40,19 @@
     },
     computed: {
       avatarLetter() {
+        try {
+      // Ensure sessionName is valid and has at least one character
+      if (this.sessionName && typeof this.sessionName === 'string' && this.sessionName.length > 0) {
         return this.sessionName.charAt(0).toUpperCase();
-      },
-    },
+      }
+      // Fallback value if sessionName is not available or valid
+      return 'A'; // Default letter
+    } catch (error) {
+      console.error('Error computing avatar letter:', error);
+      return 'A'; // Fallback value in case of an error
+    }
+  },
+},
     methods: {
       logout() {
         sessionStorage.clear();

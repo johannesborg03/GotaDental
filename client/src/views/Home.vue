@@ -56,17 +56,14 @@ export default {
     methods: {
         async onSubmit() {
             console.log("Submitting login form...");
-            console.log("Data being sent:", {
-                username_ssn: this.username_ssn,
-                password: this.password,
-            });
+          
             try {
                 const response = await axios.post('http://localhost:4000/api/login', {
                     username_ssn: this.username_ssn,
                     password: this.password,
                 });
 
-                console.log("Received response:", response.data);
+               
                 sessionStorage.setItem('Name', response.data.name);
                 sessionStorage.setItem('Email', response.data.email);
                 sessionStorage.setItem('userIdentifier', this.username_ssn);
@@ -75,8 +72,7 @@ export default {
                 sessionStorage.setItem('OfficeAddress', response.data.officeAddress);
                 sessionStorage.setItem('dentistId', response.data.dentistId);
         
-                console.log('Office in response:', response.data.office);
-                console.log('OfficeId in response:', response.data.officeId);
+              
                 
                 if (/^\d{12}$/.test(this.username_ssn)) {
                     // Redirect to dentist homepage if user is a patient (has 12 digits)

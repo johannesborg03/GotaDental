@@ -32,7 +32,13 @@
         </span>
 
         <!-- Dropdown Menu (Visible only on small screens) -->
-        <BNavItemDropdown text="Menu" id="navbar-dropdown" class="text-white ms-3 d-block d-md-none">
+        <BNavItemDropdown
+  text="Menu"
+  toggle-class="nav-link-custom"
+  id="navbar-dropdown"
+  style="color: white;"
+  class="text-white ms-3 d-block d-md-none"
+>
           <BDropdownItem>
             <router-link :to="homePage" class="nav-link">Home</router-link>
           </BDropdownItem>
@@ -101,6 +107,17 @@ export default {
 </script>
 
 <style scoped>
+
+
+
+
+
+
+#navbar-dropdown .dropdown-toggle {
+  color: white !important;
+  /* Forces white color for the text */
+}
+
 .bg-custom {
   background-color: #356bbb !important;
 }
@@ -112,18 +129,18 @@ export default {
   font-size: 15px;
 }
 
-.nav-link:hover {
-  color: white !important;
-  text-decoration: none !important;
-}
 
 .text-white {
   color: white !important;
 }
 
+
+
+
 @media (max-width: 768px) {
   .navbuttons {
     display: none;
+    color: white;
   }
 
   .navbar-toggler {
@@ -150,12 +167,32 @@ export default {
   }
 
   .d-block.d-md-none {
-    order: -1; /* Reorder the menu to appear first on the left */
+    order: -1;
+    /* Reorder the menu to appear first on the left */
   }
 
   /* Remove padding on dropdown menu */
   .navbar-nav .dropdown-menu {
     padding: 0;
+    color: white;
   }
+
+  .nav-link {
+    color: #356bbb !important;
+    text-decoration: none !important;
+    padding: 0px;
+    font-size: 15px;
+  }
+
+  #navbar-dropdown .dropdown-toggle {
+    color: white !important;
+    /* Ensures the text "Menu" is white */
+    text-decoration: none;
+    /* Removes underline if applied */
+    font-size: 15px;
+    /* Optional: Adjust font size */
+  }
+
+
 }
 </style>

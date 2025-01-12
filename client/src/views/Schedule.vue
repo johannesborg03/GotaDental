@@ -298,7 +298,7 @@ showOkButton.value = true; // Explicitly set the OK button visibility
       patient: ""
     };
 
-    console.log("Sending payload", payload);
+    
     const response = await axios.post("http://localhost:4000/api/timeslots", payload);
    // modalMessage.value = "Timeslot saved successfully!";
     console.log("Saved timeslot:", response.data);
@@ -338,7 +338,7 @@ async function fetchTimeslots() {
 
   try {
     const response = await axios.get(`http://localhost:4000/api/offices/${officeId}/timeslots`);
-    console.log("Fetched timeslots:", response.data);
+
 
     // Filter out timeslots created by patients
     events.value = response.data.timeslots
@@ -410,10 +410,10 @@ onMounted(() => {
   // Check if the new timeslot belongs to the current office
   const officeId = sessionStorage.getItem("OfficeId");
   socket.on("timeslot/create", (newTimeslot) => {
-    console.log("Received timeslot new Timeslot Created", newTimeslot);
+
 
     const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
-    console.log("New Timeslot officeID:", newTimeslot.office,)
+    
 
     if (newTimeslot.office === officeId) {
       events.value.push({
@@ -430,13 +430,13 @@ onMounted(() => {
         : "#62FB08", // Green for unbooked timeslots
     });
       calendarConfig.value.events = [...events.value];
-      console.log("Updated events after WebSocket create:", events.value);
+   
     }
   });
 
   // Listen for timeslot updates
   socket.on("timeslot/update", (updatedTimeslot) => {
-    console.log("Received timeslot update:", updatedTimeslot);
+
 
 
 

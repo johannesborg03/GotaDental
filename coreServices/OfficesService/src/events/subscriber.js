@@ -5,7 +5,12 @@ let channel;
 
 // Subscribe to a topic
 async function subscribeToTopic(topic, callback) {
-    const connection = await amqp.connect('amqp://rabbitmq:5672');
+      const connection = await amqp.connect({
+        protocol: 'amqp',
+        hostname: 'rabbitmq',
+        port: 5672,
+        heartbeat: 10, // Heartbeat to keep connection alive
+    });
     channel = await connection.createChannel();
 
     await channel.assertExchange(topic, 'fanout', { durable: false });
