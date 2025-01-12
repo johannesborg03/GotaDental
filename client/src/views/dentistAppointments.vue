@@ -40,7 +40,7 @@ async function fetchOffices() {
     try {
         const response = await axios.get("http://localhost:4000/api/offices");
         offices.value = response.data.offices;
-        console.log("OFFICES:", response.data.offices);
+        
         
     } catch (err) {
         console.error("Error fetching offices:", err);
@@ -74,7 +74,7 @@ async function fetchBookedTimeslots() {
     const dentistId = sessionStorage.getItem("dentistId"); // Dentist's unique identifier
     try {
         const response = await axios.get(`http://localhost:4000/api/offices/${OfficeId}/timeslots`);
-        console.log("Fetched Booked Timeslots:", response.data);
+        
 
         // Filter and adjust timeslots
         bookedTimeslots.value = (response.data.timeslots || [])
@@ -94,7 +94,7 @@ async function fetchBookedTimeslots() {
                 };
             });
 
-    console.log("Filtered Booked Timeslots:", bookedTimeslots.value);
+   
     } catch (error) {
         console.error("Error fetching appointments:", error);
         error.value = error.response?.data?.message || "Failed to load booked timeslots.";
@@ -129,7 +129,7 @@ onMounted(() => {
         console.log("WebSocket connected:", socket.id);
     });
     socket.on("timeslot/update", (updatedTimeslot) => {
-    console.log("Received timeslot update:", updatedTimeslot);
+    
 
     const officeId = sessionStorage.getItem("OfficeId"); // Get current office ID
 
@@ -159,7 +159,7 @@ onMounted(() => {
                 // Add the new timeslot
                 bookedTimeslots.value.push(updatedTimeslot);
             }
-            console.log("Updated bookedTimeslots:", bookedTimeslots.value);
+            
         } else {
             // If the timeslot is unbooked (canceled), remove it
             if (updatedTimeslot.isBooked == false) {
